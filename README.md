@@ -32,7 +32,7 @@ docs/               Specs and screenshots
 
 ```bash
 cp .env.example .env              # local-only values, never commit .env
-docker compose up --build         # db (PostgreSQL 16), redis, api, worker, beat
+docker compose up --build         # db (PostgreSQL 16), redis, storage (S3), api, worker, beat
 curl -i http://localhost:8000/api/health
 # HTTP/1.1 200 OK  {"status":"ok","database":"ok","redis":"ok"}
 ```
@@ -44,6 +44,7 @@ curl -i http://localhost:8000/api/health
 | `api` | Django (migrations, then the dev server with auto-reload) | 8000 |
 | `worker` | Celery worker | — |
 | `beat` | Celery Beat scheduler (e.g. ends expired support sessions every minute) | — |
+| `storage` | SeaweedFS S3 API: local stand-in for AWS S3 (sign-off evidence, later imports and recordings) | 8333 |
 
 If a port is already used on your machine (for example a local Redis on 6379), set `POSTGRES_HOST_PORT`,
 `REDIS_HOST_PORT` or `API_HOST_PORT` in `.env`. Also update `POSTGRES_PORT` / `REDIS_URL` there for tools run on
@@ -54,6 +55,10 @@ Create the first super admin (they set up 2FA with an authenticator app at first
 ```bash
 docker compose exec api python manage.py createplatformuser --email you@example.com --role super_admin
 ```
+
+The API creates the S3 bucket on start-up (`manage.py ensure_storage_bucket`). WhatsApp templates use a stub provider
+(no calls to Meta) until Phase 2; set what "Meta" reports with
+`StubProvider.set_status(<provider_template_id>, "approved")` in `manage.py shell`.
 
 Emails (such as invites) print to the `worker` logs locally: `docker compose logs -f worker`.
 

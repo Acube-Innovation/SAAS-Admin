@@ -5,3 +5,5 @@ drf-spectacular==0.30.0
 django-otp==1.7.5
 celery[redis]==5.6.3    # also brings the compatible redis client
 psycopg[binary]==3.3.6
+django-storages[s3]==1.14.6  # files on S3 (SeaweedFS S3 API locally)
+boto3==1.43.119

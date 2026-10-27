@@ -158,11 +158,11 @@ booking date, planned delivery date, cylinder type, quantity, remarks. Cylinder 
 | `category` | `utility` (only utility in the pilot) |
 | `schedule_type` | The schedule type whose fields can be used as variables |
 | `header_text` | Optional, up to 60 characters, at most 1 variable |
-| `body` | Required, **up to 1,024 characters**. Variables `{{field_key}}` limited to the schedule type's fields + `agency_name` |
+| `body` | Required, **up to 1,024 characters**. Variables `{{field_key}}` limited to the schedule type's fields, the template's subscriber fields (e.g. `customer_name`) and `agency_name` (the variables picker lists them: `GET /api/admin/whatsapp-templates/variables?schedule_type=`). Stored by name; the Meta adapter converts to positional `{{1}}` at submission |
 | `footer` | Optional, **up to 60 characters, no variables** |
-| `buttons` | Up to 3 quick replies, each **up to 25 characters**, each mapped to an outcome |
+| `buttons` | Up to 3 quick replies, each **up to 25 characters** and unique, each mapped to an outcome (`confirmed`, `not_available`, `reschedule`) |
 | `sample_values` | **Required for every variable** used in header/body |
-| `signoff_evidence` | File (PDF/PNG/JPG), **up to 5 MB**, uploaded to S3. Required for manual sign-off |
+| `signoff_evidence` | File (PDF/PNG/JPG; the content must match the type), **up to 5 MB**, uploaded to S3 under `tenants/<tenant>/whatsapp-signoff/<version>/`. Required for manual sign-off. Downloaded through a signed link valid for 5 minutes |
 
 The editor shows live character counters, a variables picker, a preview per language, the Workflow 3.4 status at
 the top, version history and the rejection reason when rejected.
@@ -277,7 +277,10 @@ States: `draft`, `sent_to_client`, `signed_off`, `sent_back`, `submitted`, `appr
 | any except disabled | disable | disabled | super_admin |
 | approved / live / rejected | new version from live | new `draft` version (version + 1) | super_admin, support |
 
-Every other transition is blocked (`409 invalid_transition`). Approved versions are immutable. Each transition
+Every other transition is blocked (`409 invalid_transition`). Approved versions are immutable. Only one version per
+template can be live (database constraint). A new version can't start while another is in progress (draft, sent to
+client, signed off, sent back or submitted): `409 open_version_exists`. Provider statuses are pulled by
+`sync-status` and by Celery Beat every 10 minutes (Phase 2 adds Meta's status webhook). Each transition
 writes an audit entry and a `TemplateStatusEvent`. The `WhatsAppProvider` interface has `submit_template()` and
 `get_template_status()`. `StubProvider` is used in tests and local, `MetaCloudProvider` comes in Phase 2.
 
@@ -444,7 +447,8 @@ All under `/api/admin/`. They need an authenticated, OTP-verified user with `pla
 | GET | `/api/admin/industry-templates/{id}/versions` | Version history | staff |
 | GET/POST | `/api/admin/whatsapp-templates` | List / create | staff |
 | GET/PATCH | `/api/admin/whatsapp-templates/{id}/versions/{vid}` | Detail / edit draft | staff |
-| POST | `…/versions/{vid}/send-to-client` · `/manual-signoff` · `/submit` · `/make-live` · `/disable` · `/new-version` | 3.4 actions | per 3.4 |
+| POST | `…/versions/{vid}/send-to-client` · `/manual-signoff` (multipart) · `/submit` · `/make-live` · `/disable` · `/new-version` · `/sync-status` | 3.4 actions (manual sign-off, submit, make live, disable: super admin) | per 3.4 |
+| GET | `/api/admin/whatsapp-templates/variables?schedule_type=` · `…/versions/{vid}/evidence` | Variables picker · signed evidence link (5 min) | staff |
 | GET/PATCH | `/api/admin/change-requests[/{id}]` | Queue / detail / assign / status | staff |
 | POST | `/api/admin/change-requests/{id}/comments` · `/decline` · `/link-version` | | staff |
 | GET | `/api/admin/audit-logs` · `/audit-logs/export` | Audit list / CSV (audited) | staff |

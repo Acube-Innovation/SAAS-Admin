@@ -1,6 +1,7 @@
 import json
 
 from django.core.serializers.json import DjangoJSONEncoder
+from django.db import models
 
 from apps.core.tenancy import db_context, get_current_tenant_id
 
@@ -30,6 +31,8 @@ def snapshot(instance, fields=None, exclude=()):
             continue
         key = field.attname if field.is_relation else field.name
         value = field.value_from_object(instance)
+        if isinstance(field, models.FileField):
+            value = value.name or ""  # files are recorded by their storage key
         data[key] = MASK if field.name in SENSITIVE_FIELDS and value else value
     return _json_safe(data)
 

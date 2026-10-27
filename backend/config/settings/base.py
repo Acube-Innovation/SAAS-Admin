@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "apps.audit",
     "apps.platform_admin",
     "apps.industry",
+    "apps.messaging_templates",
 ]
 
 AUTH_USER_MODEL = "accounts.User"
@@ -113,6 +114,42 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REDIS_URL = env("REDIS_URL", "redis://localhost:6379/0")
 
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": env("CACHE_URL", REDIS_URL),
+        "KEY_PREFIX": "saas",
+    }
+}
+
+# Files (sign-off evidence, imports, recordings) on S3. Locally the endpoint is the SeaweedFS S3 API
+# in docker-compose; on AWS the endpoint is left empty and credentials come from the task role.
+AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME", "schedule-saas-local")
+AWS_S3_ENDPOINT_URL = env("AWS_S3_ENDPOINT_URL") or None
+AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME", "ap-south-1")
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "bucket_name": AWS_STORAGE_BUCKET_NAME,
+            "endpoint_url": AWS_S3_ENDPOINT_URL,
+            "region_name": AWS_S3_REGION_NAME,
+            "access_key": env("AWS_ACCESS_KEY_ID") or None,
+            "secret_key": env("AWS_SECRET_ACCESS_KEY") or None,
+            "addressing_style": "path",
+            "signature_version": "s3v4",
+            "default_acl": None,
+            "file_overwrite": False,
+            "querystring_auth": True,
+            "querystring_expire": 300,  # signed download links last 5 minutes
+        },
+    },
+    "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
+}
+
+# WhatsApp Business provider (spec 3.4). The stub makes no network calls; Phase 2 adds Meta.
+WHATSAPP_PROVIDER = env("WHATSAPP_PROVIDER", "apps.messaging_templates.providers.StubProvider")
+
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {
@@ -161,6 +198,7 @@ SPECTACULAR_SETTINGS = {
         "SupportSessionEndReasonEnum": "apps.platform_admin.models.SupportSession.EndReason",
         "TenantRoleEnum": "apps.accounts.models.TenantRole",
         "LanguageEnum": "apps.core.constants.Language",
+        "TemplateVersionStatusEnum": "apps.messaging_templates.models.VersionStatus",
     },
 }
 
@@ -191,6 +229,10 @@ CELERY_BEAT_SCHEDULE = {
     "expire-support-sessions": {
         "task": "apps.platform_admin.tasks.expire_support_sessions",
         "schedule": 60.0,
+    },
+    "sync-whatsapp-template-statuses": {
+        "task": "apps.messaging_templates.tasks.sync_template_statuses",
+        "schedule": 600.0,
     },
 }
 

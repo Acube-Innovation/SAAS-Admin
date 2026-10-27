@@ -10,6 +10,7 @@ x-backend: &backend
     POSTGRES_HOST: db
     REDIS_URL: redis://redis:6379/0
     CELERY_BROKER_URL: redis://redis:6379/0
+    AWS_S3_ENDPOINT_URL: http://storage:8333
   volumes:
     - ./backend:/app
   depends_on:
@@ -17,6 +18,8 @@ x-backend: &backend
       condition: service_healthy
     redis:
       condition: service_healthy
+    storage:
+      condition: service_started
 
 services:
   db:
@@ -47,10 +50,28 @@ services:
       timeout: 3s
       retries: 10
 
+  storage:
+    # S3-compatible object storage for local development (stands in for AWS S3).
+    image: chrislusf/seaweedfs:4.51
+    env_file: .env
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        cat > /tmp/s3.json <<EOF
+        {"identities": [{"name": "app", "credentials": [{"accessKey": "$${AWS_ACCESS_KEY_ID}",
+          "secretKey": "$${AWS_SECRET_ACCESS_KEY}"}], "actions": ["Admin", "Read", "Write", "List", "Tagging"]}]}
+        EOF
+        exec weed server -dir=/data -s3 -s3.port=8333 -s3.config=/tmp/s3.json -master.volumeSizeLimitMB=256
+    ports:
+      - "${STORAGE_HOST_PORT:-8333}:8333"
+    volumes:
+      - storagedata:/data
+
   api:
     <<: *backend
     command: >
       sh -c "DJANGO_DB_ROLE=owner python manage.py migrate --noinput &&
+             python manage.py ensure_storage_bucket &&
              python manage.py runserver 0.0.0.0:8000"
     ports:
       - "${API_HOST_PORT:-8000}:8000"
@@ -78,3 +99,4 @@ services:
 
 volumes:
   pgdata:
+  storagedata:
