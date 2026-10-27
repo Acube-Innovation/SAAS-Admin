@@ -10,6 +10,9 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from apps.audit.context import refresh_actor
+from apps.audit.models import Action
+from apps.audit.services import write_audit
 from apps.core.exceptions import ApiError
 
 from . import services
@@ -73,6 +76,8 @@ class LoginView(APIView):
         serializer.is_valid(raise_exception=True)
         user = services.authenticate_with_lockout(**serializer.validated_data)
         login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+        refresh_actor(user)
+        write_audit(Action.LOGIN, user, tenant=None)
         return Response(auth_state(request))
 
 
@@ -81,6 +86,8 @@ class LogoutView(APIView):
 
     @extend_schema(request=None, responses={204: None})
     def post(self, request):
+        if request.user.is_authenticated:
+            write_audit(Action.LOGOUT, request.user, tenant=None)
         logout(request)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -108,6 +115,7 @@ class OtpSetupView(APIView):
             )
         TOTPDevice.objects.filter(user=request.user, confirmed=False).delete()
         device = TOTPDevice.objects.create(user=request.user, name="Authenticator", confirmed=False)
+        write_audit(Action.OTP_SETUP_STARTED, request.user, tenant=None)
         return Response({"otpauth_url": device.config_url, "secret": device.key})
 
 
@@ -124,10 +132,12 @@ class OtpConfirmView(APIView):
         if device is None:
             raise ApiError("otp_setup_missing", "Start two-factor set-up first.", 409)
         if not device.verify_token(serializer.validated_data["otp_code"]):
+            write_audit(Action.OTP_FAILED, request.user, after={"step": "setup"}, tenant=None)
             raise INVALID_OTP
         device.confirmed = True
         device.save(update_fields=["confirmed"])
         otp_login(request, device)
+        write_audit(Action.OTP_ENABLED, request.user, tenant=None)
         return Response(auth_state(request))
 
 
@@ -145,7 +155,9 @@ class OtpVerifyView(APIView):
             # verify_token applies django-otp's throttling after repeated failures.
             if device.verify_token(code):
                 otp_login(request, device)
+                write_audit(Action.OTP_VERIFIED, request.user, tenant=None)
                 return Response(auth_state(request))
+        write_audit(Action.OTP_FAILED, request.user, after={"step": "sign_in"}, tenant=None)
         raise INVALID_OTP
 
 
@@ -197,4 +209,6 @@ class AcceptInviteView(APIView):
         serializer.is_valid(raise_exception=True)
         user = services.accept_invite(token, **serializer.validated_data)
         login(request, user, backend="django.contrib.auth.backends.ModelBackend")
+        refresh_actor(user)
+        write_audit(Action.LOGIN, user, after={"via": "invite"}, tenant=None)
         return Response(auth_state(request))

@@ -16,10 +16,13 @@ from django.db import connection, transaction
 
 TENANT_SETTING = "app.tenant_id"
 USER_SETTING = "app.user_id"
+# "on" for 2FA-verified platform staff; lets policies that opt in (the audit log) read every tenant.
+PLATFORM_SETTING = "app.platform_access"
 
 _current = {
     TENANT_SETTING: contextvars.ContextVar("current_tenant_id", default=None),
     USER_SETTING: contextvars.ContextVar("current_user_id", default=None),
+    PLATFORM_SETTING: contextvars.ContextVar("platform_access", default=None),
 }
 _UNSET = object()
 
@@ -27,6 +30,10 @@ _UNSET = object()
 def get_current_tenant_id() -> uuid.UUID | None:
     value = _current[TENANT_SETTING].get()
     return uuid.UUID(value) if value else None
+
+
+def has_platform_access() -> bool:
+    return _current[PLATFORM_SETTING].get() == "on"
 
 
 def get_current_user_id() -> uuid.UUID | None:
@@ -47,17 +54,19 @@ def _set_db(name: str, value: str | None):
 
 
 @contextmanager
-def db_context(tenant=_UNSET, user=_UNSET):
+def db_context(tenant=_UNSET, user=_UNSET, platform=_UNSET):
     """
-    Run the block inside a transaction with app.tenant_id and/or app.user_id set. Each accepts a
-    model instance, UUID, string or None ("none"); an argument left out keeps its current value.
-    Nested contexts restore the outer values on exit.
+    Run the block inside a transaction with app.tenant_id, app.user_id and/or app.platform_access
+    set. tenant/user accept a model instance, UUID, string or None ("none"); platform is a bool.
+    An argument left out keeps its current value. Nested contexts restore the outer values on exit.
     """
     changes = {}
     if tenant is not _UNSET:
         changes[TENANT_SETTING] = _normalise(tenant)
     if user is not _UNSET:
         changes[USER_SETTING] = _normalise(user)
+    if platform is not _UNSET:
+        changes[PLATFORM_SETTING] = "on" if platform else None
     previous = {name: _current[name].get() for name in changes}
 
     with transaction.atomic():

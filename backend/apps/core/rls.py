@@ -7,6 +7,8 @@ POLICY_NAME = "tenant_isolation"
 TENANT_EXPRESSION = "NULLIF(current_setting('app.tenant_id', true), '')::uuid"
 # Optional extra read rule: a signed-in user may read their own rows in any tenant (memberships).
 OWN_ROWS = "user_id = NULLIF(current_setting('app.user_id', true), '')::uuid"
+# Optional extra read rule: 2FA-verified platform staff may read every tenant's rows (audit log).
+PLATFORM_ACCESS = "current_setting('app.platform_access', true) = 'on'"
 
 
 class EnableRLS(Operation):
@@ -17,17 +19,24 @@ class EnableRLS(Operation):
     Usage in a migration:  EnableRLS("subscriber")
 
     `extra_using` widens reads only (e.g. OWN_ROWS); writes always need the current tenant.
+    `nullable_tenant=True` is for tables whose tenant_id may be NULL (platform-level rows): writes
+    need tenant_id IS NOT DISTINCT FROM app.tenant_id, so NULL rows are written with no tenant.
     """
 
     reversible = True
     reduces_to_sql = True
 
-    def __init__(self, model_name, extra_using=None):
+    def __init__(self, model_name, extra_using=None, nullable_tenant=False):
         self.model_name = model_name
         self.extra_using = extra_using
+        self.nullable_tenant = nullable_tenant
 
     def deconstruct(self):
-        kwargs = {"extra_using": self.extra_using} if self.extra_using else {}
+        kwargs = {}
+        if self.extra_using:
+            kwargs["extra_using"] = self.extra_using
+        if self.nullable_tenant:
+            kwargs["nullable_tenant"] = True
         return self.__class__.__name__, [self.model_name], kwargs
 
     def state_forwards(self, app_label, state):
@@ -43,10 +52,11 @@ class EnableRLS(Operation):
         using = f"tenant_id = {TENANT_EXPRESSION}"
         if self.extra_using:
             using = f"({using}) OR ({self.extra_using})"
+        operator = "IS NOT DISTINCT FROM" if self.nullable_tenant else "="
         schema_editor.execute(
             f"CREATE POLICY {POLICY_NAME} ON {table} "
             f"USING ({using}) "
-            f"WITH CHECK (tenant_id = {TENANT_EXPRESSION})"
+            f"WITH CHECK (tenant_id {operator} {TENANT_EXPRESSION})"
         )
 
     def database_backwards(self, app_label, schema_editor, from_state, to_state):

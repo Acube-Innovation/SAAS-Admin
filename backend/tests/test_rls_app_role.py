@@ -144,3 +144,25 @@ def test_app_role_cannot_rewrite_migration_history(app_conn):
     assert query(app_conn, "SELECT count(*) > 0 FROM django_migrations") == [(True,)]
     with pytest.raises(errors.InsufficientPrivilege), app_conn.cursor() as cursor:
         cursor.execute("DELETE FROM django_migrations")
+
+
+def test_app_role_can_insert_but_never_change_audit_entries(app_conn, tenants):
+    a, _b = tenants
+    [(entry_id,)] = query(
+        app_conn,
+        "INSERT INTO audit_auditlog (id, created_at, tenant_id, action, actor_email, object_type,"
+        " object_id, user_agent) VALUES (gen_random_uuid(), now(), %s, 'probe', '', '', '', '')"
+        " RETURNING id",
+        [a.id],
+        tenant=a.id,
+    )
+    assert query(
+        app_conn, "SELECT action FROM audit_auditlog WHERE id = %s", [entry_id], tenant=a.id
+    ) == [("probe",)]
+    for statement in (
+        "UPDATE audit_auditlog SET action = 'tampered'",
+        "DELETE FROM audit_auditlog",
+        "TRUNCATE audit_auditlog",
+    ):
+        with pytest.raises(errors.InsufficientPrivilege), app_conn.cursor() as cursor:
+            cursor.execute(statement)

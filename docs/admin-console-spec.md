@@ -380,7 +380,7 @@ All primary keys are UUIDs. Every model has `created_at` and `updated_at`. **Ten
 | Membership | accounts | Yes (plus a read rule: users can read their own memberships in any tenant) | `user`, `tenant`, `role` (`owner`, `manager`, `office_staff`), `status` (`invited`, `active`, `deactivated`); unique (`tenant`, `user`) |
 | Invite | accounts | Yes | `membership`, `token_hash` (SHA-256), `expires_at`, `used_at`, `revoked_at`, `created_by` |
 | TOTP device | accounts | No | django-otp `TOTPDevice` (`confirmed`) |
-| AuditLog | audit | Nullable tenant (platform actions have none) | `actor` (FK User, null = system), `tenant`, `support_session`, `action` (`create`, `update`, `delete`, `status_change`, `login`, `export`, `support_start`, `support_end`, …), `object_type`, `object_id`, `before` (JSONB), `after` (JSONB), `ip_address`, `user_agent`. **Insert-only** |
+| AuditLog | audit | Nullable tenant (platform actions have none); RLS: own tenant, or all for 2FA-verified platform staff | `actor` (FK User, null = system), `actor_email`, `tenant`, `support_session` (stored as `support_session_id`; FK from Step 5), `action` (`create`, `update`, `delete`, `status_change`, `export`, `login`, `login_failed`, `account_locked`, `logout`, `otp_*`, `invite_accepted`, `support_start`, `support_end`, …), `object_type`, `object_id`, `before` (JSONB), `after` (JSONB), `ip_address`, `user_agent`. **Insert-only**: Django blocks save/delete/queryset update, a database trigger rejects UPDATE/DELETE for every role, and `app_user` has no UPDATE/DELETE/TRUNCATE. Secrets (`password`, `token_hash`, keys) are masked |
 | SupportSession | platform_admin | No | `staff_user`, `tenant`, `reason`, `started_at`, `expires_at`, `ended_at` |
 | IndustryTemplate | industry | No | `key`, `name`, `description`, `is_active`, `current_version` |
 | IndustryTemplateVersion | industry | No | `template`, `version`, `definition` (JSONB: schedule types, fields, choice lists, default rule, default flow), `created_by` |
@@ -461,6 +461,10 @@ Errors use `{"code": "...", "detail": "...", "fields": {...}}`.
    on a pooled connection. The Celery base task `TenantTask` does the same around each task: it requires a
    `tenant_id` kwarg, which is filled in automatically when the task is queued inside a tenant context.
 5. With no tenant set, tenant tables return no rows and reject writes.
+5a. For 2FA-verified platform staff the middleware also sets `app.platform_access = 'on'`. Only policies that opt in
+   (`EnableRLS(..., extra_using=PLATFORM_ACCESS)`, so far the audit log) use it, to let the admin console read
+   every tenant's rows. Tables with platform-level rows use `nullable_tenant=True` (writes need
+   `tenant_id IS NOT DISTINCT FROM app.tenant_id`).
 6. Every tenant index starts with `tenant_id`.
 7. Tests create two tenants and prove that a query under tenant A, **including raw SQL**, never returns or
    modifies tenant B's rows. They also connect as `app_user` to prove RLS is enforced for that role and can't be

@@ -12,6 +12,8 @@ from django.db import transaction
 from django.utils import timezone
 from rest_framework import serializers
 
+from apps.audit.models import Action
+from apps.audit.services import snapshot, write_audit
 from apps.core.exceptions import ApiError
 from apps.core.tenancy import tenant_context
 
@@ -34,22 +36,25 @@ def authenticate_with_lockout(email: str, password: str) -> User:
     email exists.
     """
     now = timezone.now()
-    authenticated = None
+    authenticated, reason, locked_now = None, None, False
     # The failure is raised after the block, so the counter update is not rolled back with it.
     with transaction.atomic():
         user = User.objects.select_for_update().filter(email__iexact=email.strip()).first()
         if user is None:
             # Spend the same hashing time as a real check so timing doesn't reveal unknown emails.
             User().set_password(password)
+            reason = "unknown_email"
         elif user.is_locked(now):
-            pass
+            reason = "locked"
         elif not user.check_password(password) or not user.is_active:
+            reason = "wrong_password" if user.is_active else "inactive"
             user.failed_login_count += 1
             update = ["failed_login_count"]
             if user.failed_login_count >= MAX_FAILED_LOGINS:
                 user.failed_login_count = 0
                 user.locked_until = now + LOCK_DURATION
                 update.append("locked_until")
+                locked_now = True
             user.save(update_fields=update)
         else:
             if user.failed_login_count or user.locked_until:
@@ -58,6 +63,22 @@ def authenticate_with_lockout(email: str, password: str) -> User:
                 user.save(update_fields=["failed_login_count", "locked_until"])
             authenticated = user
     if authenticated is None:
+        audit_target = {"obj": user} if user else {"object_type": "accounts.user"}
+        write_audit(
+            Action.LOGIN_FAILED,
+            **audit_target,
+            after={"email": email.strip().lower(), "reason": reason},
+            tenant=None,
+            actor=None,
+        )
+        if locked_now:
+            write_audit(
+                Action.ACCOUNT_LOCKED,
+                user,
+                after={"locked_until": user.locked_until},
+                tenant=None,
+                actor=None,
+            )
         raise INVALID_CREDENTIALS
     return authenticated
 
@@ -85,15 +106,18 @@ def create_invite(membership: Membership, created_by: User | None = None) -> str
     now = timezone.now()
     token = f"{membership.tenant_id}.{secrets.token_urlsafe(32)}"
     with tenant_context(membership.tenant_id):
-        Invite.objects.filter(membership=membership, used_at=None, revoked_at=None).update(
-            revoked_at=now
-        )
+        revoked = Invite.objects.filter(
+            membership=membership, used_at=None, revoked_at=None
+        ).update(revoked_at=now)
         invite = Invite.objects.create(
             tenant_id=membership.tenant_id,
             membership=membership,
             token_hash=hash_token(token),
             expires_at=now + INVITE_LIFETIME,
             created_by=created_by,
+        )
+        write_audit(
+            Action.CREATE, invite, after={**snapshot(invite), "revoked_earlier_invites": revoked}
         )
         transaction.on_commit(
             lambda: send_invite_email.delay(
@@ -161,9 +185,21 @@ def accept_invite(token: str, password: str, full_name: str = "") -> User:
         if full_name:
             user.full_name = full_name
         user.save()
+        invite_before = snapshot(invite)
         invite.used_at = timezone.now()
         invite.save(update_fields=["used_at", "updated_at"])
-        Membership.objects.filter(pk=invite.membership_id).update(
-            status=Membership.Status.ACTIVE, updated_at=timezone.now()
+        write_audit(
+            Action.INVITE_ACCEPTED, invite, before=invite_before, after=snapshot(invite), actor=user
+        )
+        membership = Membership.objects.get(pk=invite.membership_id)
+        membership_before = snapshot(membership)
+        membership.status = Membership.Status.ACTIVE
+        membership.save(update_fields=["status", "updated_at"])
+        write_audit(
+            Action.STATUS_CHANGE,
+            membership,
+            before=membership_before,
+            after=snapshot(membership),
+            actor=user,
         )
     return user

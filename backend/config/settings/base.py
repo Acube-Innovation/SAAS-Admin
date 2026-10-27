@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "apps.core",
     "apps.accounts",
+    "apps.audit",
 ]
 
 AUTH_USER_MODEL = "accounts.User"
@@ -54,6 +55,7 @@ MIDDLEWARE = [
     "django_otp.middleware.OTPMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "apps.audit.context.AuditContextMiddleware",
     "apps.core.middleware.TenantMiddleware",
 ]
 
@@ -156,6 +158,9 @@ EMAIL_HOST_USER = env("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", True)
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", "no-reply@localhost")
+
+# Behind the AWS load balancer, the client IP is the first X-Forwarded-For entry (staging, prod).
+AUDIT_TRUST_X_FORWARDED_FOR = env_bool("AUDIT_TRUST_X_FORWARDED_FOR", False)
 
 ADMIN_BASE_URL = env("ADMIN_BASE_URL", "http://localhost:3000")
 PORTAL_BASE_URL = env("PORTAL_BASE_URL", "http://localhost:3001")

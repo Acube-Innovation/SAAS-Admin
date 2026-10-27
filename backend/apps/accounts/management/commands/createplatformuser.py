@@ -4,8 +4,11 @@ import sys
 from django.contrib.auth import password_validation
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
 
 from apps.accounts.models import PlatformRole, User
+from apps.audit.models import Action
+from apps.audit.services import snapshot, write_audit
 
 
 class Command(BaseCommand):
@@ -36,5 +39,7 @@ class Command(BaseCommand):
         except ValidationError as exc:
             raise CommandError(" ".join(exc.messages)) from exc
         user.set_password(password)
-        user.save()
+        with transaction.atomic():
+            user.save()
+            write_audit(Action.CREATE, user, after=snapshot(user), tenant=None, actor=None)
         self.stdout.write(self.style.SUCCESS(f"Created {role} {user.email}"))
