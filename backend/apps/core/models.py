@@ -36,7 +36,15 @@ class Tenant(BaseModel):
     contact_name = models.CharField(max_length=100)
     contact_phone = models.CharField(max_length=13)
     contact_email = models.EmailField()
-    # industry_template / industry_template_version are added with apps/industry in Step 6.
+    industry_template = models.ForeignKey(
+        "industry.IndustryTemplate",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="tenants",
+        help_text="Required when a client is created (spec 2.4).",
+    )
+    industry_template_version = models.PositiveIntegerField(null=True, blank=True)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.ACTIVE)
     suspended_at = models.DateTimeField(null=True, blank=True)
     suspension_reason = models.TextField(blank=True)

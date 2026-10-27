@@ -15,8 +15,17 @@ pytestmark = pytest.mark.django_db
 URL = "/api/admin/tenants"
 
 
+_TEMPLATE = {}
+
+
+@pytest.fixture(autouse=True)
+def _template_id(gas_template):
+    _TEMPLATE["id"] = str(gas_template.pk)
+
+
 def payload(**overrides):
     data = {
+        "industry_template": _TEMPLATE.get("id"),
         "name": "Kollam Gas Agency",
         "legal_name": "Kollam Gas Agency Pvt Ltd",
         "gstin": "32ABCDE1234F1Z5",
@@ -35,7 +44,7 @@ def payload(**overrides):
 
 
 @pytest.fixture
-def admin_api(api, super_admin):
+def admin_api(api, super_admin, gas_template):
     sign_in(api, super_admin)
     return api
 

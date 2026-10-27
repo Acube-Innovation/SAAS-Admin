@@ -11,6 +11,7 @@ from apps.core.exceptions import ApiError
 from apps.core.models import Tenant
 from apps.core.signals import tenant_reactivated
 from apps.core.tenancy import db_context, tenant_context
+from apps.industry.services import assign_template
 
 from .models import SUPPORT_SESSION_LENGTH, SupportSession
 
@@ -22,14 +23,19 @@ OWNER_FIELDS = ("owner_name", "owner_email", "owner_phone")
 
 def create_client(data: dict, created_by: User) -> Tenant:
     """
-    Create the tenant, the owner user (or reuse an existing one), an invited owner membership and
-    the invite, in one transaction. The invite email is sent after commit.
+    Create the tenant (with a copy of its industry template's defaults), the owner user (or reuse
+    an existing one), an invited owner membership and the invite, in one transaction. The invite
+    email is sent after commit.
     """
     tenant_fields = {k: v for k, v in data.items() if k not in OWNER_FIELDS}
+    template = tenant_fields.pop("industry_template")
     owner_email = data["owner_email"].strip().lower()
 
     with transaction.atomic():
-        tenant = Tenant.objects.create(**tenant_fields)
+        tenant = Tenant(**tenant_fields)
+        # Copy the template's defaults (reminder rule, question flow, choice lists) onto the client.
+        assign_template(tenant, template)
+        tenant.save()
         write_audit(Action.CREATE, tenant, after=snapshot(tenant))
 
         user = User.objects.filter(email__iexact=owner_email).first()

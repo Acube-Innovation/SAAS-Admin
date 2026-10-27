@@ -11,6 +11,14 @@ def api():
 
 
 @pytest.fixture
+def gas_template(db):
+    """The seeded gas_agency template (re-seeded if a transactional test flushed it)."""
+    from apps.industry.seed import seed_gas_agency
+
+    return seed_gas_agency()
+
+
+@pytest.fixture
 def tenant(db):
     return factories.make_tenant("Kochi Gas Agency")
 

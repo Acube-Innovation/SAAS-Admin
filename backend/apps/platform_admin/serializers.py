@@ -12,6 +12,7 @@ from apps.core.validators import (
     normalize_indian_mobile,
     validate_pin_code,
 )
+from apps.industry.models import IndustryTemplate
 
 from .models import SupportSession
 
@@ -47,12 +48,18 @@ class TenantSerializer(serializers.ModelSerializer):
     contact_phone = serializers.CharField()
     daily_send_cap = serializers.IntegerField(min_value=1, max_value=100_000, default=5000)
     owner_email = serializers.EmailField(read_only=True, allow_null=True)
+    industry_template_name = serializers.CharField(
+        source="industry_template.name", read_only=True, allow_null=True
+    )
 
     class Meta:
         model = Tenant
         fields = [
             "id",
             *TENANT_FIELDS,
+            "industry_template",
+            "industry_template_name",
+            "industry_template_version",
             "status",
             "suspended_at",
             "suspension_reason",
@@ -60,7 +67,14 @@ class TenantSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["status", "suspended_at", "suspension_reason"]
+        # The industry is chosen when the client is created and can't be switched afterwards.
+        read_only_fields = [
+            "status",
+            "suspended_at",
+            "suspension_reason",
+            "industry_template",
+            "industry_template_version",
+        ]
 
     def validate_gstin(self, value):
         gstin = normalize_gstin(value)
@@ -93,6 +107,10 @@ class TenantSerializer(serializers.ModelSerializer):
 class TenantCreateSerializer(TenantSerializer):
     """Create client form (spec 2.4): client details plus the owner who is invited."""
 
+    industry_template = serializers.PrimaryKeyRelatedField(
+        queryset=IndustryTemplate.objects.filter(is_active=True),
+        error_messages={"does_not_exist": _("Choose an active industry template.")},
+    )
     owner_name = serializers.CharField(max_length=100, write_only=True)
     owner_email = serializers.EmailField(write_only=True)
     owner_phone = serializers.CharField(write_only=True, required=False, allow_blank=True)

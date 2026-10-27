@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.audit",
     "apps.platform_admin",
+    "apps.industry",
 ]
 
 AUTH_USER_MODEL = "accounts.User"

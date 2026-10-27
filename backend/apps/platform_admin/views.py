@@ -55,7 +55,7 @@ class TenantViewSet(
         owner_email = Membership.objects.filter(
             tenant=OuterRef("pk"), role=TenantRole.OWNER
         ).order_by("created_at")
-        queryset = Tenant.objects.annotate(
+        queryset = Tenant.objects.select_related("industry_template").annotate(
             owner_email=Subquery(owner_email.values("user__email")[:1])
         )
         params = self.request.query_params
@@ -68,6 +68,8 @@ class TenantViewSet(
             )
         if status_filter := params.get("status"):
             queryset = queryset.filter(status=status_filter)
+        if template_filter := params.get("industry_template"):
+            queryset = queryset.filter(industry_template__key=template_filter)
         ordering = params.get("ordering", "name")
         return queryset.order_by(ordering if ordering in ORDERINGS else "name")
 
@@ -75,6 +77,7 @@ class TenantViewSet(
         parameters=[
             OpenApiParameter("search", str, description="Name, legal name, GSTIN or owner email"),
             OpenApiParameter("status", str, enum=Tenant.Status.values),
+            OpenApiParameter("industry_template", str, description="Template key, e.g. gas_agency"),
             OpenApiParameter("ordering", str, enum=sorted(ORDERINGS)),
         ]
     )

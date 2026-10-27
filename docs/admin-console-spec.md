@@ -133,10 +133,12 @@ A suspended client shows a **read-only banner** with the suspension reason and d
 | `description` | Optional, up to 500 characters |
 | `is_active` | Inactive templates can't be picked for new clients |
 | Schedule types | `key`, `name` (e.g. "Cylinder delivery"), linked default reminder rule and question flow |
-| Field definitions (per entity `subscriber` or `schedule`) | `key` (snake_case), `label`, `field_type` (`text`, `number`, `date`, `phone`, `choice`, `boolean`), `required`, `options` (for choice), `max_length`, `is_active`, `order` |
-| Default reminder rule | `send_time` (HH:MM), `days_before` (default 1), `wait_minutes`, `quiet_start`, `quiet_end`, `delivery_weekdays`, channel order |
-| Default question flow | Answers with `label` and `outcome` (`confirmed`, `not_available`, `reschedule`) |
-| Choice lists | e.g. cylinder types |
+| Field definitions (per entity `subscriber` or `schedule`) | `key` (snake_case `^[a-z][a-z0-9_]{1,49}$`), `label` (1–100), `field_type` (`text`, `number`, `date`, `phone`, `choice`, `boolean`), `required`, `options` (choice fields: at least one, unique), `max_length` (1–1000), `is_active`, order = position in the list. **Core** fields (`is_core`) map to model columns (e.g. `customer_name`, `external_ref`, `booking_reference`, `scheduled_date`): only their label can change and they can't be removed. Other fields are **custom** and stored in `custom_fields` JSONB |
+| Default reminder rule | `send_time`, `quiet_start`, `quiet_end` (HH:MM 24-hour), `days_before` (0–7, default 1), `wait_minutes` (30–1440), `delivery_weekdays` (0 = Monday … 6, at least one), `channel_order` (`whatsapp`, `voice`) |
+| Default question flow | 1–3 answers, each `key`, `label` (≤ 25 characters: a WhatsApp button), `outcome` (`confirmed`, `not_available`, `reschedule`), optional `pick_next_delivery_days` (1–10) |
+| Choice lists | The options of custom choice fields, e.g. cylinder types. Copied onto each client, which can edit its own list |
+
+The editor saves the **whole definition** with `PUT` (the read shape of `GET` can be sent back as is).
 
 Saving publishes a **new version** (see Workflow 3.5).
 
@@ -286,7 +288,14 @@ writes an audit entry and a `TemplateStatusEvent`. The `WhatsAppProvider` interf
 - **Removed field:** switched off (`is_active = false`) and kept, so existing data stays readable.
 - **Default changes** (reminder rule, choice lists): apply to **new clients only**. Existing clients keep their copy.
 - **New required field:** blocked (`409 required_field_in_use`) once any client uses the template.
-- A field's `key` and `field_type` can't change once the template is in use.
+- A field's `key` and `field_type` can't change once the template is in use. (A key is the field's identity:
+  a different key is a new field.) Making a field required, or switching a required field back on, counts as a
+  new required field.
+- Core fields: only the label can change, at any time.
+- "In use" = at least one client has this template. When a client is created it gets a copy of the template's
+  defaults (reminder rule, question flow, choice lists) in `Tenant.settings.industry`, plus
+  `industry_template_version`. Fields are always read live from the template, so new optional fields apply to all
+  clients.
 
 ### 3.6 Change request
 
@@ -381,17 +390,17 @@ All primary keys are UUIDs. Every model has `created_at` and `updated_at`. **Ten
 
 | Model | App | Tenant-scoped | Key fields |
 | --- | --- | --- | --- |
-| Tenant | core | — (is the tenant) | `name`, `legal_name`, `gstin` (unique, nullable), `address_line1`, `address_line2`, `city`, `state`, `pin_code`, `contact_name`, `contact_phone`, `contact_email`, `industry_template` (FK), `industry_template_version` (int), `status` (`active`, `suspended`), `suspended_at`, `suspension_reason`, `default_language`, `timezone`, `daily_send_cap` (default 5000), `settings` (JSONB) |
+| Tenant | core | — (is the tenant) | `name`, `legal_name`, `gstin` (unique, nullable), `address_line1`, `address_line2`, `city`, `state`, `pin_code`, `contact_name`, `contact_phone`, `contact_email`, `industry_template` (FK, required on create, can't change afterwards), `industry_template_version` (int, the version whose defaults were copied), `status` (`active`, `suspended`), `suspended_at`, `suspension_reason`, `default_language`, `timezone`, `daily_send_cap` (default 5000), `settings` (JSONB) |
 | User | accounts | No | `email` (unique, ci), `full_name`, `phone`, `platform_role` (`super_admin`, `support`, or blank), `is_active`, `failed_login_count`, `locked_until`, `last_login` |
 | Membership | accounts | Yes (plus a read rule: users can read their own memberships in any tenant) | `user`, `tenant`, `role` (`owner`, `manager`, `office_staff`), `status` (`invited`, `active`, `deactivated`); unique (`tenant`, `user`) |
 | Invite | accounts | Yes | `membership`, `token_hash` (SHA-256), `expires_at`, `used_at`, `revoked_at`, `created_by` |
 | TOTP device | accounts | No | django-otp `TOTPDevice` (`confirmed`) |
 | AuditLog | audit | Nullable tenant (platform actions have none); RLS: own tenant, or all for 2FA-verified platform staff | `actor` (FK User, null = system), `actor_email`, `tenant`, `support_session` (stored as `support_session_id`; FK from Step 5), `action` (`create`, `update`, `delete`, `status_change`, `export`, `login`, `login_failed`, `account_locked`, `logout`, `otp_*`, `invite_accepted`, `support_start`, `support_end`, …), `object_type`, `object_id`, `before` (JSONB), `after` (JSONB), `ip_address`, `user_agent`. **Insert-only**: Django blocks save/delete/queryset update, a database trigger rejects UPDATE/DELETE for every role, and `app_user` has no UPDATE/DELETE/TRUNCATE. Secrets (`password`, `token_hash`, keys) are masked |
 | SupportSession | platform_admin | No | `staff_user`, `tenant`, `reason`, `started_at`, `expires_at`, `ended_at` |
-| IndustryTemplate | industry | No | `key`, `name`, `description`, `is_active`, `current_version` |
+| IndustryTemplate | industry | No | `key` (immutable), `name`, `description`, `is_active`, `current_version` |
 | IndustryTemplateVersion | industry | No | `template`, `version`, `definition` (JSONB: schedule types, fields, choice lists, default rule, default flow), `created_by` |
-| ScheduleType | industry | No | `template`, `key`, `name` |
-| FieldDefinition | industry | No | `schedule_type` / `template`, `entity` (`subscriber`, `schedule`), `key`, `label`, `field_type`, `required`, `options`, `max_length`, `is_active`, `order` |
+| ScheduleType | industry | No | `template`, `key`, `name`, `is_active`, `default_reminder_rule` (JSON), `default_question_flow` (JSON) |
+| FieldDefinition | industry | No | `template`, `schedule_type` (schedule fields), `entity` (`subscriber`, `schedule`), `key`, `label`, `field_type`, `required`, `is_core`, `options`, `max_length`, `is_active`, `order`. Never deleted: removed fields are switched off |
 | WhatsAppTemplate | messaging_templates | Yes | `tenant`, `name`, `language`, `category`, `schedule_type` |
 | WhatsAppTemplateVersion | messaging_templates | Yes | `template`, `version`, `status`, `is_live`, `header_text`, `body`, `footer`, `buttons` (JSONB), `sample_values` (JSONB), `provider_template_id`, `rejection_reason`, `signoff_evidence` (S3 key), `signed_off_by`, `signed_off_at`, `signoff_method` (`client`, `manual`) |
 | TemplateStatusEvent | messaging_templates | Yes | `version`, `from_status`, `to_status`, `actor`, `note` |
