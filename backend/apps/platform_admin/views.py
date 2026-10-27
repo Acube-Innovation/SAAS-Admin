@@ -208,6 +208,7 @@ class ReferenceDataView(APIView):
     @extend_schema(responses=ReferenceDataSerializer)
     def get(self, request):
         from apps.core.constants import STATES, Language
+        from apps.messaging_templates.dev import dev_controls_enabled
 
         return Response(
             {
@@ -215,5 +216,6 @@ class ReferenceDataView(APIView):
                 "languages": [{"code": c, "name": str(n)} for c, n in Language.choices],
                 "timezones": ["Asia/Kolkata"],
                 "daily_send_cap": {"default": 5000, "min": 1, "max": 100_000},
+                "whatsapp_dev_controls": dev_controls_enabled(),
             }
         )

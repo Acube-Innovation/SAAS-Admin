@@ -97,3 +97,49 @@ export function useEndSupportSession() {
     onSuccess: () => queryClient.setQueryData(keys.supportSession, null),
   });
 }
+
+export function useIndustryTemplate(id: string) {
+  return useQuery({
+    queryKey: ["industry-template", id],
+    enabled: Boolean(id),
+    queryFn: () => unwrap(api.GET("/api/admin/industry-templates/{id}", { params: { path: { id } } })),
+  });
+}
+
+export function useIndustryVersions(id: string) {
+  return useQuery({
+    queryKey: ["industry-template", id, "versions"],
+    queryFn: () =>
+      unwrap(api.GET("/api/admin/industry-templates/{id}/versions", { params: { path: { id } } })),
+  });
+}
+
+export function useWhatsAppTemplates(params: { tenant?: string; status?: string; search?: string; page?: string }) {
+  const query = Object.fromEntries(Object.entries(params).filter(([, value]) => value)) as Record<string, string>;
+  return useQuery({
+    queryKey: ["whatsapp-templates", query],
+    queryFn: () => unwrap(api.GET("/api/admin/whatsapp-templates", { params: { query } })),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useWhatsAppTemplate(id: string) {
+  return useQuery({
+    queryKey: ["whatsapp-template", id],
+    queryFn: () => unwrap(api.GET("/api/admin/whatsapp-templates/{id}", { params: { path: { id } } })),
+  });
+}
+
+export function useTemplateVariables(scheduleType: string | undefined) {
+  return useQuery({
+    queryKey: ["template-variables", scheduleType],
+    enabled: Boolean(scheduleType),
+    queryFn: () =>
+      unwrap(
+        api.GET("/api/admin/whatsapp-templates/variables", {
+          params: { query: { schedule_type: scheduleType! } },
+        }),
+      ),
+    staleTime: 60_000,
+  });
+}

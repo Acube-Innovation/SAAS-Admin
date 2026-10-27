@@ -166,8 +166,15 @@ booking date, planned delivery date, cylinder type, quantity, remarks. Cylinder 
 | `sample_values` | **Required for every variable** used in header/body |
 | `signoff_evidence` | File (PDF/PNG/JPG; the content must match the type), **up to 5 MB**, uploaded to S3 under `tenants/<tenant>/whatsapp-signoff/<version>/`. Required for manual sign-off. Downloaded through a signed link valid for 5 minutes |
 
-The editor shows live character counters, a variables picker, a preview per language, the Workflow 3.4 status at
-the top, version history and the rejection reason when rejected.
+The editor shows live character counters, a variables picker, a preview per language (tabs for the same template
+name in other languages), the Workflow 3.4 status at the top, version history and the rejection reason when
+rejected. The `{{agency_name}}` sample defaults to the client's name.
+
+**Development-only Simulate panel.** While the stub provider is active and `DEBUG` is on (and
+`WHATSAPP_DEV_CONTROLS` is true), super admins see a panel to act as Meta (approve, reject with reason, pause) or as
+the client (approve, send back with a comment) through
+`POST /api/admin/dev/whatsapp-versions/{vid}/simulate`. Otherwise that endpoint answers 404, so it can't exist in
+staging or production.
 
 ### 2.8 Audit log
 

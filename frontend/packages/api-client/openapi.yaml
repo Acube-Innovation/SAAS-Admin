@@ -3,6 +3,41 @@ info:
   title: Schedule Confirmation SaaS API
   version: 0.1.0
 paths:
+  /api/admin/dev/whatsapp-versions/{vid}/simulate:
+    post:
+      operationId: admin_dev_whatsapp_versions_simulate_create
+      description: 'Development only: act as Meta (then sync) or as the client''s
+        owner on a version.'
+      parameters:
+      - in: path
+        name: vid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - 'admin: dev'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SimulateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SimulateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
+          description: ''
   /api/admin/industry-templates:
     get:
       operationId: admin_industry_templates_list
@@ -1220,6 +1255,20 @@ components:
           maxLength: 100
       required:
       - password
+    ActionEnum:
+      enum:
+      - provider_approve
+      - provider_reject
+      - provider_pause
+      - client_approve
+      - client_send_back
+      type: string
+      description: |-
+        * `provider_approve` - provider_approve
+        * `provider_reject` - provider_reject
+        * `provider_pause` - provider_pause
+        * `client_approve` - client_approve
+        * `client_send_back` - client_send_back
     AnswerRequest:
       type: object
       properties:
@@ -1941,11 +1990,16 @@ components:
             type: string
         daily_send_cap:
           $ref: '#/components/schemas/SendCapLimits'
+        whatsapp_dev_controls:
+          type: boolean
+          description: 'Development only: the Simulate panel (stub provider + DEBUG)
+            is available.'
       required:
       - daily_send_cap
       - languages
       - states
       - timezones
+      - whatsapp_dev_controls
     ReminderRuleRequest:
       type: object
       properties:
@@ -1991,6 +2045,10 @@ components:
     ScheduleType:
       type: object
       properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
         key:
           type: string
           maxLength: 50
@@ -2010,6 +2068,7 @@ components:
       - default_question_flow
       - default_reminder_rule
       - fields
+      - id
       - is_active
       - key
       - name
@@ -2070,6 +2129,17 @@ components:
       description: |-
         * `client` - Client
         * `manual` - Manual
+    SimulateRequest:
+      type: object
+      properties:
+        action:
+          $ref: '#/components/schemas/ActionEnum'
+        reason:
+          type: string
+          default: ''
+          maxLength: 1000
+      required:
+      - action
     StateEnum:
       enum:
       - AN
@@ -2404,7 +2474,8 @@ components:
       properties:
         variables:
           type: array
-          items: {}
+          items:
+            type: string
       required:
       - variables
     TemplateVersionStatusEnum:

@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
-import { icons } from "@/components/icons";
-import { PlaceholderPage } from "@/components/placeholder-page";
+import { WhatsAppList } from "@/components/whatsapp/wa-list";
 import { t } from "@/i18n";
 
 export const metadata: Metadata = { title: t("page.whatsapp_templates.title") };
 
-export default function WhatsappTemplatesPage() {
-  return <PlaceholderPage page="whatsapp_templates" icon={icons.whatsapp} />;
+export default function Page() {
+  return (
+    <Suspense>
+      <WhatsAppList />
+    </Suspense>
+  );
 }

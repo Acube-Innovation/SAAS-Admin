@@ -17,10 +17,19 @@ export function mockApi(handlers: Handler[]) {
   const calls: { method: string; path: string; body: unknown }[] = [];
   vi.stubGlobal(
     "fetch",
-    vi.fn(async (request: Request) => {
+    vi.fn(async (input: Request | string, init?: RequestInit) => {
+      const request = typeof input === "string" ? new Request(new URL(input, "http://localhost:3000"), init) : input;
       const url = new URL(request.url);
       const text = request.method === "GET" ? "" : await request.text();
-      calls.push({ method: request.method, path: url.pathname, body: text ? JSON.parse(text) : undefined });
+      let body: unknown = undefined;
+      if (text) {
+        try {
+          body = JSON.parse(text);
+        } catch {
+          body = text; // e.g. multipart form data
+        }
+      }
+      calls.push({ method: request.method, path: url.pathname, body });
       const handler = handlers.find((h) => h.method === request.method && h.path === url.pathname);
       const status = handler?.status ?? (handler ? 200 : 404);
       return new Response(handler?.body === undefined ? null : JSON.stringify(handler.body), {

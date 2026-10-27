@@ -87,6 +87,7 @@ def test_seeded_gas_agency_template_is_returned_by_the_api(admin_api, gas_templa
     detail = admin_api.get(f"{URL}/{gas_template.pk}").json()
     [delivery] = detail["schedule_types"]
     assert delivery["name"] == "Cylinder delivery"
+    assert delivery["id"] == str(gas_template.schedule_types.get().pk)
     fields = {f["key"]: f for f in delivery["fields"]}
     assert fields["cylinder_type"]["options"] == [
         "14.2 kg domestic",

@@ -215,3 +215,6 @@ class ReferenceDataSerializer(serializers.Serializer):
     languages = LanguageOptionSerializer(many=True)
     timezones = serializers.ListField(child=serializers.CharField())
     daily_send_cap = SendCapLimitsSerializer()
+    whatsapp_dev_controls = serializers.BooleanField(
+        help_text="Development only: the Simulate panel (stub provider + DEBUG) is available."
+    )

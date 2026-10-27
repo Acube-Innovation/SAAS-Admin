@@ -8,6 +8,7 @@ from rest_framework.response import Response
 
 from apps.accounts.permissions import IsPlatformStaff, IsSuperAdmin
 from apps.core.exceptions import ApiError
+from apps.core.storage import signed_url
 from apps.industry.models import ScheduleType
 
 from . import services
@@ -89,7 +90,9 @@ class WhatsAppTemplateViewSet(
 
     @extend_schema(
         parameters=[OpenApiParameter("schedule_type", str, required=True)],
-        responses=inline_serializer("TemplateVariables", {"variables": serializers.ListField()}),
+        responses=inline_serializer(
+            "TemplateVariables", {"variables": serializers.ListField(child=serializers.CharField())}
+        ),
     )
     @action(detail=False, methods=["get"])
     def variables(self, request):
@@ -176,4 +179,4 @@ class WhatsAppTemplateViewSet(
         version = self._version(pk, vid)
         if not version.signoff_evidence:
             raise ApiError("no_evidence", "This version has no sign-off evidence.", 404)
-        return Response({"url": version.signoff_evidence.url})
+        return Response({"url": signed_url(version.signoff_evidence.name)})

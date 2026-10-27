@@ -127,6 +127,8 @@ CACHES = {
 AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME", "schedule-saas-local")
 AWS_S3_ENDPOINT_URL = env("AWS_S3_ENDPOINT_URL") or None
 AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME", "ap-south-1")
+# Endpoint browsers use for signed links when it differs from the API's (local docker-compose only).
+AWS_S3_PUBLIC_ENDPOINT_URL = env("AWS_S3_PUBLIC_ENDPOINT_URL") or None
 STORAGES = {
     "default": {
         "BACKEND": "storages.backends.s3.S3Storage",
@@ -149,6 +151,9 @@ STORAGES = {
 
 # WhatsApp Business provider (spec 3.4). The stub makes no network calls; Phase 2 adds Meta.
 WHATSAPP_PROVIDER = env("WHATSAPP_PROVIDER", "apps.messaging_templates.providers.StubProvider")
+# Development-only "simulate Meta / the client" controls (see messaging_templates/dev.py). They also
+# require the stub provider and DEBUG, so they can never be on in staging or production.
+WHATSAPP_DEV_CONTROLS = env_bool("WHATSAPP_DEV_CONTROLS", True)
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},

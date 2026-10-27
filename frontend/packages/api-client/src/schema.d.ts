@@ -4,6 +4,23 @@
  */
 
 export interface paths {
+    "/api/admin/dev/whatsapp-versions/{vid}/simulate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Development only: act as Meta (then sync) or as the client's owner on a version. */
+        post: operations["admin_dev_whatsapp_versions_simulate_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/industry-templates": {
         parameters: {
             query?: never;
@@ -646,6 +663,15 @@ export interface components {
             password: string;
             full_name?: string;
         };
+        /**
+         * @description * `provider_approve` - provider_approve
+         *     * `provider_reject` - provider_reject
+         *     * `provider_pause` - provider_pause
+         *     * `client_approve` - client_approve
+         *     * `client_send_back` - client_send_back
+         * @enum {string}
+         */
+        ActionEnum: "provider_approve" | "provider_reject" | "provider_pause" | "client_approve" | "client_send_back";
         AnswerRequest: {
             key: string;
             label: string;
@@ -953,6 +979,8 @@ export interface components {
             languages: components["schemas"]["LanguageOption"][];
             timezones: string[];
             daily_send_cap: components["schemas"]["SendCapLimits"];
+            /** @description Development only: the Simulate panel (stub provider + DEBUG) is available. */
+            whatsapp_dev_controls: boolean;
         };
         ReminderRuleRequest: {
             send_time: string;
@@ -964,6 +992,8 @@ export interface components {
             channel_order: components["schemas"]["ChannelOrderEnum"][];
         };
         ScheduleType: {
+            /** Format: uuid */
+            readonly id: string;
             key: string;
             name: string;
             is_active: boolean;
@@ -995,6 +1025,11 @@ export interface components {
          * @enum {string}
          */
         SignoffMethodEnum: "client" | "manual";
+        SimulateRequest: {
+            action: components["schemas"]["ActionEnum"];
+            /** @default  */
+            reason: string;
+        };
         /**
          * @description * `AN` - Andaman and Nicobar Islands
          *     * `AP` - Andhra Pradesh
@@ -1137,7 +1172,7 @@ export interface components {
             schedule_types: components["schemas"]["ScheduleTypeInputRequest"][];
         };
         TemplateVariables: {
-            variables: unknown[];
+            variables: string[];
         };
         /**
          * @description * `draft` - Draft
@@ -1271,6 +1306,33 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    admin_dev_whatsapp_versions_simulate_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                vid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SimulateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SimulateRequest"];
+                "multipart/form-data": components["schemas"]["SimulateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Version"];
+                };
+            };
+        };
+    };
     admin_industry_templates_list: {
         parameters: {
             query?: never;

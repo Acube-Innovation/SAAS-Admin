@@ -57,8 +57,9 @@ docker compose exec api python manage.py createplatformuser --email you@example.
 ```
 
 The API creates the S3 bucket on start-up (`manage.py ensure_storage_bucket`). WhatsApp templates use a stub provider
-(no calls to Meta) until Phase 2; set what "Meta" reports with
-`StubProvider.set_status(<provider_template_id>, "approved")` in `manage.py shell`.
+(no calls to Meta) until Phase 2. In the admin console's template editor, super admins get a development-only
+**Simulate** panel to play Meta (approve / reject / pause) and the client (approve / send back); it only exists with
+the stub provider and `DEBUG` on.
 
 Emails (such as invites) print to the `worker` logs locally: `docker compose logs -f worker`.
 
@@ -103,8 +104,9 @@ CI fails if the committed client doesn't match the backend.
 
 ## End-to-end tests (Playwright)
 
-`frontend/apps/admin/e2e` covers Workflows 3.1 (onboard a client), 3.2 (suspend / reactivate) and 3.3 (support access)
-in a real browser against the running API. With `docker compose up` running:
+`frontend/apps/admin/e2e` covers Workflows 3.1 (onboard a client), 3.2 (suspend / reactivate), 3.3 (support access),
+every Workflow 3.4 WhatsApp template path and the industry template editor, in a real browser against the running
+API. With `docker compose up` running:
 
 ```bash
 cd frontend/apps/admin
