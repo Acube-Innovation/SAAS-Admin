@@ -1,0 +1,6 @@
+# Core runtime dependencies (stack fixed by CLAUDE.md)
+Django==5.2.18                # LTS
+djangorestframework==3.18.3
+drf-spectacular==0.30.0
+celery[redis]==5.6.3    # also brings the compatible redis client
+psycopg[binary]==3.3.6

@@ -1,0 +1,7 @@
+@import "tailwindcss";
+@import "@saas/config/tailwind/theme.css";
+@source "../../../../packages/ui/src";
+
+body {
+  @apply bg-slate-50 text-ink antialiased;
+}

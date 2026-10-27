@@ -1,0 +1,4 @@
+{
+  "extends": "@saas/config/typescript/library.json",
+  "include": ["src"]
+}

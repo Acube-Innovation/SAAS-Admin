@@ -1,0 +1,25 @@
+import type { Messages } from "@saas/ui";
+
+export const en: Messages = {
+  "app.name": "Super Admin Console",
+  "app.tagline": "Schedule Confirmation SaaS · platform team",
+  "app.host": "admin.yourdomain.com",
+  "scaffold.badge": "Step 1 · scaffold",
+  "scaffold.title": "Monorepo and local environment are running",
+  "scaffold.body": "No features yet. Screens are added from Step 8 onwards, following the build prompts.",
+  "scaffold.coming": "Coming next",
+  "health.title": "Backend connection",
+  "health.api": "API",
+  "health.database": "PostgreSQL",
+  "health.redis": "Redis",
+  "health.ok": "Healthy",
+  "health.error": "Unavailable",
+  "health.unreachable": "API not reachable at {url}",
+  "footer.stack": "Next.js · TypeScript · Tailwind · Turborepo",
+  "coming.login": "Login, 2FA and invite acceptance",
+  "coming.clients": "Clients and client detail",
+  "coming.industry": "Industry templates",
+  "coming.whatsapp": "WhatsApp templates",
+  "coming.dashboard": "Dashboard",
+  "coming.audit": "Audit log",
+};

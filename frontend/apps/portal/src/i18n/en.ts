@@ -1,0 +1,25 @@
+import type { Messages } from "@saas/ui";
+
+export const en: Messages = {
+  "app.name": "Client Portal",
+  "app.tagline": "Schedule Confirmation SaaS · agency workspace",
+  "app.host": "app.yourdomain.com",
+  "scaffold.badge": "Step 1 · scaffold",
+  "scaffold.title": "Monorepo and local environment are running",
+  "scaffold.body": "No features yet. Screens are added from Step 8 onwards, following the build prompts.",
+  "scaffold.coming": "Coming next",
+  "health.title": "Backend connection",
+  "health.api": "API",
+  "health.database": "PostgreSQL",
+  "health.redis": "Redis",
+  "health.ok": "Healthy",
+  "health.error": "Unavailable",
+  "health.unreachable": "API not reachable at {url}",
+  "footer.stack": "Next.js · TypeScript · Tailwind · Turborepo",
+  "coming.home": "Home",
+  "coming.subscribers": "Subscribers and CSV import",
+  "coming.bookings": "Bookings",
+  "coming.deliveries": "Deliveries",
+  "coming.followup": "Follow-up queue",
+  "coming.settings": "Reminder settings",
+};
