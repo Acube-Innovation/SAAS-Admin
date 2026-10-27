@@ -83,10 +83,23 @@ database once with `docker compose down -v && docker compose up -d --build`. Thi
 ```bash
 cd frontend
 pnpm install
-pnpm dev                          # admin console on :3000 (portal: see SAAS-Client)
+pnpm dev                          # admin console on http://localhost:3000 (portal: see SAAS-Client)
 ```
 
-Both apps proxy `/api/*` to `API_INTERNAL_URL` or `NEXT_PUBLIC_API_URL` (default `http://localhost:8000`).
+Sign in at http://localhost:3000/login with a platform user (see `createplatformuser` above). The first sign-in
+shows a QR code for an authenticator app (2FA is required for platform staff).
+
+The admin app proxies `/api/*` to `API_INTERNAL_URL` or `NEXT_PUBLIC_API_URL` (default `http://localhost:8000`).
+
+## Typed API client
+
+`frontend/packages/api-client` is generated from the backend's OpenAPI schema. After changing an endpoint or serializer:
+
+```bash
+scripts/generate-api-client.sh    # writes openapi.yaml and src/schema.d.ts; commit both
+```
+
+CI fails if the committed client doesn't match the backend.
 
 ## Tests and lint
 

@@ -1,7 +1,8 @@
-/**
- * Typed API client. In Step 8 the types here are generated from the OpenAPI schema at /api/schema;
- * for now it only covers the health endpoint.
- */
+export { ApiError, createApiClient, csrfMiddleware, readCookie, unwrap } from "./client";
+export type { ApiClient, ApiErrorBody } from "./client";
+export type { components, paths } from "./schema";
+
+/** Health check used by the scaffold pages and monitoring. */
 export type Health = {
   status: "ok" | "error";
   database: "ok" | "error";
@@ -19,3 +20,5 @@ export async function getHealth(baseUrl: string, fetchImpl: typeof fetch = fetch
   }
   return (await response.json()) as Health;
 }
+
+export type AuthState = import("./schema").components["schemas"]["AuthState"];

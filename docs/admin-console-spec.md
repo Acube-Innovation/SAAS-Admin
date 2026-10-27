@@ -65,6 +65,8 @@ Field names below are the exact snake_case names used in the DB and API.
 - Session cookie auth with CSRF (`SameSite=Lax`, `HttpOnly`, `Secure` outside local).
 - Users who must have 2FA but have no confirmed device are sent to **2FA set-up** (QR code + confirm code) before
   they can reach any page.
+- After a wrong 2FA code, further codes are refused for 1, 2, 4, 8 … seconds (django-otp throttling). During that
+  wait the API answers `429 otp_throttled` with the wait in the message, instead of calling a correct code invalid.
 - Admin API access needs `platform_role` set **and** an OTP-verified session.
 - Error messages never reveal whether the email exists.
 

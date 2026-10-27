@@ -1,4 +1,7 @@
+import math
+
 from django.contrib.auth import login, logout
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from django_otp import login as otp_login
@@ -30,6 +33,18 @@ from .serializers import (
 from .tenancy import ACTIVE_TENANT_SESSION_KEY, active_tenant_ids
 
 INVALID_OTP = ApiError("invalid_otp", "That code is not valid. Try again.", 400)
+
+
+def check_otp_throttle(device):
+    """
+    django-otp refuses codes for 1, 2, 4, 8 … seconds after each wrong one. Say so, instead of
+    rejecting a correct code as invalid during that wait.
+    """
+    allowed, info = device.verify_is_allowed()
+    if not allowed:
+        wait = max(1, math.ceil((info["locked_until"] - timezone.now()).total_seconds()))
+        unit = "second" if wait == 1 else "seconds"
+        raise ApiError("otp_throttled", f"Too many attempts. Try again in {wait} {unit}.", 429)
 
 
 def auth_state(request):
@@ -131,6 +146,7 @@ class OtpConfirmView(APIView):
         device = TOTPDevice.objects.filter(user=request.user, confirmed=False).first()
         if device is None:
             raise ApiError("otp_setup_missing", "Start two-factor set-up first.", 409)
+        check_otp_throttle(device)
         if not device.verify_token(serializer.validated_data["otp_code"]):
             write_audit(Action.OTP_FAILED, request.user, after={"step": "setup"}, tenant=None)
             raise INVALID_OTP
@@ -151,8 +167,10 @@ class OtpVerifyView(APIView):
         serializer = OtpCodeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         code = serializer.validated_data["otp_code"]
-        for device in TOTPDevice.objects.filter(user=request.user, confirmed=True):
-            # verify_token applies django-otp's throttling after repeated failures.
+        devices = list(TOTPDevice.objects.filter(user=request.user, confirmed=True))
+        for device in devices:
+            check_otp_throttle(device)
+        for device in devices:
             if device.verify_token(code):
                 otp_login(request, device)
                 write_audit(Action.OTP_VERIFIED, request.user, tenant=None)

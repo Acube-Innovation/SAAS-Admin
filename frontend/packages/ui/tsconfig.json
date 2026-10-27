@@ -1,4 +1,13 @@
 {
   "extends": "@saas/config/typescript/library.json",
-  "include": ["src"]
+  "include": [
+    "src",
+    "vitest.setup.ts",
+    "vitest.config.ts"
+  ],
+  "compilerOptions": {
+    "types": [
+      "@testing-library/jest-dom/vitest"
+    ]
+  }
 }

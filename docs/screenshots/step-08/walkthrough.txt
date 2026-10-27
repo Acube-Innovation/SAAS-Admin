@@ -1,0 +1,14 @@
+1. Signed out, opened /clients -> /login?next=%2Fclients
+2. Empty submit -> client-side validation messages
+3. Wrong password -> "Invalid email or password."
+4. Correct password -> /two-factor: QR code + setup key "7NCH QYW7 W45Z BMNK QQCL XTHS XRHS VQCZ"
+5. Wrong code -> "That code isn't valid. Check your app and try again."
+5b. Right code within the 1 s throttle -> "Too many attempts. Try again in 1 second."
+6. Right code -> back to the page asked for: /clients
+7. Sidebar: Dashboard | Clients | Industry templates | WhatsApp templates | Audit log
+8. Phone width: menu opens from the top bar
+9. Signed out -> /dashboard redirects to /login?next=%2Fdashboard
+10. Second sign-in asks only for the code -> /dashboard
+11. Client manager signs in -> "This console is for the platform team. Client users sign in to the client portal."
+12. Invite page: "You've been invited to Palakkad Gas Agency as Manager." ; short password -> "Use at least 12 characters."
+13. Invalid invite link -> "This invitation can't be used"

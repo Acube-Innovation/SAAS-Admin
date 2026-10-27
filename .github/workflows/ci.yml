@@ -63,6 +63,11 @@ jobs:
       - run: ruff format --check .
       - run: python manage.py makemigrations --check --dry-run
       - run: python manage.py spectacular --validate --fail-on-warn --file /tmp/schema.yml
+      - name: Typed API client is up to date with the backend
+        run: |
+          python manage.py spectacular --file ../frontend/packages/api-client/openapi.yaml
+          git diff --exit-code -- ../frontend/packages/api-client/openapi.yaml \
+            || (echo "Run scripts/generate-api-client.sh and commit the result." && exit 1)
       - run: pytest
 
   frontend:
@@ -82,4 +87,9 @@ jobs:
           cache: pnpm
           cache-dependency-path: frontend/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
+      - name: Generated API types match openapi.yaml
+        run: |
+          pnpm --filter @saas/api-client generate
+          git diff --exit-code -- packages/api-client/src/schema.d.ts \
+            || (echo "Run scripts/generate-api-client.sh and commit the result." && exit 1)
       - run: pnpm turbo run lint typecheck test build

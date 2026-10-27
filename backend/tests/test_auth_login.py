@@ -243,3 +243,26 @@ def test_logout_ends_the_session(api, office_staff):
     sign_in(api, office_staff)
     assert api.post("/api/auth/logout").status_code == 204
     assert api.get("/api/auth/me").status_code == 403
+
+
+def test_codes_are_throttled_after_a_wrong_one_and_the_wait_is_reported(api, super_admin):
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    device = factories.add_totp_device(super_admin)
+    login(api, super_admin.email, factories.PASSWORD)
+    wrong = f"{(int(factories.totp_code(device)) + 1) % 1_000_000:06d}"
+    api.post("/api/auth/otp/verify", {"otp_code": wrong})
+
+    throttled = api.post("/api/auth/otp/verify", {"otp_code": factories.totp_code(device)})
+    assert throttled.status_code == 429
+    assert throttled.json()["code"] == "otp_throttled"
+    assert throttled.json()["detail"] == "Too many attempts. Try again in 1 second."
+
+    device.refresh_from_db()
+    device.throttling_failure_timestamp = timezone.now() - timedelta(seconds=2)
+    device.save()
+    ok = api.post("/api/auth/otp/verify", {"otp_code": factories.totp_code(device)})
+    assert ok.status_code == 200
+    assert ok.json()["otp_verified"] is True

@@ -1,0 +1,2708 @@
+openapi: 3.0.3
+info:
+  title: Schedule Confirmation SaaS API
+  version: 0.1.0
+paths:
+  /api/admin/industry-templates:
+    get:
+      operationId: admin_industry_templates_list
+      description: Industry template editor (spec 2.6). PUT saves the whole definition
+        as a new version.
+      tags:
+      - 'admin: industry templates'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IndustryTemplate'
+          description: ''
+    post:
+      operationId: admin_industry_templates_create
+      description: Industry template editor (spec 2.6). PUT saves the whole definition
+        as a new version.
+      tags:
+      - 'admin: industry templates'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TemplateInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TemplateInput'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndustryTemplate'
+          description: ''
+  /api/admin/industry-templates/{id}:
+    get:
+      operationId: admin_industry_templates_retrieve
+      description: Industry template editor (spec 2.6). PUT saves the whole definition
+        as a new version.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this industry template.
+        required: true
+      tags:
+      - 'admin: industry templates'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndustryTemplate'
+          description: ''
+    put:
+      operationId: admin_industry_templates_update
+      description: Industry template editor (spec 2.6). PUT saves the whole definition
+        as a new version.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this industry template.
+        required: true
+      tags:
+      - 'admin: industry templates'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateInput'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TemplateInput'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TemplateInput'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IndustryTemplate'
+          description: ''
+  /api/admin/industry-templates/{id}/versions:
+    get:
+      operationId: admin_industry_templates_versions_list
+      description: Industry template editor (spec 2.6). PUT saves the whole definition
+        as a new version.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this industry template.
+        required: true
+      tags:
+      - 'admin: industry templates'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IndustryTemplateVersion'
+          description: ''
+  /api/admin/support-sessions/{id}/end:
+    post:
+      operationId: admin_support_sessions_end_create
+      description: 'The signed-in staff user''s support session: the banner''s data
+        and ending it.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this support session.
+        required: true
+      tags:
+      - 'admin: support sessions'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportSession'
+          description: ''
+  /api/admin/support-sessions/current:
+    get:
+      operationId: admin_support_sessions_current_retrieve
+      description: 'The signed-in staff user''s support session: the banner''s data
+        and ending it.'
+      tags:
+      - 'admin: support sessions'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportSession'
+          description: ''
+        '204':
+          description: No response body
+  /api/admin/tenants:
+    get:
+      operationId: admin_tenants_list
+      description: 'Clients (tenants) for the super admin console: spec 2.3 to 2.5,
+        Workflows 3.1 to 3.3.'
+      parameters:
+      - in: query
+        name: industry_template
+        schema:
+          type: string
+        description: Template key, e.g. gas_agency
+      - in: query
+        name: ordering
+        schema:
+          type: string
+          enum:
+          - -created_at
+          - -name
+          - created_at
+          - name
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Name, legal name, GSTIN or owner email
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - active
+          - suspended
+      tags:
+      - 'admin: clients'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTenantList'
+          description: ''
+    post:
+      operationId: admin_tenants_create
+      description: 'Clients (tenants) for the super admin console: spec 2.3 to 2.5,
+        Workflows 3.1 to 3.3.'
+      tags:
+      - 'admin: clients'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TenantCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TenantCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TenantCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+          description: ''
+  /api/admin/tenants/{id}:
+    get:
+      operationId: admin_tenants_retrieve
+      description: 'Clients (tenants) for the super admin console: spec 2.3 to 2.5,
+        Workflows 3.1 to 3.3.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this tenant.
+        required: true
+      tags:
+      - 'admin: clients'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+          description: ''
+    patch:
+      operationId: admin_tenants_partial_update
+      description: 'Clients (tenants) for the super admin console: spec 2.3 to 2.5,
+        Workflows 3.1 to 3.3.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this tenant.
+        required: true
+      tags:
+      - 'admin: clients'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTenant'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTenant'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTenant'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+          description: ''
+  /api/admin/tenants/{id}/activate:
+    post:
+      operationId: admin_tenants_activate_create
+      description: 'Clients (tenants) for the super admin console: spec 2.3 to 2.5,
+        Workflows 3.1 to 3.3.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this tenant.
+        required: true
+      tags:
+      - 'admin: clients'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reason'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Reason'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Reason'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+          description: ''
+  /api/admin/tenants/{id}/activity:
+    get:
+      operationId: admin_tenants_activity_list
+      description: 'Clients (tenants) for the super admin console: spec 2.3 to 2.5,
+        Workflows 3.1 to 3.3.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this tenant.
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - 'admin: clients'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAuditLogList'
+          description: ''
+  /api/admin/tenants/{id}/support-sessions:
+    post:
+      operationId: admin_tenants_support_sessions_create
+      description: 'Clients (tenants) for the super admin console: spec 2.3 to 2.5,
+        Workflows 3.1 to 3.3.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this tenant.
+        required: true
+      tags:
+      - 'admin: clients'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reason'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Reason'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Reason'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportSession'
+          description: ''
+  /api/admin/tenants/{id}/suspend:
+    post:
+      operationId: admin_tenants_suspend_create
+      description: 'Clients (tenants) for the super admin console: spec 2.3 to 2.5,
+        Workflows 3.1 to 3.3.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this tenant.
+        required: true
+      tags:
+      - 'admin: clients'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Reason'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Reason'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Reason'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+          description: ''
+  /api/admin/tenants/{id}/users:
+    get:
+      operationId: admin_tenants_users_list
+      description: 'Clients (tenants) for the super admin console: spec 2.3 to 2.5,
+        Workflows 3.1 to 3.3.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this tenant.
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - 'admin: clients'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMembershipAdminList'
+          description: ''
+  /api/admin/tenants/{id}/users/{membership_id}/resend-invite:
+    post:
+      operationId: admin_tenants_users_resend_invite_create
+      description: 'Clients (tenants) for the super admin console: spec 2.3 to 2.5,
+        Workflows 3.1 to 3.3.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this tenant.
+        required: true
+      - in: path
+        name: membership_id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]+$
+        required: true
+      tags:
+      - 'admin: clients'
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/admin/whatsapp-templates:
+    get:
+      operationId: admin_whatsapp_templates_list
+      description: WhatsApp template editor and approval workflow (spec 2.7, Workflow
+        3.4).
+      parameters:
+      - in: query
+        name: language
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: search
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - approved
+          - disabled
+          - draft
+          - paused
+          - rejected
+          - sent_back
+          - sent_to_client
+          - signed_off
+          - submitted
+      - in: query
+        name: tenant
+        schema:
+          type: string
+      tags:
+      - 'admin: whatsapp templates'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTemplateList'
+          description: ''
+    post:
+      operationId: admin_whatsapp_templates_create
+      description: WhatsApp template editor and approval workflow (spec 2.7, Workflow
+        3.4).
+      tags:
+      - 'admin: whatsapp templates'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TemplateCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TemplateCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TemplateCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateDetail'
+          description: ''
+  /api/admin/whatsapp-templates/{id}:
+    get:
+      operationId: admin_whatsapp_templates_retrieve
+      description: WhatsApp template editor and approval workflow (spec 2.7, Workflow
+        3.4).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this whats app template.
+        required: true
+      tags:
+      - 'admin: whatsapp templates'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateDetail'
+          description: ''
+  /api/admin/whatsapp-templates/{id}/versions/{vid}:
+    get:
+      operationId: admin_whatsapp_templates_versions_retrieve
+      description: WhatsApp template editor and approval workflow (spec 2.7, Workflow
+        3.4).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this whats app template.
+        required: true
+      - in: path
+        name: vid
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]+$
+        required: true
+      tags:
+      - 'admin: whatsapp templates'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
+          description: ''
+    patch:
+      operationId: admin_whatsapp_templates_versions_partial_update
+      description: WhatsApp template editor and approval workflow (spec 2.7, Workflow
+        3.4).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this whats app template.
+        required: true
+      - in: path
+        name: vid
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]+$
+        required: true
+      tags:
+      - 'admin: whatsapp templates'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedVersionEdit'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedVersionEdit'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedVersionEdit'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
+          description: ''
+  /api/admin/whatsapp-templates/{id}/versions/{vid}/disable:
+    post:
+      operationId: admin_whatsapp_templates_versions_disable_create
+      description: WhatsApp template editor and approval workflow (spec 2.7, Workflow
+        3.4).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this whats app template.
+        required: true
+      - in: path
+        name: vid
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]+$
+        required: true
+      tags:
+      - 'admin: whatsapp templates'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReasonOptional'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReasonOptional'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReasonOptional'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
+          description: ''
+  /api/admin/whatsapp-templates/{id}/versions/{vid}/evidence:
+    get:
+      operationId: admin_whatsapp_templates_versions_evidence_retrieve
+      description: A signed link to the sign-off evidence, valid for 5 minutes.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this whats app template.
+        required: true
+      - in: path
+        name: vid
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]+$
+        required: true
+      tags:
+      - 'admin: whatsapp templates'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvidenceLink'
+          description: ''
+  /api/admin/whatsapp-templates/{id}/versions/{vid}/make-live:
+    post:
+      operationId: admin_whatsapp_templates_versions_make_live_create
+      description: WhatsApp template editor and approval workflow (spec 2.7, Workflow
+        3.4).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this whats app template.
+        required: true
+      - in: path
+        name: vid
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]+$
+        required: true
+      tags:
+      - 'admin: whatsapp templates'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
+          description: ''
+  /api/admin/whatsapp-templates/{id}/versions/{vid}/manual-signoff:
+    post:
+      operationId: admin_whatsapp_templates_versions_manual_signoff_create
+      description: WhatsApp template editor and approval workflow (spec 2.7, Workflow
+        3.4).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this whats app template.
+        required: true
+      - in: path
+        name: vid
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]+$
+        required: true
+      tags:
+      - 'admin: whatsapp templates'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ManualSignoff'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ManualSignoff'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
+          description: ''
+  /api/admin/whatsapp-templates/{id}/versions/{vid}/new-version:
+    post:
+      operationId: admin_whatsapp_templates_versions_new_version_create
+      description: WhatsApp template editor and approval workflow (spec 2.7, Workflow
+        3.4).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this whats app template.
+        required: true
+      - in: path
+        name: vid
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]+$
+        required: true
+      tags:
+      - 'admin: whatsapp templates'
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
+          description: ''
+  /api/admin/whatsapp-templates/{id}/versions/{vid}/send-to-client:
+    post:
+      operationId: admin_whatsapp_templates_versions_send_to_client_create
+      description: WhatsApp template editor and approval workflow (spec 2.7, Workflow
+        3.4).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this whats app template.
+        required: true
+      - in: path
+        name: vid
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]+$
+        required: true
+      tags:
+      - 'admin: whatsapp templates'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
+          description: ''
+  /api/admin/whatsapp-templates/{id}/versions/{vid}/submit:
+    post:
+      operationId: admin_whatsapp_templates_versions_submit_create
+      description: WhatsApp template editor and approval workflow (spec 2.7, Workflow
+        3.4).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this whats app template.
+        required: true
+      - in: path
+        name: vid
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]+$
+        required: true
+      tags:
+      - 'admin: whatsapp templates'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
+          description: ''
+  /api/admin/whatsapp-templates/{id}/versions/{vid}/sync-status:
+    post:
+      operationId: admin_whatsapp_templates_versions_sync_status_create
+      description: Ask the provider for the review status now (Celery Beat also does
+        this every 10 min).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this whats app template.
+        required: true
+      - in: path
+        name: vid
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]+$
+        required: true
+      tags:
+      - 'admin: whatsapp templates'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
+          description: ''
+  /api/admin/whatsapp-templates/variables:
+    get:
+      operationId: admin_whatsapp_templates_variables_retrieve
+      description: 'Variables the editor''s picker may offer: the schedule type''s
+        fields + agency_name.'
+      parameters:
+      - in: query
+        name: schedule_type
+        schema:
+          type: string
+        required: true
+      tags:
+      - 'admin: whatsapp templates'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TemplateVariables'
+          description: ''
+  /api/auth/csrf:
+    get:
+      operationId: auth_csrf_retrieve
+      description: Sets the csrftoken cookie. The SPA sends it back in the X-CSRFToken
+        header.
+      tags:
+      - auth
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/auth/invites/{token}:
+    get:
+      operationId: auth_invites_retrieve
+      description: Check an invite link before showing the acceptance form.
+      parameters:
+      - in: path
+        name: token
+        schema:
+          type: string
+        required: true
+      tags:
+      - auth
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InviteInfo'
+          description: ''
+  /api/auth/invites/{token}/accept:
+    post:
+      operationId: auth_invites_accept_create
+      description: 'Accept an invite: set (or confirm) the password, activate the
+        membership, sign in.'
+      parameters:
+      - in: path
+        name: token
+        schema:
+          type: string
+        required: true
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcceptInvite'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AcceptInvite'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AcceptInvite'
+        required: true
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthState'
+          description: ''
+  /api/auth/login:
+    post:
+      operationId: auth_login_create
+      description: 'Step 1 of sign-in: email + password. The response says whether
+        2FA comes next.'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Login'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Login'
+        required: true
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthState'
+          description: ''
+  /api/auth/logout:
+    post:
+      operationId: auth_logout_create
+      tags:
+      - auth
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/auth/me:
+    get:
+      operationId: auth_me_retrieve
+      description: Current user and 2FA state. Available before 2FA so the frontend
+        can route the user.
+      tags:
+      - auth
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthState'
+          description: ''
+  /api/auth/otp/confirm:
+    post:
+      operationId: auth_otp_confirm_create
+      description: Finish set-up with the first code from the app. Marks the session
+        as 2FA-verified.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpCode'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OtpCode'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OtpCode'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthState'
+          description: ''
+  /api/auth/otp/setup:
+    post:
+      operationId: auth_otp_setup_create
+      description: 'Start authenticator set-up: returns the otpauth:// URL (shown
+        as a QR code) and secret.'
+      tags:
+      - auth
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OtpSetup'
+          description: ''
+  /api/auth/otp/verify:
+    post:
+      operationId: auth_otp_verify_create
+      description: 'Step 2 of sign-in for users with an authenticator: verify a 6-digit
+        code.'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OtpCode'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OtpCode'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OtpCode'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthState'
+          description: ''
+  /api/auth/tenant:
+    post:
+      operationId: auth_tenant_create
+      description: Choose the active tenant for users with more than one membership.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SelectTenant'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SelectTenant'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SelectTenant'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthState'
+          description: ''
+  /api/health:
+    get:
+      operationId: health_retrieve
+      description: Liveness check used by Docker Compose, the load balancer and monitoring.
+      tags:
+      - health
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+          description: ''
+        '503':
+          description: No response body
+components:
+  schemas:
+    AcceptInvite:
+      type: object
+      properties:
+        password:
+          type: string
+        full_name:
+          type: string
+          maxLength: 100
+      required:
+      - password
+    Answer:
+      type: object
+      properties:
+        key:
+          type: string
+          pattern: ^[a-z][a-z0-9_]{1,49}$
+        label:
+          type: string
+          maxLength: 25
+        outcome:
+          $ref: '#/components/schemas/OutcomeEnum'
+        pick_next_delivery_days:
+          type: integer
+          maximum: 10
+          minimum: 1
+      required:
+      - key
+      - label
+      - outcome
+    AuditLog:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        tenant_id:
+          type: string
+          format: uuid
+          nullable: true
+          readOnly: true
+        actor_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Empty for system actions.
+          readOnly: true
+        actor_email:
+          type: string
+          maxLength: 254
+        support_session_id:
+          type: string
+          format: uuid
+          nullable: true
+          readOnly: true
+        action:
+          type: string
+          maxLength: 50
+        object_type:
+          type: string
+          maxLength: 100
+        object_id:
+          type: string
+          maxLength: 64
+        before:
+          nullable: true
+        after:
+          nullable: true
+        ip_address:
+          type: string
+          nullable: true
+        user_agent:
+          type: string
+          maxLength: 500
+      required:
+      - action
+      - actor_id
+      - created_at
+      - id
+      - support_session_id
+      - tenant_id
+    AuthState:
+      type: object
+      description: 'What the frontend needs to route a user: who they are and which
+        2FA step is next.'
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        full_name:
+          type: string
+        platform_role:
+          type: string
+        requires_2fa:
+          type: boolean
+        otp_device_confirmed:
+          type: boolean
+        otp_verified:
+          type: boolean
+        otp_required:
+          type: boolean
+          description: Enter a code from the authenticator app.
+        otp_setup_required:
+          type: boolean
+          description: Set up an authenticator app first.
+        active_tenant_id:
+          type: string
+          format: uuid
+          nullable: true
+        memberships:
+          type: array
+          items:
+            $ref: '#/components/schemas/Membership'
+      required:
+      - active_tenant_id
+      - email
+      - full_name
+      - id
+      - memberships
+      - otp_device_confirmed
+      - otp_required
+      - otp_setup_required
+      - otp_verified
+      - platform_role
+      - requires_2fa
+    BlankEnum:
+      enum:
+      - ''
+    Button:
+      type: object
+      properties:
+        text:
+          type: string
+        outcome:
+          $ref: '#/components/schemas/OutcomeEnum'
+      required:
+      - outcome
+      - text
+    CategoryEnum:
+      enum:
+      - utility
+      type: string
+      description: '* `utility` - Utility'
+    ChannelOrderEnum:
+      enum:
+      - whatsapp
+      - voice
+      type: string
+      description: |-
+        * `whatsapp` - whatsapp
+        * `voice` - voice
+    Event:
+      type: object
+      properties:
+        action:
+          type: string
+          maxLength: 30
+        from_status:
+          type: string
+          maxLength: 20
+        to_status:
+          type: string
+          maxLength: 20
+        actor_email:
+          type: string
+          format: email
+          nullable: true
+        note:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - action
+      - created_at
+      - from_status
+      - to_status
+    EvidenceLink:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+      required:
+      - url
+    Field:
+      type: object
+      properties:
+        key:
+          type: string
+          maxLength: 50
+        label:
+          type: string
+          maxLength: 100
+        field_type:
+          $ref: '#/components/schemas/FieldTypeEnum'
+        required:
+          type: boolean
+        is_core:
+          type: boolean
+        options: {}
+        max_length:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+        is_active:
+          type: boolean
+      required:
+      - field_type
+      - key
+      - label
+    FieldInput:
+      type: object
+      properties:
+        key:
+          type: string
+          pattern: ^[a-z][a-z0-9_]{1,49}$
+        label:
+          type: string
+          maxLength: 100
+          minLength: 1
+        field_type:
+          $ref: '#/components/schemas/FieldTypeEnum'
+        required:
+          type: boolean
+          default: false
+        is_core:
+          type: boolean
+          readOnly: true
+          default: false
+        options:
+          type: array
+          items:
+            type: string
+            maxLength: 100
+        max_length:
+          type: integer
+          maximum: 1000
+          minimum: 1
+          nullable: true
+        is_active:
+          type: boolean
+          default: true
+      required:
+      - field_type
+      - is_core
+      - key
+      - label
+    FieldTypeEnum:
+      enum:
+      - text
+      - number
+      - date
+      - phone
+      - choice
+      - boolean
+      type: string
+      description: |-
+        * `text` - Text
+        * `number` - Number
+        * `date` - Date
+        * `phone` - Phone
+        * `choice` - Choice
+        * `boolean` - Yes / No
+    Health:
+      type: object
+      properties:
+        status:
+          type: string
+        database:
+          type: string
+        redis:
+          type: string
+      required:
+      - database
+      - redis
+      - status
+    IndustryTemplate:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        key:
+          type: string
+          description: Immutable, e.g. gas_agency.
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 500
+        is_active:
+          type: boolean
+        current_version:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        clients_using:
+          type: integer
+          readOnly: true
+        subscriber_fields:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+          readOnly: true
+        schedule_types:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScheduleType'
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - clients_using
+      - id
+      - key
+      - name
+      - schedule_types
+      - subscriber_fields
+      - updated_at
+    IndustryTemplateVersion:
+      type: object
+      properties:
+        version:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        definition: {}
+        created_by_email:
+          type: string
+          format: email
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - created_by_email
+      - definition
+      - version
+    InviteInfo:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        tenant_name:
+          type: string
+        role:
+          type: string
+        expires_at:
+          type: string
+          format: date-time
+        needs_new_password:
+          type: boolean
+        requires_2fa:
+          type: boolean
+      required:
+      - email
+      - expires_at
+      - needs_new_password
+      - requires_2fa
+      - role
+      - tenant_name
+    LanguageEnum:
+      enum:
+      - ml
+      - en
+      - hi
+      - ta
+      type: string
+      description: |-
+        * `ml` - Malayalam
+        * `en` - English
+        * `hi` - Hindi
+        * `ta` - Tamil
+    Login:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required:
+      - email
+      - password
+    ManualSignoff:
+      type: object
+      properties:
+        evidence:
+          type: string
+          format: uri
+        note:
+          type: string
+          default: ''
+          maxLength: 500
+      required:
+      - evidence
+    Membership:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        tenant_id:
+          type: string
+          format: uuid
+          readOnly: true
+        tenant_name:
+          type: string
+        tenant_status:
+          type: string
+        role:
+          $ref: '#/components/schemas/TenantRoleEnum'
+        status:
+          $ref: '#/components/schemas/MembershipStatusEnum'
+      required:
+      - id
+      - role
+      - tenant_id
+      - tenant_name
+      - tenant_status
+    MembershipAdmin:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        email:
+          type: string
+          format: email
+        full_name:
+          type: string
+        role:
+          $ref: '#/components/schemas/TenantRoleEnum'
+        status:
+          $ref: '#/components/schemas/MembershipStatusEnum'
+        last_login:
+          type: string
+          format: date-time
+          nullable: true
+        otp_enabled:
+          type: boolean
+      required:
+      - email
+      - full_name
+      - id
+      - last_login
+      - otp_enabled
+      - role
+    MembershipStatusEnum:
+      enum:
+      - invited
+      - active
+      - deactivated
+      type: string
+      description: |-
+        * `invited` - Invited
+        * `active` - Active
+        * `deactivated` - Deactivated
+    OtpCode:
+      type: object
+      properties:
+        otp_code:
+          type: string
+          pattern: ^\d{6}$
+      required:
+      - otp_code
+    OtpSetup:
+      type: object
+      properties:
+        otpauth_url:
+          type: string
+          description: Show as a QR code in the authenticator app.
+        secret:
+          type: string
+          description: Hex key, for manual entry.
+      required:
+      - otpauth_url
+      - secret
+    OutcomeEnum:
+      enum:
+      - confirmed
+      - not_available
+      - reschedule
+      type: string
+      description: |-
+        * `confirmed` - confirmed
+        * `not_available` - not_available
+        * `reschedule` - reschedule
+    PaginatedAuditLogList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditLog'
+    PaginatedMembershipAdminList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MembershipAdmin'
+    PaginatedTemplateList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Template'
+    PaginatedTenantList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tenant'
+    PatchedTenant:
+      type: object
+      description: Client details and settings (spec 2.4 / 2.5). Validation matches
+        the create form.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+          minLength: 2
+        legal_name:
+          type: string
+          maxLength: 200
+          minLength: 2
+        gstin:
+          type: string
+          nullable: true
+          maxLength: 15
+        address_line1:
+          type: string
+          maxLength: 200
+        address_line2:
+          type: string
+          maxLength: 200
+        city:
+          type: string
+          maxLength: 100
+        state:
+          $ref: '#/components/schemas/StateEnum'
+        pin_code:
+          type: string
+        contact_name:
+          type: string
+          maxLength: 100
+        contact_phone:
+          type: string
+        contact_email:
+          type: string
+          format: email
+          maxLength: 254
+        default_language:
+          $ref: '#/components/schemas/LanguageEnum'
+        timezone:
+          type: string
+          maxLength: 50
+        daily_send_cap:
+          type: integer
+          maximum: 100000
+          minimum: 1
+          default: 5000
+        industry_template:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+          description: Required when a client is created (spec 2.4).
+        industry_template_name:
+          type: string
+          readOnly: true
+          nullable: true
+        industry_template_version:
+          type: integer
+          readOnly: true
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/TenantStatusEnum'
+          readOnly: true
+        suspended_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        suspension_reason:
+          type: string
+          readOnly: true
+        owner_email:
+          type: string
+          format: email
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedVersionEdit:
+      type: object
+      description: Template content; the spec 2.7 rules are applied by validation.validate_content().
+      properties:
+        header_text:
+          type: string
+        body:
+          type: string
+        footer:
+          type: string
+        buttons:
+          type: array
+          items:
+            $ref: '#/components/schemas/Button'
+        sample_values:
+          type: object
+          additionalProperties:
+            type: string
+    QuestionFlow:
+      type: object
+      properties:
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Answer'
+      required:
+      - answers
+    Reason:
+      type: object
+      properties:
+        reason:
+          type: string
+          maxLength: 500
+          minLength: 5
+      required:
+      - reason
+    ReasonOptional:
+      type: object
+      properties:
+        reason:
+          type: string
+          default: ''
+          maxLength: 500
+    ReminderRule:
+      type: object
+      properties:
+        send_time:
+          type: string
+        days_before:
+          type: integer
+          maximum: 7
+          minimum: 0
+        wait_minutes:
+          type: integer
+          maximum: 1440
+          minimum: 30
+        quiet_start:
+          type: string
+        quiet_end:
+          type: string
+        delivery_weekdays:
+          type: array
+          items:
+            type: integer
+            maximum: 6
+            minimum: 0
+          maxItems: 7
+          minItems: 1
+        channel_order:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChannelOrderEnum'
+          maxItems: 2
+          minItems: 1
+      required:
+      - channel_order
+      - days_before
+      - delivery_weekdays
+      - quiet_end
+      - quiet_start
+      - send_time
+      - wait_minutes
+    ScheduleType:
+      type: object
+      properties:
+        key:
+          type: string
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+          maxLength: 100
+        is_active:
+          type: boolean
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/Field'
+        default_reminder_rule: {}
+        default_question_flow: {}
+      required:
+      - fields
+      - key
+      - name
+    ScheduleTypeInput:
+      type: object
+      properties:
+        key:
+          type: string
+          pattern: ^[a-z][a-z0-9_]{1,49}$
+        name:
+          type: string
+          maxLength: 100
+          minLength: 2
+        is_active:
+          type: boolean
+          default: true
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldInput'
+        default_reminder_rule:
+          $ref: '#/components/schemas/ReminderRule'
+        default_question_flow:
+          $ref: '#/components/schemas/QuestionFlow'
+      required:
+      - default_question_flow
+      - default_reminder_rule
+      - fields
+      - key
+      - name
+    SelectTenant:
+      type: object
+      properties:
+        tenant_id:
+          type: string
+          format: uuid
+      required:
+      - tenant_id
+    SignoffMethodEnum:
+      enum:
+      - client
+      - manual
+      type: string
+      description: |-
+        * `client` - Client
+        * `manual` - Manual
+    StateEnum:
+      enum:
+      - AN
+      - AP
+      - AR
+      - AS
+      - BR
+      - CH
+      - CG
+      - DH
+      - DL
+      - GA
+      - GJ
+      - HR
+      - HP
+      - JK
+      - JH
+      - KA
+      - KL
+      - LA
+      - LD
+      - MP
+      - MH
+      - MN
+      - ML
+      - MZ
+      - NL
+      - OD
+      - PY
+      - PB
+      - RJ
+      - SK
+      - TN
+      - TS
+      - TR
+      - UP
+      - UK
+      - WB
+      type: string
+      description: |-
+        * `AN` - Andaman and Nicobar Islands
+        * `AP` - Andhra Pradesh
+        * `AR` - Arunachal Pradesh
+        * `AS` - Assam
+        * `BR` - Bihar
+        * `CH` - Chandigarh
+        * `CG` - Chhattisgarh
+        * `DH` - Dadra and Nagar Haveli and Daman and Diu
+        * `DL` - Delhi
+        * `GA` - Goa
+        * `GJ` - Gujarat
+        * `HR` - Haryana
+        * `HP` - Himachal Pradesh
+        * `JK` - Jammu and Kashmir
+        * `JH` - Jharkhand
+        * `KA` - Karnataka
+        * `KL` - Kerala
+        * `LA` - Ladakh
+        * `LD` - Lakshadweep
+        * `MP` - Madhya Pradesh
+        * `MH` - Maharashtra
+        * `MN` - Manipur
+        * `ML` - Meghalaya
+        * `MZ` - Mizoram
+        * `NL` - Nagaland
+        * `OD` - Odisha
+        * `PY` - Puducherry
+        * `PB` - Punjab
+        * `RJ` - Rajasthan
+        * `SK` - Sikkim
+        * `TN` - Tamil Nadu
+        * `TS` - Telangana
+        * `TR` - Tripura
+        * `UP` - Uttar Pradesh
+        * `UK` - Uttarakhand
+        * `WB` - West Bengal
+    SupportSession:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        tenant_id:
+          type: string
+          format: uuid
+          readOnly: true
+        tenant_name:
+          type: string
+        staff_email:
+          type: string
+          format: email
+        reason:
+          type: string
+        started_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+        ended_at:
+          type: string
+          format: date-time
+          nullable: true
+        end_reason:
+          oneOf:
+          - $ref: '#/components/schemas/SupportSessionEndReasonEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        is_active:
+          type: boolean
+          readOnly: true
+        seconds_left:
+          type: integer
+          readOnly: true
+      required:
+      - expires_at
+      - id
+      - is_active
+      - reason
+      - seconds_left
+      - staff_email
+      - tenant_id
+      - tenant_name
+    SupportSessionEndReasonEnum:
+      enum:
+      - manual
+      - expired
+      - replaced
+      type: string
+      description: |-
+        * `manual` - Ended by staff
+        * `expired` - Expired
+        * `replaced` - Replaced by a new session
+    Template:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        tenant_id:
+          type: string
+          format: uuid
+          readOnly: true
+        tenant_name:
+          type: string
+        name:
+          type: string
+          maxLength: 512
+        language:
+          $ref: '#/components/schemas/LanguageEnum'
+        category:
+          $ref: '#/components/schemas/CategoryEnum'
+        schedule_type:
+          type: string
+          format: uuid
+        schedule_type_name:
+          type: string
+        live_version:
+          type: integer
+          nullable: true
+          readOnly: true
+        latest_version:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - language
+      - latest_version
+      - live_version
+      - name
+      - schedule_type
+      - schedule_type_name
+      - tenant_id
+      - tenant_name
+    TemplateCreate:
+      type: object
+      description: Template content; the spec 2.7 rules are applied by validation.validate_content().
+      properties:
+        header_text:
+          type: string
+          default: ''
+        body:
+          type: string
+        footer:
+          type: string
+          default: ''
+        buttons:
+          type: array
+          items:
+            $ref: '#/components/schemas/Button'
+        sample_values:
+          type: object
+          additionalProperties:
+            type: string
+        tenant:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 512
+          pattern: ^[a-z0-9_]{1,512}$
+        language:
+          $ref: '#/components/schemas/LanguageEnum'
+        category:
+          allOf:
+          - $ref: '#/components/schemas/CategoryEnum'
+          default: utility
+        schedule_type:
+          type: string
+          format: uuid
+      required:
+      - body
+      - language
+      - name
+      - schedule_type
+      - tenant
+    TemplateDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        tenant_id:
+          type: string
+          format: uuid
+          readOnly: true
+        tenant_name:
+          type: string
+        name:
+          type: string
+          maxLength: 512
+        language:
+          $ref: '#/components/schemas/LanguageEnum'
+        category:
+          $ref: '#/components/schemas/CategoryEnum'
+        schedule_type:
+          type: string
+          format: uuid
+        schedule_type_name:
+          type: string
+        live_version:
+          type: integer
+          nullable: true
+          readOnly: true
+        latest_version:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Version'
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - language
+      - latest_version
+      - live_version
+      - name
+      - schedule_type
+      - schedule_type_name
+      - tenant_id
+      - tenant_name
+      - versions
+    TemplateInput:
+      type: object
+      description: The whole template as the editor saves it. Saving always creates
+        a new version.
+      properties:
+        key:
+          type: string
+          pattern: ^[a-z][a-z0-9_]{2,49}$
+        name:
+          type: string
+          maxLength: 100
+          minLength: 2
+        description:
+          type: string
+          default: ''
+          maxLength: 500
+        is_active:
+          type: boolean
+          default: true
+        subscriber_fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldInput'
+        schedule_types:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScheduleTypeInput'
+      required:
+      - key
+      - name
+      - schedule_types
+      - subscriber_fields
+    TemplateVariables:
+      type: object
+      properties:
+        variables:
+          type: array
+          items: {}
+      required:
+      - variables
+    TemplateVersionStatusEnum:
+      enum:
+      - draft
+      - sent_to_client
+      - signed_off
+      - sent_back
+      - submitted
+      - approved
+      - rejected
+      - paused
+      - disabled
+      type: string
+      description: |-
+        * `draft` - Draft
+        * `sent_to_client` - Sent to client
+        * `signed_off` - Signed off
+        * `sent_back` - Sent back
+        * `submitted` - Submitted to Meta
+        * `approved` - Approved
+        * `rejected` - Rejected
+        * `paused` - Paused
+        * `disabled` - Disabled
+    Tenant:
+      type: object
+      description: Client details and settings (spec 2.4 / 2.5). Validation matches
+        the create form.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+          minLength: 2
+        legal_name:
+          type: string
+          maxLength: 200
+          minLength: 2
+        gstin:
+          type: string
+          nullable: true
+          maxLength: 15
+        address_line1:
+          type: string
+          maxLength: 200
+        address_line2:
+          type: string
+          maxLength: 200
+        city:
+          type: string
+          maxLength: 100
+        state:
+          $ref: '#/components/schemas/StateEnum'
+        pin_code:
+          type: string
+        contact_name:
+          type: string
+          maxLength: 100
+        contact_phone:
+          type: string
+        contact_email:
+          type: string
+          format: email
+          maxLength: 254
+        default_language:
+          $ref: '#/components/schemas/LanguageEnum'
+        timezone:
+          type: string
+          maxLength: 50
+        daily_send_cap:
+          type: integer
+          maximum: 100000
+          minimum: 1
+          default: 5000
+        industry_template:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+          description: Required when a client is created (spec 2.4).
+        industry_template_name:
+          type: string
+          readOnly: true
+          nullable: true
+        industry_template_version:
+          type: integer
+          readOnly: true
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/TenantStatusEnum'
+          readOnly: true
+        suspended_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        suspension_reason:
+          type: string
+          readOnly: true
+        owner_email:
+          type: string
+          format: email
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - address_line1
+      - city
+      - contact_email
+      - contact_name
+      - contact_phone
+      - created_at
+      - id
+      - industry_template
+      - industry_template_name
+      - industry_template_version
+      - legal_name
+      - name
+      - owner_email
+      - pin_code
+      - state
+      - status
+      - suspended_at
+      - suspension_reason
+      - updated_at
+    TenantCreate:
+      type: object
+      description: 'Create client form (spec 2.4): client details plus the owner who
+        is invited.'
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+          minLength: 2
+        legal_name:
+          type: string
+          maxLength: 200
+          minLength: 2
+        gstin:
+          type: string
+          nullable: true
+          maxLength: 15
+        address_line1:
+          type: string
+          maxLength: 200
+        address_line2:
+          type: string
+          maxLength: 200
+        city:
+          type: string
+          maxLength: 100
+        state:
+          $ref: '#/components/schemas/StateEnum'
+        pin_code:
+          type: string
+        contact_name:
+          type: string
+          maxLength: 100
+        contact_phone:
+          type: string
+        contact_email:
+          type: string
+          format: email
+          maxLength: 254
+        default_language:
+          $ref: '#/components/schemas/LanguageEnum'
+        timezone:
+          type: string
+          maxLength: 50
+        daily_send_cap:
+          type: integer
+          maximum: 100000
+          minimum: 1
+          default: 5000
+        industry_template:
+          type: string
+          format: uuid
+        industry_template_name:
+          type: string
+          readOnly: true
+          nullable: true
+        industry_template_version:
+          type: integer
+          readOnly: true
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/TenantStatusEnum'
+          readOnly: true
+        suspended_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        suspension_reason:
+          type: string
+          readOnly: true
+        owner_email:
+          type: string
+          format: email
+          writeOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        owner_name:
+          type: string
+          writeOnly: true
+          maxLength: 100
+        owner_phone:
+          type: string
+          writeOnly: true
+      required:
+      - address_line1
+      - city
+      - contact_email
+      - contact_name
+      - contact_phone
+      - created_at
+      - id
+      - industry_template
+      - industry_template_name
+      - industry_template_version
+      - legal_name
+      - name
+      - owner_email
+      - owner_name
+      - pin_code
+      - state
+      - status
+      - suspended_at
+      - suspension_reason
+      - updated_at
+    TenantRoleEnum:
+      enum:
+      - owner
+      - manager
+      - office_staff
+      type: string
+      description: |-
+        * `owner` - Owner
+        * `manager` - Manager
+        * `office_staff` - Office staff
+    TenantStatusEnum:
+      enum:
+      - active
+      - suspended
+      type: string
+      description: |-
+        * `active` - Active
+        * `suspended` - Suspended
+    Version:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        version:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        status:
+          $ref: '#/components/schemas/TemplateVersionStatusEnum'
+        is_live:
+          type: boolean
+        header_text:
+          type: string
+          maxLength: 60
+        body:
+          type: string
+          maxLength: 1024
+        footer:
+          type: string
+          maxLength: 60
+        buttons:
+          description: '[{"text": ..., "outcome": ...}]'
+        sample_values: {}
+        provider_template_id:
+          type: string
+          maxLength: 100
+        rejection_reason:
+          type: string
+        has_evidence:
+          type: boolean
+          readOnly: true
+        signoff_method:
+          oneOf:
+          - $ref: '#/components/schemas/SignoffMethodEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        signed_off_by_email:
+          type: string
+          format: email
+          nullable: true
+        signed_off_at:
+          type: string
+          format: date-time
+          nullable: true
+        submitted_at:
+          type: string
+          format: date-time
+          nullable: true
+        approved_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        available_actions:
+          type: array
+          items:
+            type: string
+          description: Actions the version's status allows (the user's role is checked
+            by the API).
+          readOnly: true
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'
+          readOnly: true
+      required:
+      - available_actions
+      - body
+      - created_at
+      - events
+      - has_evidence
+      - id
+      - version
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
