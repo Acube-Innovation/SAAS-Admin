@@ -39,6 +39,10 @@ jobs:
       POSTGRES_DB: schedule_saas
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      POSTGRES_OWNER_USER: app_owner
+      POSTGRES_OWNER_PASSWORD: app_owner_ci
+      POSTGRES_APP_USER: app_user
+      POSTGRES_APP_PASSWORD: app_user_ci
       POSTGRES_HOST: localhost
       POSTGRES_PORT: "5432"
       REDIS_URL: redis://localhost:6379/0
@@ -50,6 +54,11 @@ jobs:
           cache: pip
           cache-dependency-path: backend/requirements/*.txt
       - run: pip install -r requirements/local.txt
+      - name: Create database roles (app_owner, app_user)
+        run: ../infra/docker/postgres/init-roles.sh
+        env:
+          PGHOST: localhost
+          PGPASSWORD: postgres
       - run: ruff check .
       - run: ruff format --check .
       - run: python manage.py makemigrations --check --dry-run

@@ -437,20 +437,30 @@ Errors use `{"code": "...", "detail": "...", "fields": {...}}`.
 ## 8. Tenancy and Row-Level Security
 
 1. `apps/core` provides `TenantScopedModel` (abstract: UUID `id`, `tenant` FK, timestamps). Every tenant table
-   inherits it.
-2. A migration helper `enable_rls(table)` runs `ALTER TABLE … ENABLE ROW LEVEL SECURITY`,
+   inherits it. `save()` fills `tenant` from the current tenant context.
+2. The migration operation `apps.core.rls.EnableRLS("<model>")` runs `ALTER TABLE … ENABLE ROW LEVEL SECURITY`,
    `ALTER TABLE … FORCE ROW LEVEL SECURITY` and
-   `CREATE POLICY tenant_isolation ON … USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
-   WITH CHECK (same)`.
-3. The application connects as role `app_user` (`NOSUPERUSER NOBYPASSRLS`, not the table owner). Migrations and
-   platform reporting jobs use the privileged `app_owner` / migration role.
-4. Request middleware resolves the tenant (membership or active support session) and runs
-   `SET LOCAL app.tenant_id = '<uuid>'` inside the request's transaction (`ATOMIC_REQUESTS`). A Celery
-   `TenantTask` base class does the same around each task.
-5. With no tenant set, tenant tables return no rows.
+   `CREATE POLICY tenant_isolation ON … USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
+   WITH CHECK (same)`. `NULLIF` makes "no tenant set" match no rows instead of raising an error. A test fails for
+   any `TenantScopedModel` whose table lacks RLS, FORCE or the policy.
+3. Database roles (created by `infra/docker/postgres/init-roles.sh`):
+   - `postgres`: superuser, used only to bootstrap the roles. Django never connects as it.
+   - `app_owner`: owns the database, schema and tables; runs migrations (`DJANGO_DB_ROLE=owner`) and tests.
+     `NOSUPERUSER NOBYPASSRLS`, so FORCE RLS applies to it too.
+   - `app_user`: the API and workers (`DJANGO_DB_ROLE=app`, the default). `NOSUPERUSER NOBYPASSRLS`, never a
+     table owner, so it can't alter tables, drop policies or switch `row_security` off. It gets DML on all tables
+     after each migrate, and read-only access to `django_migrations`.
+   - Cross-tenant platform reporting (later) gets its own role with `BYPASSRLS`, used only by those jobs.
+4. `TenantMiddleware` resolves the tenant with `settings.TENANCY_RESOLVER` (Step 3: membership or active support
+   session) and runs the rest of the request inside `tenant_context(tenant)`. That is one transaction in which
+   `set_config('app.tenant_id', <uuid>, true)` is set; it is transaction-local, so it can't leak to the next request
+   on a pooled connection. The Celery base task `TenantTask` does the same around each task: it requires a
+   `tenant_id` kwarg, which is filled in automatically when the task is queued inside a tenant context.
+5. With no tenant set, tenant tables return no rows and reject writes.
 6. Every tenant index starts with `tenant_id`.
-7. Tests create two tenants and prove that a query under tenant A, **including raw SQL**, never returns tenant B's
-   rows, and that the `app_user` role really is subject to RLS.
+7. Tests create two tenants and prove that a query under tenant A, **including raw SQL**, never returns or
+   modifies tenant B's rows. They also connect as `app_user` to prove RLS is enforced for that role and can't be
+   switched off.
 
 ### 8.1 Admin additions built alongside the client portal
 

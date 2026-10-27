@@ -48,7 +48,12 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "apps.core.middleware.TenantMiddleware",
 ]
+
+# Callable that returns the tenant (or tenant id) for a request, or None.
+# Step 3 replaces it with membership / support-session resolution.
+TENANCY_RESOLVER = "apps.core.tenancy.resolve_no_tenant"
 
 ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "config.wsgi.application"
@@ -69,12 +74,23 @@ TEMPLATES = [
     },
 ]
 
+# Two database roles (see docs/admin-console-spec.md Section 8):
+# - "app" (default): app_user, used by the API and workers. Cannot bypass Row-Level Security.
+# - "owner": app_owner, owns the tables. Used only for migrations (and tests, which run migrations).
+DATABASE_ROLES = {
+    "app": (env("POSTGRES_APP_USER", "app_user"), env("POSTGRES_APP_PASSWORD", "")),
+    "owner": (env("POSTGRES_OWNER_USER", "app_owner"), env("POSTGRES_OWNER_PASSWORD", "")),
+}
+DATABASE_ROLE = env("DJANGO_DB_ROLE", "app")
+if DATABASE_ROLE not in DATABASE_ROLES:
+    raise ImproperlyConfigured("DJANGO_DB_ROLE must be 'app' or 'owner'")
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": env("POSTGRES_DB", "schedule_saas"),
-        "USER": env("POSTGRES_USER", "postgres"),
-        "PASSWORD": env("POSTGRES_PASSWORD", ""),
+        "USER": DATABASE_ROLES[DATABASE_ROLE][0],
+        "PASSWORD": DATABASE_ROLES[DATABASE_ROLE][1],
         "HOST": env("POSTGRES_HOST", "localhost"),
         "PORT": env("POSTGRES_PORT", "5432"),
         "CONN_MAX_AGE": int(env("POSTGRES_CONN_MAX_AGE", "60")),

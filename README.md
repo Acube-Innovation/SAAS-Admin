@@ -49,6 +49,19 @@ the host.
 The API docs are at http://localhost:8000/api/docs, and the OpenAPI schema is at http://localhost:8000/api/schema.
 The production image (`backend/Dockerfile`) runs Gunicorn.
 
+### Database roles and Row-Level Security
+
+Every tenant table is protected by PostgreSQL Row-Level Security. Django never connects as the superuser:
+
+| Role | Used by | Notes |
+| --- | --- | --- |
+| `postgres` | Postgres container bootstrap only | Creates the two roles below (`infra/docker/postgres/init-roles.sh`) |
+| `app_owner` | Migrations (`DJANGO_DB_ROLE=owner`) and tests | Owns the tables; not superuser, no BYPASSRLS |
+| `app_user` | API and Celery workers (default) | DML only; can't bypass or disable RLS |
+
+The role script runs only when the Postgres volume is empty. If you started the stack before Step 2, reset the local
+database once with `docker compose down -v && docker compose up -d --build`. This deletes local data.
+
 ## Run the frontend
 
 ```bash

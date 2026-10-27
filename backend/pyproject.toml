@@ -13,7 +13,8 @@ select = ["E", "F", "W", "I", "B", "UP", "DJ", "S", "C4", "SIM"]
 ignore = []
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S101", "S105", "S106"]
+# S608: tests build SQL from constant table names to exercise RLS with raw queries.
+"tests/**" = ["S101", "S105", "S106", "S608"]
 "**/tests/**" = ["S101", "S105", "S106"]
 
 [tool.pytest.ini_options]
