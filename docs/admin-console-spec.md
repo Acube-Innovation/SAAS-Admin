@@ -327,6 +327,9 @@ can make a script live.
 
 ## 5. Repository structure
 
+Two repositories: **SAAS-Admin** (below: backend for both apps, admin console, infrastructure) and
+**SAAS-Client** (the client portal: `apps/portal` plus its own copy of the shared packages).
+
 ```
 /
 ├─ CLAUDE.md                     project rules
@@ -360,8 +363,8 @@ can make a script live.
 ├─ frontend/                     Turborepo + pnpm workspace
 │  ├─ package.json  pnpm-workspace.yaml  turbo.json
 │  ├─ apps/
-│  │  ├─ admin/                  Next.js super admin console (port 3000)
-│  │  └─ portal/                 Next.js client portal (port 3001)
+│  │  └─ admin/                  Next.js super admin console (port 3000)
+│  │                             (client portal: SAAS-Client repo, port 3001)
 │  └─ packages/
 │     ├─ ui/                     shared components
 │     ├─ api-client/             typed client generated from /api/schema

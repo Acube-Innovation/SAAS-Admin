@@ -3,17 +3,19 @@
 Multi-tenant SaaS that reminds our clients' customers (gas agencies first) about upcoming schedules over
 WhatsApp, and later AI voice, and records their answers.
 
+This repository (SAAS-Admin) holds the backend API, the super admin console and the infrastructure.
+The client portal frontend is in [SAAS-Client](https://github.com/Acube-Innovation/SAAS-Client).
+
 - Project rules: [CLAUDE.md](CLAUDE.md)
 - Specs: [docs/admin-console-spec.md](docs/admin-console-spec.md), [docs/client-portal-spec.md](docs/client-portal-spec.md)
 
 ## Layout
 
 ```
-backend/            Django + DRF API, Celery worker (modular monolith)
+backend/            Django + DRF API for both apps, Celery worker and beat (modular monolith)
 frontend/           Turborepo + pnpm workspace
   apps/admin        Super admin console (Next.js, port 3000)
-  apps/portal       Client portal (Next.js, port 3001)
-  packages/ui       Shared UI components + translation helper
+  packages/ui       Shared UI components + translation helper (also in SAAS-Client)
   packages/api-client  Typed API client
   packages/config   Shared tsconfig, ESLint and Tailwind theme
 infra/terraform/    AWS infrastructure (from Step 12)
@@ -76,7 +78,7 @@ database once with `docker compose down -v && docker compose up -d --build`. Thi
 ```bash
 cd frontend
 pnpm install
-pnpm dev                          # admin on :3000, portal on :3001
+pnpm dev                          # admin console on :3000 (portal: see SAAS-Client)
 ```
 
 Both apps proxy `/api/*` to `API_INTERNAL_URL` or `NEXT_PUBLIC_API_URL` (default `http://localhost:8000`).

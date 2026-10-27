@@ -258,8 +258,9 @@ Same as admin spec Section 4. Also: a reply shows in the portal **within 1 minut
 
 ## 5. Repository
 
-The portal lives in `frontend/apps/portal`. It reuses `packages/ui` and `packages/api-client`. Backend apps: see
-admin spec Section 5.
+The portal lives in the **SAAS-Client** repository (`apps/portal`), with its own copy of `packages/ui`,
+`packages/api-client` and `packages/config`. Its backend apps live in SAAS-Admin's `backend/`: see admin spec
+Section 5.
 
 ## 6. Data model (portal additions)
 

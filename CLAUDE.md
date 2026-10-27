@@ -1,5 +1,12 @@
 # Schedule Confirmation SaaS
 
+## This repository (SAAS-Admin)
+- Backend (Django API serving both the admin console and the client portal), the super admin
+  console (`frontend/apps/admin`), shared frontend packages, infrastructure and docs.
+- The client portal frontend lives in SAAS-Client: https://github.com/Acube-Innovation/SAAS-Client
+  It keeps its own copy of `packages/ui`, `packages/api-client` and `packages/config`; make
+  changes to those in both repositories.
+
 Multi-tenant SaaS that reminds our clients' customers (gas agencies first)
 via WhatsApp and later AI voice, and records their answers.
 
