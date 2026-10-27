@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "apps.core",
     "apps.accounts",
     "apps.audit",
+    "apps.platform_admin",
 ]
 
 AUTH_USER_MODEL = "accounts.User"
@@ -55,12 +56,16 @@ MIDDLEWARE = [
     "django_otp.middleware.OTPMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "apps.audit.context.AuditContextMiddleware",
     "apps.core.middleware.TenantMiddleware",
+    "apps.platform_admin.middleware.TenantWriteGuardMiddleware",
+    # After TenantMiddleware, so audit entries see request.support_session_id.
+    "apps.audit.context.AuditContextMiddleware",
 ]
 
 # Callable that returns the tenant (or tenant id) for a request, or None.
-TENANCY_RESOLVER = "apps.accounts.tenancy.resolve_tenant_from_membership"
+TENANCY_RESOLVER = "apps.platform_admin.tenancy.resolve_request_tenant"
+# Paths where a suspended tenant / support session may still write (sign-in and the admin API).
+TENANT_GUARD_EXEMPT_PATHS = ("/api/auth/", "/api/admin/")
 
 ROOT_URLCONF = "config.urls"
 WSGI_APPLICATION = "config.wsgi.application"
@@ -140,12 +145,22 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "EXCEPTION_HANDLER": "apps.core.exceptions.api_exception_handler",
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 25,
 }
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Schedule Confirmation SaaS API",
     "VERSION": "0.1.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    # Several models have a "status" field; name each enum so the generated client reads well.
+    "ENUM_NAME_OVERRIDES": {
+        "TenantStatusEnum": "apps.core.models.Tenant.Status",
+        "MembershipStatusEnum": "apps.accounts.models.Membership.Status",
+        "SupportSessionEndReasonEnum": "apps.platform_admin.models.SupportSession.EndReason",
+        "TenantRoleEnum": "apps.accounts.models.TenantRole",
+        "LanguageEnum": "apps.core.constants.Language",
+    },
 }
 
 OTP_TOTP_ISSUER = "Schedule Confirmation"
@@ -171,6 +186,12 @@ CELERY_TASK_ACKS_LATE = True
 CELERY_TASK_REJECT_ON_WORKER_LOST = True
 CELERY_WORKER_PREFETCH_MULTIPLIER = 1
 CELERY_TIMEZONE = TIME_ZONE
+CELERY_BEAT_SCHEDULE = {
+    "expire-support-sessions": {
+        "task": "apps.platform_admin.tasks.expire_support_sessions",
+        "schedule": 60.0,
+    },
+}
 
 LOGGING = {
     "version": 1,

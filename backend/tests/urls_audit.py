@@ -18,7 +18,7 @@ class NoteSerializer(serializers.ModelSerializer):
 class NoteViewSet(AuditedModelMixin, viewsets.ModelViewSet):
     serializer_class = NoteSerializer
     permission_classes = [tenant_roles("owner", "manager", "office_staff")]
-    queryset = Note.objects.all()
+    queryset = Note.objects.order_by("created_at")
 
 
 router = SimpleRouter(trailing_slash=False)

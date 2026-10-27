@@ -1,7 +1,8 @@
 from django.conf import settings
+from django.http import JsonResponse
 from django.utils.module_loading import import_string
 
-from .tenancy import db_context
+from .tenancy import TenantAccessDenied, db_context
 
 
 class TenantMiddleware:
@@ -15,7 +16,10 @@ class TenantMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        tenant = import_string(settings.TENANCY_RESOLVER)(request)
+        try:
+            tenant = import_string(settings.TENANCY_RESOLVER)(request)
+        except TenantAccessDenied as exc:
+            return JsonResponse({"code": exc.code, "detail": exc.detail, "fields": {}}, status=403)
         request.tenant_id = getattr(tenant, "pk", tenant)
         user = getattr(request, "user", None)
         signed_in = user is not None and user.is_authenticated

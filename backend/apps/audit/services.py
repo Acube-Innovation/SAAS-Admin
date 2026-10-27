@@ -54,6 +54,7 @@ def write_audit(
     actor=_UNSET,
     object_type=None,
     object_id=None,
+    support_session=_UNSET,
 ):
     """
     Record one audit entry. Actor, IP, user agent and support session come from the current request
@@ -81,7 +82,11 @@ def write_audit(
             tenant_id=tenant_id,
             actor_id=actor_id,
             actor_email=actor_email,
-            support_session_id=meta.support_session_id,
+            support_session_id=(
+                meta.support_session_id
+                if support_session is _UNSET
+                else getattr(support_session, "pk", support_session)
+            ),
             action=action,
             object_type=object_type or "",
             object_id=str(object_id or ""),

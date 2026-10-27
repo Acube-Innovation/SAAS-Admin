@@ -1,7 +1,5 @@
 """Audit log (Step 4): write_audit(), the DRF mixin, insert-only rules and tenant visibility."""
 
-import uuid
-
 import pytest
 from django.db import ProgrammingError, connection, transaction
 from django.http import HttpResponse
@@ -78,14 +76,17 @@ def test_x_forwarded_for_is_used_only_when_trusted(settings, manager):
 
 
 def test_support_session_is_recorded_when_present(tenant, support_user):
+    from apps.platform_admin.services import start_support_session
+
+    session = start_support_session(support_user, tenant, "Customer asked for help")
     request = RequestFactory().get("/")
     request.user = support_user
-    request.support_session_id = session_id = uuid.uuid4()
+    request.support_session_id = session.pk
 
     AuditContextMiddleware(lambda req: write_audit("probe", tenant=tenant))(request)
 
     [entry] = entries(action="probe")
-    assert entry.support_session_id == session_id
+    assert entry.support_session_id == session.pk
 
 
 def test_snapshot_masks_secrets(manager):

@@ -63,8 +63,14 @@ class AuditLog(models.Model):
         help_text="Empty for system actions.",
     )
     actor_email = models.CharField(max_length=254, blank=True)
-    # Becomes a foreign key to platform_admin.SupportSession in Step 5 (same column).
-    support_session_id = models.UUIDField(null=True, blank=True)
+    support_session = models.ForeignKey(
+        "platform_admin.SupportSession",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="+",
+        db_index=False,
+    )
     action = models.CharField(max_length=50)
     object_type = models.CharField(max_length=100, blank=True)
     object_id = models.CharField(max_length=64, blank=True)

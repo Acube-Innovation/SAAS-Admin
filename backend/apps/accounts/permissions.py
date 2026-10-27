@@ -1,4 +1,4 @@
-from rest_framework.permissions import BasePermission
+from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 from .models import Membership, PlatformRole
 
@@ -64,6 +64,9 @@ class HasTenantRole(TwoFactorIfRequired):
         tenant_id = getattr(request, "tenant_id", None)
         if not tenant_id:
             return False
+        if getattr(request, "support_session_id", None):
+            # Platform staff in a support session may view, never change (spec 1.1 of the portal).
+            return request.method in SAFE_METHODS
         return Membership.objects.filter(
             user=request.user,
             tenant_id=tenant_id,

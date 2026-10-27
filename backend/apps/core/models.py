@@ -53,6 +53,10 @@ class Tenant(BaseModel):
     def __str__(self):
         return self.name
 
+    def can_send(self) -> bool:
+        """Whether reminders may be sent now. Phase 2 adds wallet and send-cap checks."""
+        return self.status == self.Status.ACTIVE
+
 
 class TenantScopedModel(BaseModel):
     """

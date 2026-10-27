@@ -92,13 +92,25 @@ def db_context(tenant=_UNSET, user=_UNSET, platform=_UNSET):
 
 
 def tenant_context(tenant):
-    """Run the block with app.tenant_id set to `tenant` (None for "no tenant")."""
-    return db_context(tenant=tenant)
+    """
+    Run the block with app.tenant_id set to `tenant` (None for "no tenant") and platform access
+    off, so even platform staff see exactly that tenant's rows inside it.
+    """
+    return db_context(tenant=tenant, platform=False)
 
 
 def user_context(user):
     """Run the block with app.user_id set to `user`, keeping the current tenant."""
     return db_context(user=user)
+
+
+class TenantAccessDenied(Exception):
+    """Raised by a tenant resolver to refuse the request (403) with a code and message."""
+
+    def __init__(self, code, detail):
+        super().__init__(detail)
+        self.code = code
+        self.detail = detail
 
 
 def resolve_no_tenant(request):

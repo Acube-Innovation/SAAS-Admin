@@ -11,6 +11,18 @@ OWN_ROWS = "user_id = NULLIF(current_setting('app.user_id', true), '')::uuid"
 PLATFORM_ACCESS = "current_setting('app.platform_access', true) = 'on'"
 
 
+def create_policy(schema_editor, table, extra_using=None, nullable_tenant=False):
+    using = f"tenant_id = {TENANT_EXPRESSION}"
+    if extra_using:
+        using = f"({using}) OR ({extra_using})"
+    operator = "IS NOT DISTINCT FROM" if nullable_tenant else "="
+    schema_editor.execute(
+        f"CREATE POLICY {POLICY_NAME} ON {table} "
+        f"USING ({using}) "
+        f"WITH CHECK (tenant_id {operator} {TENANT_EXPRESSION})"
+    )
+
+
 class EnableRLS(Operation):
     """
     Enable and force RLS on a TenantScopedModel's table, with a policy that only allows rows whose
@@ -49,15 +61,7 @@ class EnableRLS(Operation):
         table = schema_editor.quote_name(self._table(app_label, to_state))
         schema_editor.execute(f"ALTER TABLE {table} ENABLE ROW LEVEL SECURITY")
         schema_editor.execute(f"ALTER TABLE {table} FORCE ROW LEVEL SECURITY")
-        using = f"tenant_id = {TENANT_EXPRESSION}"
-        if self.extra_using:
-            using = f"({using}) OR ({self.extra_using})"
-        operator = "IS NOT DISTINCT FROM" if self.nullable_tenant else "="
-        schema_editor.execute(
-            f"CREATE POLICY {POLICY_NAME} ON {table} "
-            f"USING ({using}) "
-            f"WITH CHECK (tenant_id {operator} {TENANT_EXPRESSION})"
-        )
+        create_policy(schema_editor, table, self.extra_using, self.nullable_tenant)
 
     def database_backwards(self, app_label, schema_editor, from_state, to_state):
         table = schema_editor.quote_name(self._table(app_label, from_state))
@@ -71,3 +75,49 @@ class EnableRLS(Operation):
     @property
     def migration_name_fragment(self):
         return f"rls_{self.model_name.lower()}"
+
+
+class AlterRLSPolicy(Operation):
+    """
+    Replace a table's tenant_isolation policy, e.g. to add a read rule. `previous` holds the old
+    arguments ({"extra_using": ..., "nullable_tenant": ...}) so the migration can be reversed.
+    """
+
+    reversible = True
+    reduces_to_sql = True
+
+    def __init__(self, model_name, extra_using=None, nullable_tenant=False, previous=None):
+        self.model_name = model_name
+        self.extra_using = extra_using
+        self.nullable_tenant = nullable_tenant
+        self.previous = previous or {}
+
+    def deconstruct(self):
+        kwargs = {"extra_using": self.extra_using, "previous": self.previous}
+        if self.nullable_tenant:
+            kwargs["nullable_tenant"] = True
+        return self.__class__.__name__, [self.model_name], kwargs
+
+    def state_forwards(self, app_label, state):
+        pass
+
+    def _replace(self, app_label, schema_editor, state, extra_using, nullable_tenant):
+        model = state.apps.get_model(app_label, self.model_name)
+        table = schema_editor.quote_name(model._meta.db_table)
+        schema_editor.execute(f"DROP POLICY IF EXISTS {POLICY_NAME} ON {table}")
+        create_policy(schema_editor, table, extra_using, nullable_tenant)
+
+    def database_forwards(self, app_label, schema_editor, from_state, to_state):
+        self._replace(app_label, schema_editor, to_state, self.extra_using, self.nullable_tenant)
+
+    def database_backwards(self, app_label, schema_editor, from_state, to_state):
+        self._replace(
+            app_label,
+            schema_editor,
+            to_state,
+            self.previous.get("extra_using"),
+            self.previous.get("nullable_tenant", False),
+        )
+
+    def describe(self):
+        return f"Replace the row-level security policy on {self.model_name}"

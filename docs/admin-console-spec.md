@@ -103,7 +103,7 @@ created date. 25 rows per page. "New client" button (super_admin only).
 | `contact_name` | text | Yes | Up to 100 characters |
 | `contact_phone` | phone | Yes | Indian mobile, stored E.164 `+91XXXXXXXXXX`; 10 digits starting 6–9 |
 | `contact_email` | email | Yes | Valid email |
-| `industry_template` | choice | Yes | An active industry template (pilot: `gas_agency`) |
+| `industry_template` | choice | Yes | An active industry template (pilot: `gas_agency`). Added to the API with apps/industry in Step 6 |
 | `default_language` | choice | Yes | `ml`, `en`, `hi`, `ta`. Default `ml` |
 | `daily_send_cap` | integer | Yes | **Default 5000**, 1–100000 |
 | `owner_name` | text | Yes | Up to 100 characters |
@@ -244,10 +244,13 @@ expiry, and is audited.
 
 - Platform staff click **Open as support** and give a `reason` (5–500 characters). This creates a
   `SupportSession(staff_user, tenant, reason, started_at, expires_at = started_at + 60 min)`.
-- While the session is active, the staff user can act in the tenant's context. Every audit entry written carries
-  `support_session`. The UI shows a support-mode banner with the time left.
-- A session ends when it is ended manually or when the expiry task (Celery, runs every minute) sets `ended_at`
-  on expired sessions. A request with an expired session gets `403`.
+- While the session is active, the staff user acts in the tenant's context: **read-only**, matching the portal's
+  "View" column for platform support (writes get `403 support_read_only`). Every audit entry written carries
+  `support_session`. The UI shows a support-mode banner with the time left. Opening a new session ends the
+  user's previous one (`end_reason = replaced`).
+- A session ends when it is ended manually or when the expiry task (Celery Beat, every minute) sets `ended_at`
+  on expired sessions (audited with no actor: the system). A request with an expired session gets
+  `403 support_session_expired`.
 - Start and end are audited.
 
 ### 3.4 WhatsApp template lifecycle
@@ -422,6 +425,7 @@ All under `/api/admin/`. They need an authenticated, OTP-verified user with `pla
 | POST | `/api/admin/tenants/{id}/users/{membership_id}/resend-invite` | Resend invite | staff |
 | GET | `/api/admin/tenants/{id}/activity` | Tenant audit entries | staff |
 | POST | `/api/admin/tenants/{id}/support-sessions` | Start support (reason) | staff |
+| GET | `/api/admin/support-sessions/current` | The user's active session (support-mode banner: tenant, `seconds_left`); 204 if none | staff |
 | POST | `/api/admin/support-sessions/{id}/end` | End support | staff |
 | GET/POST | `/api/admin/industry-templates` | List / create | staff / SA |
 | GET/PUT | `/api/admin/industry-templates/{id}` | Detail / save new version (3.5) | staff / SA |
@@ -461,8 +465,10 @@ Errors use `{"code": "...", "detail": "...", "fields": {...}}`.
    on a pooled connection. The Celery base task `TenantTask` does the same around each task: it requires a
    `tenant_id` kwarg, which is filled in automatically when the task is queued inside a tenant context.
 5. With no tenant set, tenant tables return no rows and reject writes.
-5a. For 2FA-verified platform staff the middleware also sets `app.platform_access = 'on'`. Only policies that opt in
-   (`EnableRLS(..., extra_using=PLATFORM_ACCESS)`, so far the audit log) use it, to let the admin console read
+5a. `tenant_context(t)` always switches platform access off: inside it even platform staff see exactly tenant `t`.
+   Admin code still filters by tenant explicitly when it reads tenant tables.
+5b. For 2FA-verified platform staff the middleware also sets `app.platform_access = 'on'`. Only policies that opt in
+   (`EnableRLS(..., extra_using=PLATFORM_ACCESS)`: audit log, memberships, support sessions) use it, to let the admin console read
    every tenant's rows. Tables with platform-level rows use `nullable_tenant=True` (writes need
    `tenant_id IS NOT DISTINCT FROM app.tenant_id`).
 6. Every tenant index starts with `tenant_id`.

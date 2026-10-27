@@ -30,7 +30,7 @@ docs/               Specs and screenshots
 
 ```bash
 cp .env.example .env              # local-only values, never commit .env
-docker compose up --build         # db (PostgreSQL 16), redis, api, worker
+docker compose up --build         # db (PostgreSQL 16), redis, api, worker, beat
 curl -i http://localhost:8000/api/health
 # HTTP/1.1 200 OK  {"status":"ok","database":"ok","redis":"ok"}
 ```
@@ -41,6 +41,7 @@ curl -i http://localhost:8000/api/health
 | `redis` | Redis 7 (Celery broker, cache) | 6379 |
 | `api` | Django (migrations, then the dev server with auto-reload) | 8000 |
 | `worker` | Celery worker | — |
+| `beat` | Celery Beat scheduler (e.g. ends expired support sessions every minute) | — |
 
 If a port is already used on your machine (for example a local Redis on 6379), set `POSTGRES_HOST_PORT`,
 `REDIS_HOST_PORT` or `API_HOST_PORT` in `.env`. Also update `POSTGRES_PORT` / `REDIS_URL` there for tools run on
