@@ -8,12 +8,14 @@ export function Pagination({
   page,
   count,
   onChange,
+  pageSize = PAGE_SIZE,
 }: {
   page: number;
   count: number;
   onChange: (page: number) => void;
+  pageSize?: number;
 }) {
-  const pages = Math.max(1, Math.ceil(count / PAGE_SIZE));
+  const pages = Math.max(1, Math.ceil(count / pageSize));
   return (
     <div className="mt-4 flex items-center justify-between text-sm text-muted">
       <span>{t("common.results", { count })}</span>

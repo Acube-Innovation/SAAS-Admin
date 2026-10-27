@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
-import { icons } from "@/components/icons";
-import { PlaceholderPage } from "@/components/placeholder-page";
+import { AuditLog } from "@/components/audit/audit-log";
 import { t } from "@/i18n";
 
 export const metadata: Metadata = { title: t("page.audit_log.title") };
 
 export default function AuditLogPage() {
-  return <PlaceholderPage page="audit_log" icon={icons.audit} />;
+  return (
+    <Suspense>
+      <AuditLog />
+    </Suspense>
+  );
 }

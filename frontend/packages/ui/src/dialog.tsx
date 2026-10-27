@@ -14,10 +14,12 @@ type DialogProps = {
   onClose: () => void;
   children: React.ReactNode;
   footer?: React.ReactNode;
+  /** "lg" for wide content such as tables. */
+  size?: "md" | "lg";
 };
 
 /** Accessible modal: focus moves inside, Escape and the backdrop close it. */
-export function Dialog({ open, title, onClose, children, footer }: DialogProps) {
+export function Dialog({ open, title, onClose, children, footer, size = "md" }: DialogProps) {
   const titleId = useId();
   const panel = useRef<HTMLDivElement>(null);
 
@@ -47,7 +49,7 @@ export function Dialog({ open, title, onClose, children, footer }: DialogProps) 
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative w-full max-w-md rounded-xl bg-white p-6 shadow-xl"
+        className={`relative max-h-[90vh] w-full overflow-y-auto rounded-xl bg-white p-6 shadow-xl ${size === "lg" ? "max-w-3xl" : "max-w-md"}`}
       >
         <h2 id={titleId} className="text-base font-semibold text-ink">
           {title}

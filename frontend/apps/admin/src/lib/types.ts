@@ -15,3 +15,5 @@ export type TemplateDetail = Schemas["TemplateDetail"];
 export type TemplateVersion = Schemas["Version"];
 export type FieldDef = Schemas["Field"];
 export type ScheduleTypeDef = Schemas["ScheduleType"];
+export type AuditEntry = Schemas["AuditEntry"];
+export type Dashboard = Schemas["Dashboard"];

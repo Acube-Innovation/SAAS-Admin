@@ -461,7 +461,7 @@ All under `/api/admin/`. They need an authenticated, OTP-verified user with `pla
 | GET | `/api/admin/whatsapp-templates/variables?schedule_type=` · `…/versions/{vid}/evidence` | Variables picker · signed evidence link (5 min) | staff |
 | GET/PATCH | `/api/admin/change-requests[/{id}]` | Queue / detail / assign / status | staff |
 | POST | `/api/admin/change-requests/{id}/comments` · `/decline` · `/link-version` | | staff |
-| GET | `/api/admin/audit-logs` · `/audit-logs/export` | Audit list / CSV (audited) | staff |
+| GET | `/api/admin/audit-logs` · `/audit-logs/facets` · `/audit-logs/export` | Audit list (filters: tenant, actor, action, object_type, date_from/date_to in IST; 50 per page, `page_size` ≤ 200) / filter values / CSV of every matching row, newest first (≤ 50,000 rows; formula cells neutralised; writes an `export` entry) | staff |
 | GET/POST/PATCH | `/api/admin/plans` · `/price-list` · `/tenants/{id}/subscription` · `/tenants/{id}/price-overrides` | Billing (2.11, 3.8) | SA |
 
 Errors use `{"code": "...", "detail": "...", "fields": {...}}`.

@@ -10,11 +10,18 @@ export function renderWithQuery(ui: React.ReactElement) {
   return render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
 }
 
-type Handler = { method: string; path: string; status?: number; body?: unknown };
+type Handler = {
+  method: string;
+  path: string;
+  status?: number;
+  body?: unknown;
+  /** A non-JSON body (e.g. CSV) with its headers. */
+  raw?: { text: string; headers: Record<string, string> };
+};
 
 /** Replace fetch with canned API responses; returns the list of requests made. */
 export function mockApi(handlers: Handler[]) {
-  const calls: { method: string; path: string; body: unknown }[] = [];
+  const calls: { method: string; path: string; search: string; body: unknown }[] = [];
   vi.stubGlobal(
     "fetch",
     vi.fn(async (input: Request | string, init?: RequestInit) => {
@@ -29,9 +36,10 @@ export function mockApi(handlers: Handler[]) {
           body = text; // e.g. multipart form data
         }
       }
-      calls.push({ method: request.method, path: url.pathname, body });
+      calls.push({ method: request.method, path: url.pathname, search: url.search, body });
       const handler = handlers.find((h) => h.method === request.method && h.path === url.pathname);
       const status = handler?.status ?? (handler ? 200 : 404);
+      if (handler?.raw) return new Response(handler.raw.text, { status, headers: handler.raw.headers });
       return new Response(handler?.body === undefined ? null : JSON.stringify(handler.body), {
         status,
         headers: { "Content-Type": "application/json" },

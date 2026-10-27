@@ -4,6 +4,72 @@
  */
 
 export interface paths {
+    "/api/admin/audit-logs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["admin_audit_logs_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/audit-logs/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description CSV of every entry matching the filters, newest first. The export is itself audited. */
+        get: operations["admin_audit_logs_export_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/audit-logs/facets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Values for the Client, Action and Record filters. */
+        get: operations["admin_audit_logs_facets_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["admin_dashboard_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/dev/whatsapp-versions/{vid}/simulate": {
         parameters: {
             query?: never;
@@ -678,6 +744,30 @@ export interface components {
             outcome: components["schemas"]["OutcomeEnum"];
             pick_next_delivery_days?: number;
         };
+        AuditEntry: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: uuid */
+            readonly tenant_id: string | null;
+            tenant_name: string | null;
+            /**
+             * Format: uuid
+             * @description Empty for system actions.
+             */
+            readonly actor_id: string | null;
+            actor_email: string;
+            /** Format: uuid */
+            readonly support_session_id: string | null;
+            action: string;
+            object_type: string;
+            object_id: string;
+            before: unknown;
+            after: unknown;
+            ip_address: string | null;
+            user_agent: string;
+        };
         AuditLog: {
             /** Format: uuid */
             readonly id: string;
@@ -700,6 +790,16 @@ export interface components {
             after: unknown;
             ip_address: string | null;
             user_agent: string;
+        };
+        AuditLogFacets: {
+            actions: string[];
+            object_types: string[];
+            tenants: components["schemas"]["AuditLogTenant"][];
+        };
+        AuditLogTenant: {
+            /** Format: uuid */
+            id: string;
+            name: string;
         };
         /** @description What the frontend needs to route a user: who they are and which 2FA step is next. */
         AuthState: {
@@ -737,6 +837,21 @@ export interface components {
          * @enum {string}
          */
         ChannelOrderEnum: "whatsapp" | "voice";
+        Dashboard: {
+            clients_active: number;
+            clients_suspended: number;
+            messages_today: components["schemas"]["MessagesToday"];
+            /** @description False until the Phase 2 reminder engine */
+            messages_live: boolean;
+            quality_rating: components["schemas"]["QualityRatingEnum"];
+            quality_alert: boolean;
+            failed_webhooks_24h: number;
+            templates_awaiting_action: number;
+            open_change_requests: number;
+            active_support_sessions: number;
+            /** Format: date-time */
+            generated_at: string;
+        };
         Event: {
             action: string;
             from_status: string;
@@ -874,6 +989,12 @@ export interface components {
          * @enum {string}
          */
         MembershipStatusEnum: "invited" | "active" | "deactivated";
+        MessagesToday: {
+            sent: number;
+            delivered: number;
+            failed: number;
+            replied: number;
+        };
         OtpCodeRequest: {
             otp_code: string;
         };
@@ -890,6 +1011,21 @@ export interface components {
          * @enum {string}
          */
         OutcomeEnum: "confirmed" | "not_available" | "reschedule";
+        PaginatedAuditEntryList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous: string | null;
+            results: components["schemas"]["AuditEntry"][];
+        };
         PaginatedAuditLogList: {
             /** @example 123 */
             count: number;
@@ -964,6 +1100,14 @@ export interface components {
                 [key: string]: string;
             };
         };
+        /**
+         * @description * `GREEN` - GREEN
+         *     * `YELLOW` - YELLOW
+         *     * `RED` - RED
+         *     * `UNKNOWN` - UNKNOWN
+         * @enum {string}
+         */
+        QualityRatingEnum: "GREEN" | "YELLOW" | "RED" | "UNKNOWN";
         QuestionFlowRequest: {
             answers: components["schemas"]["AnswerRequest"][];
         };
@@ -1306,6 +1450,108 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    admin_audit_logs_list: {
+        parameters: {
+            query?: {
+                action?: string;
+                /** @description Part of the actor's email */
+                actor?: string;
+                /** @description From this day (India time), inclusive */
+                date_from?: string;
+                /** @description Up to this day (India time), inclusive */
+                date_to?: string;
+                object_type?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description Client id */
+                tenant?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedAuditEntryList"];
+                };
+            };
+        };
+    };
+    admin_audit_logs_export_retrieve: {
+        parameters: {
+            query?: {
+                action?: string;
+                /** @description Part of the actor's email */
+                actor?: string;
+                /** @description From this day (India time), inclusive */
+                date_from?: string;
+                /** @description Up to this day (India time), inclusive */
+                date_to?: string;
+                object_type?: string;
+                /** @description Client id */
+                tenant?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
+                };
+            };
+        };
+    };
+    admin_audit_logs_facets_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditLogFacets"];
+                };
+            };
+        };
+    };
+    admin_dashboard_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Dashboard"];
+                };
+            };
+        };
+    };
     admin_dev_whatsapp_versions_simulate_create: {
         parameters: {
             query?: never;

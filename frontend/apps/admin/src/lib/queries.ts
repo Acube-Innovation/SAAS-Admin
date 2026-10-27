@@ -15,6 +15,9 @@ export const keys = {
   referenceData: ["reference-data"] as const,
   industryTemplates: ["industry-templates"] as const,
   supportSession: ["support-session"] as const,
+  dashboard: ["dashboard"] as const,
+  auditLogs: ["audit-logs"] as const,
+  auditFacets: ["audit-logs", "facets"] as const,
 };
 
 export function useTenants(params: { search?: string; status?: string; industry_template?: string; page?: string }) {
@@ -140,6 +143,30 @@ export function useTemplateVariables(scheduleType: string | undefined) {
           params: { query: { schedule_type: scheduleType! } },
         }),
       ),
+    staleTime: 60_000,
+  });
+}
+
+export function useDashboard() {
+  return useQuery({
+    queryKey: keys.dashboard,
+    queryFn: () => unwrap(api.GET("/api/admin/dashboard")),
+    refetchInterval: 60_000,
+  });
+}
+
+export function useAuditLogs(query: Record<string, string>) {
+  return useQuery({
+    queryKey: [...keys.auditLogs, query],
+    queryFn: () => unwrap(api.GET("/api/admin/audit-logs", { params: { query } })),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useAuditFacets() {
+  return useQuery({
+    queryKey: keys.auditFacets,
+    queryFn: () => unwrap(api.GET("/api/admin/audit-logs/facets")),
     staleTime: 60_000,
   });
 }

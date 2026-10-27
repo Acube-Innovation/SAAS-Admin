@@ -1,6 +1,7 @@
 "use client";
 
 import { Alert, type Column, DataTable, StatusPill } from "@saas/ui";
+import Link from "next/link";
 import { useState } from "react";
 
 import { Pagination } from "@/components/pagination";
@@ -30,6 +31,11 @@ export function ActivityTab({ tenantId }: { tenantId: string }) {
   ];
   return (
     <div className="space-y-3">
+      <div className="flex justify-end">
+        <Link href={`/audit-log?tenant=${tenantId}`} className="text-sm font-medium text-brand-700 hover:underline">
+          {t("activity.open_audit_log")}
+        </Link>
+      </div>
       {activity.isError && <Alert>{errorMessage(activity.error)}</Alert>}
       <DataTable
         caption={t("client.tab.activity")}

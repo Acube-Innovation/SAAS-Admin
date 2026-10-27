@@ -36,6 +36,10 @@ class WhatsAppProvider(ABC):
     def get_template_status(self, provider_template_id: str) -> ProviderStatus:
         """The provider's current review status for a submitted template."""
 
+    @abstractmethod
+    def get_quality_rating(self) -> str:
+        """Quality rating Meta gives the shared sending number: GREEN, YELLOW or RED (spec 2.2)."""
+
 
 class StubProvider(WhatsAppProvider):
     """In-process stand-in for Meta. State lives in the Django cache (shared by API and workers)."""
@@ -63,7 +67,16 @@ class StubProvider(WhatsAppProvider):
             return ProviderStatus(PENDING)
         return ProviderStatus(data["status"], data.get("reason", ""))
 
+    QUALITY_KEY = "whatsapp-stub:quality"
+
+    def get_quality_rating(self) -> str:
+        return cache.get(self.QUALITY_KEY, "GREEN")
+
     # --- test / developer controls ---
+
+    @classmethod
+    def set_quality(cls, rating: str):
+        cache.set(cls.QUALITY_KEY, rating, timeout=None)
 
     @classmethod
     def set_status(cls, provider_template_id: str, status: str, reason: str = ""):

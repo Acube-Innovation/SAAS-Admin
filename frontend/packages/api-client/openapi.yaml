@@ -3,6 +3,139 @@ info:
   title: Schedule Confirmation SaaS API
   version: 0.1.0
 paths:
+  /api/admin/audit-logs:
+    get:
+      operationId: admin_audit_logs_list
+      parameters:
+      - in: query
+        name: action
+        schema:
+          type: string
+      - in: query
+        name: actor
+        schema:
+          type: string
+        description: Part of the actor's email
+      - in: query
+        name: date_from
+        schema:
+          type: string
+          format: date
+        description: From this day (India time), inclusive
+      - in: query
+        name: date_to
+        schema:
+          type: string
+          format: date
+        description: Up to this day (India time), inclusive
+      - in: query
+        name: object_type
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: tenant
+        schema:
+          type: string
+        description: Client id
+      tags:
+      - 'admin: audit log'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAuditEntryList'
+          description: ''
+  /api/admin/audit-logs/export:
+    get:
+      operationId: admin_audit_logs_export_retrieve
+      description: CSV of every entry matching the filters, newest first. The export
+        is itself audited.
+      parameters:
+      - in: query
+        name: action
+        schema:
+          type: string
+      - in: query
+        name: actor
+        schema:
+          type: string
+        description: Part of the actor's email
+      - in: query
+        name: date_from
+        schema:
+          type: string
+          format: date
+        description: From this day (India time), inclusive
+      - in: query
+        name: date_to
+        schema:
+          type: string
+          format: date
+        description: Up to this day (India time), inclusive
+      - in: query
+        name: object_type
+        schema:
+          type: string
+      - in: query
+        name: tenant
+        schema:
+          type: string
+        description: Client id
+      tags:
+      - 'admin: audit log'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            text/csv:
+              schema:
+                type: string
+          description: ''
+  /api/admin/audit-logs/facets:
+    get:
+      operationId: admin_audit_logs_facets_retrieve
+      description: Values for the Client, Action and Record filters.
+      tags:
+      - 'admin: audit log'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditLogFacets'
+          description: ''
+  /api/admin/dashboard:
+    get:
+      operationId: admin_dashboard_retrieve
+      tags:
+      - 'admin: dashboard'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Dashboard'
+          description: ''
   /api/admin/dev/whatsapp-versions/{vid}/simulate:
     post:
       operationId: admin_dev_whatsapp_versions_simulate_create
@@ -1290,6 +1423,73 @@ components:
       - key
       - label
       - outcome
+    AuditEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        tenant_id:
+          type: string
+          format: uuid
+          nullable: true
+          readOnly: true
+        tenant_name:
+          type: string
+          nullable: true
+        actor_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Empty for system actions.
+          readOnly: true
+        actor_email:
+          type: string
+          maxLength: 254
+        support_session_id:
+          type: string
+          format: uuid
+          nullable: true
+          readOnly: true
+        action:
+          type: string
+          maxLength: 50
+        object_type:
+          type: string
+          maxLength: 100
+        object_id:
+          type: string
+          maxLength: 64
+        before:
+          nullable: true
+        after:
+          nullable: true
+        ip_address:
+          type: string
+          nullable: true
+        user_agent:
+          type: string
+          maxLength: 500
+      required:
+      - action
+      - actor_email
+      - actor_id
+      - after
+      - before
+      - created_at
+      - id
+      - ip_address
+      - object_id
+      - object_type
+      - support_session_id
+      - tenant_id
+      - tenant_name
+      - user_agent
     AuditLog:
       type: object
       properties:
@@ -1353,6 +1553,36 @@ components:
       - support_session_id
       - tenant_id
       - user_agent
+    AuditLogFacets:
+      type: object
+      properties:
+        actions:
+          type: array
+          items:
+            type: string
+        object_types:
+          type: array
+          items:
+            type: string
+        tenants:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditLogTenant'
+      required:
+      - actions
+      - object_types
+      - tenants
+    AuditLogTenant:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+      required:
+      - id
+      - name
     AuthState:
       type: object
       description: 'What the frontend needs to route a user: who they are and which
@@ -1426,6 +1656,45 @@ components:
       description: |-
         * `whatsapp` - whatsapp
         * `voice` - voice
+    Dashboard:
+      type: object
+      properties:
+        clients_active:
+          type: integer
+        clients_suspended:
+          type: integer
+        messages_today:
+          $ref: '#/components/schemas/MessagesToday'
+        messages_live:
+          type: boolean
+          description: False until the Phase 2 reminder engine
+        quality_rating:
+          $ref: '#/components/schemas/QualityRatingEnum'
+        quality_alert:
+          type: boolean
+        failed_webhooks_24h:
+          type: integer
+        templates_awaiting_action:
+          type: integer
+        open_change_requests:
+          type: integer
+        active_support_sessions:
+          type: integer
+        generated_at:
+          type: string
+          format: date-time
+      required:
+      - active_support_sessions
+      - clients_active
+      - clients_suspended
+      - failed_webhooks_24h
+      - generated_at
+      - messages_live
+      - messages_today
+      - open_change_requests
+      - quality_alert
+      - quality_rating
+      - templates_awaiting_action
     Event:
       type: object
       properties:
@@ -1768,6 +2037,22 @@ components:
         * `invited` - Invited
         * `active` - Active
         * `deactivated` - Deactivated
+    MessagesToday:
+      type: object
+      properties:
+        sent:
+          type: integer
+        delivered:
+          type: integer
+        failed:
+          type: integer
+        replied:
+          type: integer
+      required:
+      - delivered
+      - failed
+      - replied
+      - sent
     OtpCodeRequest:
       type: object
       properties:
@@ -1799,6 +2084,31 @@ components:
         * `confirmed` - confirmed
         * `not_available` - not_available
         * `reschedule` - reschedule
+    PaginatedAuditEntryList:
+      type: object
+      required:
+      - count
+      - next
+      - previous
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditEntry'
     PaginatedAuditLogList:
       type: object
       required:
@@ -1948,6 +2258,18 @@ components:
           type: object
           additionalProperties:
             type: string
+    QualityRatingEnum:
+      enum:
+      - GREEN
+      - YELLOW
+      - RED
+      - UNKNOWN
+      type: string
+      description: |-
+        * `GREEN` - GREEN
+        * `YELLOW` - YELLOW
+        * `RED` - RED
+        * `UNKNOWN` - UNKNOWN
     QuestionFlowRequest:
       type: object
       properties:
