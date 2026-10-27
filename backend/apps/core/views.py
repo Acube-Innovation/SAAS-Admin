@@ -3,6 +3,7 @@ import logging
 import redis
 from django.conf import settings
 from django.db import connection
+from django.http import JsonResponse
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import serializers, status
 from rest_framework.permissions import AllowAny
@@ -60,3 +61,15 @@ class HealthView(APIView):
             {"status": "ok" if healthy else "error", **checks},
             status=status.HTTP_200_OK if healthy else status.HTTP_503_SERVICE_UNAVAILABLE,
         )
+
+
+def csrf_failure(request, reason=""):
+    """CSRF failures as JSON in the API error shape, instead of Django's HTML page."""
+    return JsonResponse(
+        {
+            "code": "csrf_failed",
+            "detail": "CSRF check failed. Reload the page and try again.",
+            "fields": {},
+        },
+        status=403,
+    )

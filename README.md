@@ -46,6 +46,14 @@ If a port is already used on your machine (for example a local Redis on 6379), s
 `REDIS_HOST_PORT` or `API_HOST_PORT` in `.env`. Also update `POSTGRES_PORT` / `REDIS_URL` there for tools run on
 the host.
 
+Create the first super admin (they set up 2FA with an authenticator app at first sign-in):
+
+```bash
+docker compose exec api python manage.py createplatformuser --email you@example.com --role super_admin
+```
+
+Emails (such as invites) print to the `worker` logs locally: `docker compose logs -f worker`.
+
 The API docs are at http://localhost:8000/api/docs, and the OpenAPI schema is at http://localhost:8000/api/schema.
 The production image (`backend/Dockerfile`) runs Gunicorn.
 

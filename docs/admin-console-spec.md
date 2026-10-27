@@ -219,13 +219,15 @@ One database transaction:
 2. Create the `Tenant` with `status = active`. Copy the industry template's current version defaults (settings,
    reminder rule, choice lists) onto the tenant.
 3. Create or find the `User` for `owner_email`. Create the `Membership(role = owner, status = invited)`.
-4. Create an `Invite`: a random token, of which only the **SHA-256 hash** is stored. **Single use**, **expires after
-   72 hours**.
+4. Create an `Invite`: a token `<tenant_id>.<random secret>`, of which only the **SHA-256 hash** is stored. The
+   tenant part lets acceptance set the tenant context; the secret is what makes it unguessable. **Single use**,
+   **expires after 72 hours**.
 5. Write audit entries (tenant created, membership created, invite created).
 6. After commit, queue the invite email (SES) with the link `https://app.<domain>/invite/<token>`.
 
-Accepting an invite: the token is valid, unused and not expired. The user sets a password (2.1 rules) and sets up
-2FA (mandatory for owners). Then `Invite.used_at` is set and the membership becomes `active`.
+Accepting an invite: the token is valid, unused and not expired. A new user sets a password (2.1 rules); an existing
+user with a password confirms it. Then `Invite.used_at` is set, the membership becomes `active` and the user is
+signed in. Users who need 2FA (owners) can't use anything until they finish 2FA set-up, which comes next.
 **Resend:** invalidates any earlier unused invite for that membership, creates a new token with a new 72-hour
 expiry, and is audited.
 
@@ -374,8 +376,8 @@ All primary keys are UUIDs. Every model has `created_at` and `updated_at`. **Ten
 | Model | App | Tenant-scoped | Key fields |
 | --- | --- | --- | --- |
 | Tenant | core | — (is the tenant) | `name`, `legal_name`, `gstin` (unique, nullable), `address_line1`, `address_line2`, `city`, `state`, `pin_code`, `contact_name`, `contact_phone`, `contact_email`, `industry_template` (FK), `industry_template_version` (int), `status` (`active`, `suspended`), `suspended_at`, `suspension_reason`, `default_language`, `timezone`, `daily_send_cap` (default 5000), `settings` (JSONB) |
-| User | accounts | No | `email` (unique, ci), `full_name`, `phone`, `platform_role` (`super_admin`, `support`, null), `is_active`, `failed_login_count`, `locked_until`, `last_login` |
-| Membership | accounts | Yes | `user`, `tenant`, `role` (`owner`, `manager`, `office_staff`), `status` (`invited`, `active`, `deactivated`); unique (`user`, `tenant`) |
+| User | accounts | No | `email` (unique, ci), `full_name`, `phone`, `platform_role` (`super_admin`, `support`, or blank), `is_active`, `failed_login_count`, `locked_until`, `last_login` |
+| Membership | accounts | Yes (plus a read rule: users can read their own memberships in any tenant) | `user`, `tenant`, `role` (`owner`, `manager`, `office_staff`), `status` (`invited`, `active`, `deactivated`); unique (`tenant`, `user`) |
 | Invite | accounts | Yes | `membership`, `token_hash` (SHA-256), `expires_at`, `used_at`, `revoked_at`, `created_by` |
 | TOTP device | accounts | No | django-otp `TOTPDevice` (`confirmed`) |
 | AuditLog | audit | Nullable tenant (platform actions have none) | `actor` (FK User, null = system), `tenant`, `support_session`, `action` (`create`, `update`, `delete`, `status_change`, `login`, `export`, `support_start`, `support_end`, …), `object_type`, `object_id`, `before` (JSONB), `after` (JSONB), `ip_address`, `user_agent`. **Insert-only** |
@@ -401,11 +403,13 @@ All under `/api/admin/`. They need an authenticated, OTP-verified user with `pla
 | Method | Path | Purpose | Role |
 | --- | --- | --- | --- |
 | GET | `/api/health` | Liveness: DB + Redis | public |
+| GET | `/api/auth/csrf` | Sets the `csrftoken` cookie (sent back as `X-CSRFToken`) | public |
 | POST | `/api/auth/login` | Email + password | public |
 | POST | `/api/auth/otp/verify` | TOTP code | logged in |
 | POST | `/api/auth/otp/setup` · `/confirm` | 2FA set-up | logged in |
 | POST | `/api/auth/logout` | | logged in |
-| GET | `/api/auth/me` | Current user, roles, 2FA state | logged in |
+| GET | `/api/auth/me` | Current user, roles, 2FA state, memberships | logged in |
+| POST | `/api/auth/tenant` | Choose the active tenant (users with several memberships) | logged in + 2FA |
 | GET/POST | `/api/auth/invites/<token>` · `/accept` | Invite check and accept | public |
 | GET | `/api/admin/dashboard` | Tiles (2.2) | staff |
 | GET | `/api/admin/tenants` | List, search, filter | staff |
