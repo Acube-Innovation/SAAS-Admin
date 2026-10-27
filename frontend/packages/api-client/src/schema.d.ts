@@ -57,6 +57,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/reference-data": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Choice lists for admin forms, so the UI uses exactly the server's lists (spec 2.4). */
+        get: operations["admin_reference_data_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/support-sessions/{id}/end": {
         parameters: {
             query?: never;
@@ -625,11 +642,11 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        AcceptInvite: {
+        AcceptInviteRequest: {
             password: string;
             full_name?: string;
         };
-        Answer: {
+        AnswerRequest: {
             key: string;
             label: string;
             outcome: components["schemas"]["OutcomeEnum"];
@@ -647,16 +664,16 @@ export interface components {
              * @description Empty for system actions.
              */
             readonly actor_id: string | null;
-            actor_email?: string;
+            actor_email: string;
             /** Format: uuid */
             readonly support_session_id: string | null;
             action: string;
-            object_type?: string;
-            object_id?: string;
-            before?: unknown;
-            after?: unknown;
-            ip_address?: string | null;
-            user_agent?: string;
+            object_type: string;
+            object_id: string;
+            before: unknown;
+            after: unknown;
+            ip_address: string | null;
+            user_agent: string;
         };
         /** @description What the frontend needs to route a user: who they are and which 2FA step is next. */
         AuthState: {
@@ -679,7 +696,7 @@ export interface components {
         };
         /** @enum {unknown} */
         BlankEnum: "";
-        Button: {
+        ButtonRequest: {
             text: string;
             outcome: components["schemas"]["OutcomeEnum"];
         };
@@ -699,8 +716,8 @@ export interface components {
             from_status: string;
             to_status: string;
             /** Format: email */
-            actor_email?: string | null;
-            note?: string;
+            actor_email: string | null;
+            note: string;
             /** Format: date-time */
             readonly created_at: string;
         };
@@ -712,20 +729,18 @@ export interface components {
             key: string;
             label: string;
             field_type: components["schemas"]["FieldTypeEnum"];
-            required?: boolean;
-            is_core?: boolean;
-            options?: unknown;
-            max_length?: number | null;
-            is_active?: boolean;
+            required: boolean;
+            is_core: boolean;
+            options: unknown;
+            max_length: number | null;
+            is_active: boolean;
         };
-        FieldInput: {
+        FieldInputRequest: {
             key: string;
             label: string;
             field_type: components["schemas"]["FieldTypeEnum"];
             /** @default false */
             required: boolean;
-            /** @default false */
-            readonly is_core: boolean;
             options?: string[];
             max_length?: number | null;
             /** @default true */
@@ -752,9 +767,9 @@ export interface components {
             /** @description Immutable, e.g. gas_agency. */
             key: string;
             name: string;
-            description?: string;
-            is_active?: boolean;
-            current_version?: number;
+            description: string;
+            is_active: boolean;
+            current_version: number;
             readonly clients_using: number;
             readonly subscriber_fields: {
                 [key: string]: unknown;
@@ -789,13 +804,17 @@ export interface components {
          * @enum {string}
          */
         LanguageEnum: "ml" | "en" | "hi" | "ta";
-        Login: {
+        LanguageOption: {
+            code: string;
+            name: string;
+        };
+        LoginRequest: {
             /** Format: email */
             email: string;
             password: string;
         };
-        ManualSignoff: {
-            /** Format: uri */
+        ManualSignoffRequest: {
+            /** Format: binary */
             evidence: string;
             /** @default  */
             note: string;
@@ -808,7 +827,7 @@ export interface components {
             tenant_name: string;
             tenant_status: string;
             role: components["schemas"]["TenantRoleEnum"];
-            status?: components["schemas"]["MembershipStatusEnum"];
+            status: components["schemas"]["MembershipStatusEnum"];
         };
         MembershipAdmin: {
             /** Format: uuid */
@@ -817,7 +836,7 @@ export interface components {
             email: string;
             full_name: string;
             role: components["schemas"]["TenantRoleEnum"];
-            status?: components["schemas"]["MembershipStatusEnum"];
+            status: components["schemas"]["MembershipStatusEnum"];
             /** Format: date-time */
             last_login: string | null;
             otp_enabled: boolean;
@@ -829,7 +848,7 @@ export interface components {
          * @enum {string}
          */
         MembershipStatusEnum: "invited" | "active" | "deactivated";
-        OtpCode: {
+        OtpCodeRequest: {
             otp_code: string;
         };
         OtpSetup: {
@@ -852,28 +871,13 @@ export interface components {
              * Format: uri
              * @example http://api.example.org/accounts/?page=4
              */
-            next?: string | null;
+            next: string | null;
             /**
              * Format: uri
              * @example http://api.example.org/accounts/?page=2
              */
-            previous?: string | null;
+            previous: string | null;
             results: components["schemas"]["AuditLog"][];
-        };
-        PaginatedMembershipAdminList: {
-            /** @example 123 */
-            count: number;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=4
-             */
-            next?: string | null;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=2
-             */
-            previous?: string | null;
-            results: components["schemas"]["MembershipAdmin"][];
         };
         PaginatedTemplateList: {
             /** @example 123 */
@@ -882,12 +886,12 @@ export interface components {
              * Format: uri
              * @example http://api.example.org/accounts/?page=4
              */
-            next?: string | null;
+            next: string | null;
             /**
              * Format: uri
              * @example http://api.example.org/accounts/?page=2
              */
-            previous?: string | null;
+            previous: string | null;
             results: components["schemas"]["Template"][];
         };
         PaginatedTenantList: {
@@ -897,18 +901,16 @@ export interface components {
              * Format: uri
              * @example http://api.example.org/accounts/?page=4
              */
-            next?: string | null;
+            next: string | null;
             /**
              * Format: uri
              * @example http://api.example.org/accounts/?page=2
              */
-            previous?: string | null;
+            previous: string | null;
             results: components["schemas"]["Tenant"][];
         };
         /** @description Client details and settings (spec 2.4 / 2.5). Validation matches the create form. */
-        PatchedTenant: {
-            /** Format: uuid */
-            readonly id?: string;
+        PatchedTenantRequest: {
             name?: string;
             legal_name?: string;
             gstin?: string | null;
@@ -925,45 +927,34 @@ export interface components {
             timezone?: string;
             /** @default 5000 */
             daily_send_cap: number;
-            /**
-             * Format: uuid
-             * @description Required when a client is created (spec 2.4).
-             */
-            readonly industry_template?: string | null;
-            readonly industry_template_name?: string | null;
-            readonly industry_template_version?: number | null;
-            readonly status?: components["schemas"]["TenantStatusEnum"];
-            /** Format: date-time */
-            readonly suspended_at?: string | null;
-            readonly suspension_reason?: string;
-            /** Format: email */
-            readonly owner_email?: string | null;
-            /** Format: date-time */
-            readonly created_at?: string;
-            /** Format: date-time */
-            readonly updated_at?: string;
         };
         /** @description Template content; the spec 2.7 rules are applied by validation.validate_content(). */
-        PatchedVersionEdit: {
+        PatchedVersionEditRequest: {
             header_text?: string;
             body?: string;
             footer?: string;
-            buttons?: components["schemas"]["Button"][];
+            buttons?: components["schemas"]["ButtonRequest"][];
             sample_values?: {
                 [key: string]: string;
             };
         };
-        QuestionFlow: {
-            answers: components["schemas"]["Answer"][];
+        QuestionFlowRequest: {
+            answers: components["schemas"]["AnswerRequest"][];
         };
-        Reason: {
-            reason: string;
-        };
-        ReasonOptional: {
+        ReasonOptionalRequest: {
             /** @default  */
             reason: string;
         };
-        ReminderRule: {
+        ReasonRequest: {
+            reason: string;
+        };
+        ReferenceData: {
+            states: components["schemas"]["StateOption"][];
+            languages: components["schemas"]["LanguageOption"][];
+            timezones: string[];
+            daily_send_cap: components["schemas"]["SendCapLimits"];
+        };
+        ReminderRuleRequest: {
             send_time: string;
             days_before: number;
             wait_minutes: number;
@@ -975,23 +966,28 @@ export interface components {
         ScheduleType: {
             key: string;
             name: string;
-            is_active?: boolean;
+            is_active: boolean;
             fields: components["schemas"]["Field"][];
-            default_reminder_rule?: unknown;
-            default_question_flow?: unknown;
+            default_reminder_rule: unknown;
+            default_question_flow: unknown;
         };
-        ScheduleTypeInput: {
+        ScheduleTypeInputRequest: {
             key: string;
             name: string;
             /** @default true */
             is_active: boolean;
-            fields: components["schemas"]["FieldInput"][];
-            default_reminder_rule: components["schemas"]["ReminderRule"];
-            default_question_flow: components["schemas"]["QuestionFlow"];
+            fields: components["schemas"]["FieldInputRequest"][];
+            default_reminder_rule: components["schemas"]["ReminderRuleRequest"];
+            default_question_flow: components["schemas"]["QuestionFlowRequest"];
         };
-        SelectTenant: {
+        SelectTenantRequest: {
             /** Format: uuid */
             tenant_id: string;
+        };
+        SendCapLimits: {
+            default: number;
+            min: number;
+            max: number;
         };
         /**
          * @description * `client` - Client
@@ -1039,6 +1035,11 @@ export interface components {
          * @enum {string}
          */
         StateEnum: "AN" | "AP" | "AR" | "AS" | "BR" | "CH" | "CG" | "DH" | "DL" | "GA" | "GJ" | "HR" | "HP" | "JK" | "JH" | "KA" | "KL" | "LA" | "LD" | "MP" | "MH" | "MN" | "ML" | "MZ" | "NL" | "OD" | "PY" | "PB" | "RJ" | "SK" | "TN" | "TS" | "TR" | "UP" | "UK" | "WB";
+        StateOption: {
+            code: string;
+            name: string;
+            gst_code: string;
+        };
         SupportSession: {
             /** Format: uuid */
             readonly id: string;
@@ -1049,12 +1050,12 @@ export interface components {
             staff_email: string;
             reason: string;
             /** Format: date-time */
-            started_at?: string;
+            started_at: string;
             /** Format: date-time */
             expires_at: string;
             /** Format: date-time */
-            ended_at?: string | null;
-            end_reason?: components["schemas"]["SupportSessionEndReasonEnum"] | components["schemas"]["BlankEnum"];
+            ended_at: string | null;
+            end_reason: components["schemas"]["SupportSessionEndReasonEnum"] | components["schemas"]["BlankEnum"];
             readonly is_active: boolean;
             readonly seconds_left: number;
         };
@@ -1073,7 +1074,7 @@ export interface components {
             tenant_name: string;
             name: string;
             language: components["schemas"]["LanguageEnum"];
-            category?: components["schemas"]["CategoryEnum"];
+            category: components["schemas"]["CategoryEnum"];
             /** Format: uuid */
             schedule_type: string;
             schedule_type_name: string;
@@ -1085,13 +1086,13 @@ export interface components {
             readonly created_at: string;
         };
         /** @description Template content; the spec 2.7 rules are applied by validation.validate_content(). */
-        TemplateCreate: {
+        TemplateCreateRequest: {
             /** @default  */
             header_text: string;
             body: string;
             /** @default  */
             footer: string;
-            buttons?: components["schemas"]["Button"][];
+            buttons?: components["schemas"]["ButtonRequest"][];
             sample_values?: {
                 [key: string]: string;
             };
@@ -1112,7 +1113,7 @@ export interface components {
             tenant_name: string;
             name: string;
             language: components["schemas"]["LanguageEnum"];
-            category?: components["schemas"]["CategoryEnum"];
+            category: components["schemas"]["CategoryEnum"];
             /** Format: uuid */
             schedule_type: string;
             schedule_type_name: string;
@@ -1125,15 +1126,15 @@ export interface components {
             readonly versions: components["schemas"]["Version"][];
         };
         /** @description The whole template as the editor saves it. Saving always creates a new version. */
-        TemplateInput: {
+        TemplateInputRequest: {
             key: string;
             name: string;
             /** @default  */
             description: string;
             /** @default true */
             is_active: boolean;
-            subscriber_fields: components["schemas"]["FieldInput"][];
-            schedule_types: components["schemas"]["ScheduleTypeInput"][];
+            subscriber_fields: components["schemas"]["FieldInputRequest"][];
+            schedule_types: components["schemas"]["ScheduleTypeInputRequest"][];
         };
         TemplateVariables: {
             variables: unknown[];
@@ -1157,9 +1158,9 @@ export interface components {
             readonly id: string;
             name: string;
             legal_name: string;
-            gstin?: string | null;
+            gstin: string | null;
             address_line1: string;
-            address_line2?: string;
+            address_line2: string;
             city: string;
             state: components["schemas"]["StateEnum"];
             pin_code: string;
@@ -1167,8 +1168,8 @@ export interface components {
             contact_phone: string;
             /** Format: email */
             contact_email: string;
-            default_language?: components["schemas"]["LanguageEnum"];
-            timezone?: string;
+            default_language: components["schemas"]["LanguageEnum"];
+            timezone: string;
             /** @default 5000 */
             daily_send_cap: number;
             /**
@@ -1178,6 +1179,10 @@ export interface components {
             readonly industry_template: string | null;
             readonly industry_template_name: string | null;
             readonly industry_template_version: number | null;
+            /** @description The client's own copy of the template defaults: reminder rules, choice lists. */
+            readonly industry_settings: {
+                [key: string]: unknown;
+            };
             readonly status: components["schemas"]["TenantStatusEnum"];
             /** Format: date-time */
             readonly suspended_at: string | null;
@@ -1190,9 +1195,7 @@ export interface components {
             readonly updated_at: string;
         };
         /** @description Create client form (spec 2.4): client details plus the owner who is invited. */
-        TenantCreate: {
-            /** Format: uuid */
-            readonly id: string;
+        TenantCreateRequest: {
             name: string;
             legal_name: string;
             gstin?: string | null;
@@ -1211,18 +1214,8 @@ export interface components {
             daily_send_cap: number;
             /** Format: uuid */
             industry_template: string;
-            readonly industry_template_name: string | null;
-            readonly industry_template_version: number | null;
-            readonly status: components["schemas"]["TenantStatusEnum"];
-            /** Format: date-time */
-            readonly suspended_at: string | null;
-            readonly suspension_reason: string;
             /** Format: email */
             owner_email: string;
-            /** Format: date-time */
-            readonly created_at: string;
-            /** Format: date-time */
-            readonly updated_at: string;
             owner_name: string;
             owner_phone?: string;
         };
@@ -1243,26 +1236,26 @@ export interface components {
             /** Format: uuid */
             readonly id: string;
             version: number;
-            status?: components["schemas"]["TemplateVersionStatusEnum"];
-            is_live?: boolean;
-            header_text?: string;
+            status: components["schemas"]["TemplateVersionStatusEnum"];
+            is_live: boolean;
+            header_text: string;
             body: string;
-            footer?: string;
+            footer: string;
             /** @description [{"text": ..., "outcome": ...}] */
-            buttons?: unknown;
-            sample_values?: unknown;
-            provider_template_id?: string;
-            rejection_reason?: string;
+            buttons: unknown;
+            sample_values: unknown;
+            provider_template_id: string;
+            rejection_reason: string;
             readonly has_evidence: boolean;
-            signoff_method?: components["schemas"]["SignoffMethodEnum"] | components["schemas"]["BlankEnum"];
+            signoff_method: components["schemas"]["SignoffMethodEnum"] | components["schemas"]["BlankEnum"];
             /** Format: email */
-            signed_off_by_email?: string | null;
+            signed_off_by_email: string | null;
             /** Format: date-time */
-            signed_off_at?: string | null;
+            signed_off_at: string | null;
             /** Format: date-time */
-            submitted_at?: string | null;
+            submitted_at: string | null;
             /** Format: date-time */
-            approved_at?: string | null;
+            approved_at: string | null;
             /** Format: date-time */
             readonly created_at: string;
             /** @description Actions the version's status allows (the user's role is checked by the API). */
@@ -1306,9 +1299,9 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["TemplateInput"];
-                "application/x-www-form-urlencoded": components["schemas"]["TemplateInput"];
-                "multipart/form-data": components["schemas"]["TemplateInput"];
+                "application/json": components["schemas"]["TemplateInputRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["TemplateInputRequest"];
+                "multipart/form-data": components["schemas"]["TemplateInputRequest"];
             };
         };
         responses: {
@@ -1356,9 +1349,9 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["TemplateInput"];
-                "application/x-www-form-urlencoded": components["schemas"]["TemplateInput"];
-                "multipart/form-data": components["schemas"]["TemplateInput"];
+                "application/json": components["schemas"]["TemplateInputRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["TemplateInputRequest"];
+                "multipart/form-data": components["schemas"]["TemplateInputRequest"];
             };
         };
         responses: {
@@ -1390,6 +1383,25 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["IndustryTemplateVersion"][];
+                };
+            };
+        };
+    };
+    admin_reference_data_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReferenceData"];
                 };
             };
         };
@@ -1479,9 +1491,9 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["TenantCreate"];
-                "application/x-www-form-urlencoded": components["schemas"]["TenantCreate"];
-                "multipart/form-data": components["schemas"]["TenantCreate"];
+                "application/json": components["schemas"]["TenantCreateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["TenantCreateRequest"];
+                "multipart/form-data": components["schemas"]["TenantCreateRequest"];
             };
         };
         responses: {
@@ -1529,9 +1541,9 @@ export interface operations {
         };
         requestBody?: {
             content: {
-                "application/json": components["schemas"]["PatchedTenant"];
-                "application/x-www-form-urlencoded": components["schemas"]["PatchedTenant"];
-                "multipart/form-data": components["schemas"]["PatchedTenant"];
+                "application/json": components["schemas"]["PatchedTenantRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedTenantRequest"];
+                "multipart/form-data": components["schemas"]["PatchedTenantRequest"];
             };
         };
         responses: {
@@ -1557,9 +1569,9 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["Reason"];
-                "application/x-www-form-urlencoded": components["schemas"]["Reason"];
-                "multipart/form-data": components["schemas"]["Reason"];
+                "application/json": components["schemas"]["ReasonRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ReasonRequest"];
+                "multipart/form-data": components["schemas"]["ReasonRequest"];
             };
         };
         responses: {
@@ -1610,9 +1622,9 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["Reason"];
-                "application/x-www-form-urlencoded": components["schemas"]["Reason"];
-                "multipart/form-data": components["schemas"]["Reason"];
+                "application/json": components["schemas"]["ReasonRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ReasonRequest"];
+                "multipart/form-data": components["schemas"]["ReasonRequest"];
             };
         };
         responses: {
@@ -1638,9 +1650,9 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["Reason"];
-                "application/x-www-form-urlencoded": components["schemas"]["Reason"];
-                "multipart/form-data": components["schemas"]["Reason"];
+                "application/json": components["schemas"]["ReasonRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ReasonRequest"];
+                "multipart/form-data": components["schemas"]["ReasonRequest"];
             };
         };
         responses: {
@@ -1656,10 +1668,7 @@ export interface operations {
     };
     admin_tenants_users_list: {
         parameters: {
-            query?: {
-                /** @description A page number within the paginated result set. */
-                page?: number;
-            };
+            query?: never;
             header?: never;
             path: {
                 /** @description A UUID string identifying this tenant. */
@@ -1674,7 +1683,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedMembershipAdminList"];
+                    "application/json": components["schemas"]["MembershipAdmin"][];
                 };
             };
         };
@@ -1736,9 +1745,9 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["TemplateCreate"];
-                "application/x-www-form-urlencoded": components["schemas"]["TemplateCreate"];
-                "multipart/form-data": components["schemas"]["TemplateCreate"];
+                "application/json": components["schemas"]["TemplateCreateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["TemplateCreateRequest"];
+                "multipart/form-data": components["schemas"]["TemplateCreateRequest"];
             };
         };
         responses: {
@@ -1810,9 +1819,9 @@ export interface operations {
         };
         requestBody?: {
             content: {
-                "application/json": components["schemas"]["PatchedVersionEdit"];
-                "application/x-www-form-urlencoded": components["schemas"]["PatchedVersionEdit"];
-                "multipart/form-data": components["schemas"]["PatchedVersionEdit"];
+                "application/json": components["schemas"]["PatchedVersionEditRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedVersionEditRequest"];
+                "multipart/form-data": components["schemas"]["PatchedVersionEditRequest"];
             };
         };
         responses: {
@@ -1839,9 +1848,9 @@ export interface operations {
         };
         requestBody?: {
             content: {
-                "application/json": components["schemas"]["ReasonOptional"];
-                "application/x-www-form-urlencoded": components["schemas"]["ReasonOptional"];
-                "multipart/form-data": components["schemas"]["ReasonOptional"];
+                "application/json": components["schemas"]["ReasonOptionalRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ReasonOptionalRequest"];
+                "multipart/form-data": components["schemas"]["ReasonOptionalRequest"];
             };
         };
         responses: {
@@ -1914,8 +1923,8 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "multipart/form-data": components["schemas"]["ManualSignoff"];
-                "application/x-www-form-urlencoded": components["schemas"]["ManualSignoff"];
+                "multipart/form-data": components["schemas"]["ManualSignoffRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ManualSignoffRequest"];
             };
         };
         responses: {
@@ -2092,9 +2101,9 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["AcceptInvite"];
-                "application/x-www-form-urlencoded": components["schemas"]["AcceptInvite"];
-                "multipart/form-data": components["schemas"]["AcceptInvite"];
+                "application/json": components["schemas"]["AcceptInviteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["AcceptInviteRequest"];
+                "multipart/form-data": components["schemas"]["AcceptInviteRequest"];
             };
         };
         responses: {
@@ -2117,9 +2126,9 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["Login"];
-                "application/x-www-form-urlencoded": components["schemas"]["Login"];
-                "multipart/form-data": components["schemas"]["Login"];
+                "application/json": components["schemas"]["LoginRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["LoginRequest"];
+                "multipart/form-data": components["schemas"]["LoginRequest"];
             };
         };
         responses: {
@@ -2179,9 +2188,9 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["OtpCode"];
-                "application/x-www-form-urlencoded": components["schemas"]["OtpCode"];
-                "multipart/form-data": components["schemas"]["OtpCode"];
+                "application/json": components["schemas"]["OtpCodeRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["OtpCodeRequest"];
+                "multipart/form-data": components["schemas"]["OtpCodeRequest"];
             };
         };
         responses: {
@@ -2223,9 +2232,9 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["OtpCode"];
-                "application/x-www-form-urlencoded": components["schemas"]["OtpCode"];
-                "multipart/form-data": components["schemas"]["OtpCode"];
+                "application/json": components["schemas"]["OtpCodeRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["OtpCodeRequest"];
+                "multipart/form-data": components["schemas"]["OtpCodeRequest"];
             };
         };
         responses: {
@@ -2248,9 +2257,9 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["SelectTenant"];
-                "application/x-www-form-urlencoded": components["schemas"]["SelectTenant"];
-                "multipart/form-data": components["schemas"]["SelectTenant"];
+                "application/json": components["schemas"]["SelectTenantRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SelectTenantRequest"];
+                "multipart/form-data": components["schemas"]["SelectTenantRequest"];
             };
         };
         responses: {

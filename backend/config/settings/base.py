@@ -191,6 +191,12 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "Schedule Confirmation SaaS API",
     "VERSION": "0.1.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    # Separate request/response components: response types mark every returned field as present.
+    "COMPONENT_SPLIT_REQUEST": True,
+    "POSTPROCESSING_HOOKS": [
+        "drf_spectacular.hooks.postprocess_schema_enums",
+        "apps.core.openapi.require_response_fields",
+    ],
     # Several models have a "status" field; name each enum so the generated client reads well.
     "ENUM_NAME_OVERRIDES": {
         "TenantStatusEnum": "apps.core.models.Tenant.Status",

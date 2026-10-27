@@ -308,3 +308,24 @@ def test_openapi_schema_lists_the_admin_tenant_endpoints(api):
         "/api/admin/support-sessions/{id}/end:",
     ):
         assert path in schema, path
+
+
+def test_reference_data_lists_states_with_gst_codes_and_languages(admin_api):
+    data = admin_api.get("/api/admin/reference-data").json()
+    kerala = next(s for s in data["states"] if s["code"] == "KL")
+    assert kerala == {"code": "KL", "name": "Kerala", "gst_code": "32"}
+    assert len(data["states"]) == 36
+    assert {"code": "ml", "name": "Malayalam"} in data["languages"]
+    assert data["daily_send_cap"] == {"default": 5000, "min": 1, "max": 100_000}
+
+
+def test_reference_data_needs_platform_staff(api, owner):
+    sign_in(api, owner)
+    assert api.get("/api/admin/reference-data").status_code == 403
+
+
+def test_detail_includes_the_clients_copy_of_template_defaults(admin_api):
+    created = admin_api.post(URL, payload(), format="json").json()
+    detail = admin_api.get(f"{URL}/{created['id']}").json()
+    rule = detail["industry_settings"]["schedule_types"]["cylinder_delivery"]["reminder_rule"]
+    assert rule["send_time"] == "10:00"

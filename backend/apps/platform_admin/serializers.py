@@ -51,6 +51,9 @@ class TenantSerializer(serializers.ModelSerializer):
     industry_template_name = serializers.CharField(
         source="industry_template.name", read_only=True, allow_null=True
     )
+    industry_settings = serializers.SerializerMethodField(
+        help_text="The client's own copy of the template defaults: reminder rules, choice lists."
+    )
 
     class Meta:
         model = Tenant
@@ -60,6 +63,7 @@ class TenantSerializer(serializers.ModelSerializer):
             "industry_template",
             "industry_template_name",
             "industry_template_version",
+            "industry_settings",
             "status",
             "suspended_at",
             "suspension_reason",
@@ -75,6 +79,9 @@ class TenantSerializer(serializers.ModelSerializer):
             "industry_template",
             "industry_template_version",
         ]
+
+    def get_industry_settings(self, obj) -> dict:
+        return (obj.settings or {}).get("industry", {})
 
     def validate_gstin(self, value):
         gstin = normalize_gstin(value)
@@ -184,3 +191,27 @@ class AuditLogSerializer(serializers.ModelSerializer):
             "ip_address",
             "user_agent",
         ]
+
+
+class StateOptionSerializer(serializers.Serializer):
+    code = serializers.CharField()
+    name = serializers.CharField()
+    gst_code = serializers.CharField()
+
+
+class LanguageOptionSerializer(serializers.Serializer):
+    code = serializers.CharField()
+    name = serializers.CharField()
+
+
+class SendCapLimitsSerializer(serializers.Serializer):
+    default = serializers.IntegerField()
+    min = serializers.IntegerField()
+    max = serializers.IntegerField()
+
+
+class ReferenceDataSerializer(serializers.Serializer):
+    states = StateOptionSerializer(many=True)
+    languages = LanguageOptionSerializer(many=True)
+    timezones = serializers.ListField(child=serializers.CharField())
+    daily_send_cap = SendCapLimitsSerializer()

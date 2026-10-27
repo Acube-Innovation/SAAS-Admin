@@ -31,13 +31,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TemplateInput'
+              $ref: '#/components/schemas/TemplateInputRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/TemplateInput'
+              $ref: '#/components/schemas/TemplateInputRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/TemplateInput'
+              $ref: '#/components/schemas/TemplateInputRequest'
         required: true
       security:
       - cookieAuth: []
@@ -90,13 +90,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TemplateInput'
+              $ref: '#/components/schemas/TemplateInputRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/TemplateInput'
+              $ref: '#/components/schemas/TemplateInputRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/TemplateInput'
+              $ref: '#/components/schemas/TemplateInputRequest'
         required: true
       security:
       - cookieAuth: []
@@ -132,6 +132,22 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/IndustryTemplateVersion'
+          description: ''
+  /api/admin/reference-data:
+    get:
+      operationId: admin_reference_data_retrieve
+      description: Choice lists for admin forms, so the UI uses exactly the server's
+        lists (spec 2.4).
+      tags:
+      - 'admin: reference data'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReferenceData'
           description: ''
   /api/admin/support-sessions/{id}/end:
     post:
@@ -234,13 +250,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TenantCreate'
+              $ref: '#/components/schemas/TenantCreateRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/TenantCreate'
+              $ref: '#/components/schemas/TenantCreateRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/TenantCreate'
+              $ref: '#/components/schemas/TenantCreateRequest'
         required: true
       security:
       - cookieAuth: []
@@ -293,13 +309,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchedTenant'
+              $ref: '#/components/schemas/PatchedTenantRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PatchedTenant'
+              $ref: '#/components/schemas/PatchedTenantRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedTenant'
+              $ref: '#/components/schemas/PatchedTenantRequest'
       security:
       - cookieAuth: []
       responses:
@@ -328,13 +344,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Reason'
+              $ref: '#/components/schemas/ReasonRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Reason'
+              $ref: '#/components/schemas/ReasonRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Reason'
+              $ref: '#/components/schemas/ReasonRequest'
         required: true
       security:
       - cookieAuth: []
@@ -394,13 +410,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Reason'
+              $ref: '#/components/schemas/ReasonRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Reason'
+              $ref: '#/components/schemas/ReasonRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Reason'
+              $ref: '#/components/schemas/ReasonRequest'
         required: true
       security:
       - cookieAuth: []
@@ -430,13 +446,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Reason'
+              $ref: '#/components/schemas/ReasonRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Reason'
+              $ref: '#/components/schemas/ReasonRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Reason'
+              $ref: '#/components/schemas/ReasonRequest'
         required: true
       security:
       - cookieAuth: []
@@ -460,12 +476,6 @@ paths:
           format: uuid
         description: A UUID string identifying this tenant.
         required: true
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
       tags:
       - 'admin: clients'
       security:
@@ -475,7 +485,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedMembershipAdminList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/MembershipAdmin'
           description: ''
   /api/admin/tenants/{id}/users/{membership_id}/resend-invite:
     post:
@@ -562,13 +574,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TemplateCreate'
+              $ref: '#/components/schemas/TemplateCreateRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/TemplateCreate'
+              $ref: '#/components/schemas/TemplateCreateRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/TemplateCreate'
+              $ref: '#/components/schemas/TemplateCreateRequest'
         required: true
       security:
       - cookieAuth: []
@@ -657,13 +669,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PatchedVersionEdit'
+              $ref: '#/components/schemas/PatchedVersionEditRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/PatchedVersionEdit'
+              $ref: '#/components/schemas/PatchedVersionEditRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/PatchedVersionEdit'
+              $ref: '#/components/schemas/PatchedVersionEditRequest'
       security:
       - cookieAuth: []
       responses:
@@ -698,13 +710,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ReasonOptional'
+              $ref: '#/components/schemas/ReasonOptionalRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/ReasonOptional'
+              $ref: '#/components/schemas/ReasonOptionalRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/ReasonOptional'
+              $ref: '#/components/schemas/ReasonOptionalRequest'
       security:
       - cookieAuth: []
       responses:
@@ -798,10 +810,10 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/ManualSignoff'
+              $ref: '#/components/schemas/ManualSignoffRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/ManualSignoff'
+              $ref: '#/components/schemas/ManualSignoffRequest'
         required: true
       security:
       - cookieAuth: []
@@ -1005,13 +1017,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/AcceptInvite'
+              $ref: '#/components/schemas/AcceptInviteRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/AcceptInvite'
+              $ref: '#/components/schemas/AcceptInviteRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/AcceptInvite'
+              $ref: '#/components/schemas/AcceptInviteRequest'
         required: true
       security:
       - cookieAuth: []
@@ -1034,13 +1046,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Login'
+              $ref: '#/components/schemas/LoginRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Login'
+              $ref: '#/components/schemas/LoginRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Login'
+              $ref: '#/components/schemas/LoginRequest'
         required: true
       security:
       - cookieAuth: []
@@ -1090,13 +1102,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OtpCode'
+              $ref: '#/components/schemas/OtpCodeRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/OtpCode'
+              $ref: '#/components/schemas/OtpCodeRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/OtpCode'
+              $ref: '#/components/schemas/OtpCodeRequest'
         required: true
       security:
       - cookieAuth: []
@@ -1134,13 +1146,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OtpCode'
+              $ref: '#/components/schemas/OtpCodeRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/OtpCode'
+              $ref: '#/components/schemas/OtpCodeRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/OtpCode'
+              $ref: '#/components/schemas/OtpCodeRequest'
         required: true
       security:
       - cookieAuth: []
@@ -1161,13 +1173,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SelectTenant'
+              $ref: '#/components/schemas/SelectTenantRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/SelectTenant'
+              $ref: '#/components/schemas/SelectTenantRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/SelectTenant'
+              $ref: '#/components/schemas/SelectTenantRequest'
         required: true
       security:
       - cookieAuth: []
@@ -1197,24 +1209,27 @@ paths:
           description: No response body
 components:
   schemas:
-    AcceptInvite:
+    AcceptInviteRequest:
       type: object
       properties:
         password:
           type: string
+          minLength: 1
         full_name:
           type: string
           maxLength: 100
       required:
       - password
-    Answer:
+    AnswerRequest:
       type: object
       properties:
         key:
           type: string
+          minLength: 1
           pattern: ^[a-z][a-z0-9_]{1,49}$
         label:
           type: string
+          minLength: 1
           maxLength: 25
         outcome:
           $ref: '#/components/schemas/OutcomeEnum'
@@ -1277,11 +1292,18 @@ components:
           maxLength: 500
       required:
       - action
+      - actor_email
       - actor_id
+      - after
+      - before
       - created_at
       - id
+      - ip_address
+      - object_id
+      - object_type
       - support_session_id
       - tenant_id
+      - user_agent
     AuthState:
       type: object
       description: 'What the frontend needs to route a user: who they are and which
@@ -1332,7 +1354,7 @@ components:
     BlankEnum:
       enum:
       - ''
-    Button:
+    ButtonRequest:
       type: object
       properties:
         text:
@@ -1379,8 +1401,10 @@ components:
           readOnly: true
       required:
       - action
+      - actor_email
       - created_at
       - from_status
+      - note
       - to_status
     EvidenceLink:
       type: object
@@ -1415,31 +1439,34 @@ components:
           type: boolean
       required:
       - field_type
+      - is_active
+      - is_core
       - key
       - label
-    FieldInput:
+      - max_length
+      - options
+      - required
+    FieldInputRequest:
       type: object
       properties:
         key:
           type: string
+          minLength: 1
           pattern: ^[a-z][a-z0-9_]{1,49}$
         label:
           type: string
-          maxLength: 100
           minLength: 1
+          maxLength: 100
         field_type:
           $ref: '#/components/schemas/FieldTypeEnum'
         required:
           type: boolean
           default: false
-        is_core:
-          type: boolean
-          readOnly: true
-          default: false
         options:
           type: array
           items:
             type: string
+            minLength: 1
             maxLength: 100
         max_length:
           type: integer
@@ -1451,7 +1478,6 @@ components:
           default: true
       required:
       - field_type
-      - is_core
       - key
       - label
     FieldTypeEnum:
@@ -1526,7 +1552,10 @@ components:
           readOnly: true
       required:
       - clients_using
+      - current_version
+      - description
       - id
+      - is_active
       - key
       - name
       - schedule_types
@@ -1589,23 +1618,35 @@ components:
         * `en` - English
         * `hi` - Hindi
         * `ta` - Tamil
-    Login:
+    LanguageOption:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+      required:
+      - code
+      - name
+    LoginRequest:
       type: object
       properties:
         email:
           type: string
           format: email
+          minLength: 1
         password:
           type: string
+          minLength: 1
       required:
       - email
       - password
-    ManualSignoff:
+    ManualSignoffRequest:
       type: object
       properties:
         evidence:
           type: string
-          format: uri
+          format: binary
         note:
           type: string
           default: ''
@@ -1634,6 +1675,7 @@ components:
       required:
       - id
       - role
+      - status
       - tenant_id
       - tenant_name
       - tenant_status
@@ -1666,6 +1708,7 @@ components:
       - last_login
       - otp_enabled
       - role
+      - status
     MembershipStatusEnum:
       enum:
       - invited
@@ -1676,11 +1719,12 @@ components:
         * `invited` - Invited
         * `active` - Active
         * `deactivated` - Deactivated
-    OtpCode:
+    OtpCodeRequest:
       type: object
       properties:
         otp_code:
           type: string
+          minLength: 1
           pattern: ^\d{6}$
       required:
       - otp_code
@@ -1710,6 +1754,8 @@ components:
       type: object
       required:
       - count
+      - next
+      - previous
       - results
       properties:
         count:
@@ -1729,33 +1775,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AuditLog'
-    PaginatedMembershipAdminList:
-      type: object
-      required:
-      - count
-      - results
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/MembershipAdmin'
     PaginatedTemplateList:
       type: object
       required:
       - count
+      - next
+      - previous
       - results
       properties:
         count:
@@ -1779,6 +1804,8 @@ components:
       type: object
       required:
       - count
+      - next
+      - previous
       - results
       properties:
         count:
@@ -1798,99 +1825,63 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Tenant'
-    PatchedTenant:
+    PatchedTenantRequest:
       type: object
       description: Client details and settings (spec 2.4 / 2.5). Validation matches
         the create form.
       properties:
-        id:
-          type: string
-          format: uuid
-          readOnly: true
         name:
           type: string
-          maxLength: 100
           minLength: 2
+          maxLength: 100
         legal_name:
           type: string
-          maxLength: 200
           minLength: 2
+          maxLength: 200
         gstin:
           type: string
           nullable: true
           maxLength: 15
         address_line1:
           type: string
+          minLength: 1
           maxLength: 200
         address_line2:
           type: string
           maxLength: 200
         city:
           type: string
+          minLength: 1
           maxLength: 100
         state:
           $ref: '#/components/schemas/StateEnum'
         pin_code:
           type: string
+          minLength: 1
         contact_name:
           type: string
+          minLength: 1
           maxLength: 100
         contact_phone:
           type: string
+          minLength: 1
         contact_email:
           type: string
           format: email
+          minLength: 1
           maxLength: 254
         default_language:
           $ref: '#/components/schemas/LanguageEnum'
         timezone:
           type: string
+          minLength: 1
           maxLength: 50
         daily_send_cap:
           type: integer
           maximum: 100000
           minimum: 1
           default: 5000
-        industry_template:
-          type: string
-          format: uuid
-          readOnly: true
-          nullable: true
-          description: Required when a client is created (spec 2.4).
-        industry_template_name:
-          type: string
-          readOnly: true
-          nullable: true
-        industry_template_version:
-          type: integer
-          readOnly: true
-          nullable: true
-        status:
-          allOf:
-          - $ref: '#/components/schemas/TenantStatusEnum'
-          readOnly: true
-        suspended_at:
-          type: string
-          format: date-time
-          readOnly: true
-          nullable: true
-        suspension_reason:
-          type: string
-          readOnly: true
-        owner_email:
-          type: string
-          format: email
-          readOnly: true
-          nullable: true
-        created_at:
-          type: string
-          format: date-time
-          readOnly: true
-        updated_at:
-          type: string
-          format: date-time
-          readOnly: true
-    PatchedVersionEdit:
+    PatchedVersionEditRequest:
       type: object
       description: Template content; the spec 2.7 rules are applied by validation.validate_content().
       properties:
@@ -1903,41 +1894,64 @@ components:
         buttons:
           type: array
           items:
-            $ref: '#/components/schemas/Button'
+            $ref: '#/components/schemas/ButtonRequest'
         sample_values:
           type: object
           additionalProperties:
             type: string
-    QuestionFlow:
+    QuestionFlowRequest:
       type: object
       properties:
         answers:
           type: array
           items:
-            $ref: '#/components/schemas/Answer'
+            $ref: '#/components/schemas/AnswerRequest'
       required:
       - answers
-    Reason:
-      type: object
-      properties:
-        reason:
-          type: string
-          maxLength: 500
-          minLength: 5
-      required:
-      - reason
-    ReasonOptional:
+    ReasonOptionalRequest:
       type: object
       properties:
         reason:
           type: string
           default: ''
           maxLength: 500
-    ReminderRule:
+    ReasonRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          minLength: 5
+          maxLength: 500
+      required:
+      - reason
+    ReferenceData:
+      type: object
+      properties:
+        states:
+          type: array
+          items:
+            $ref: '#/components/schemas/StateOption'
+        languages:
+          type: array
+          items:
+            $ref: '#/components/schemas/LanguageOption'
+        timezones:
+          type: array
+          items:
+            type: string
+        daily_send_cap:
+          $ref: '#/components/schemas/SendCapLimits'
+      required:
+      - daily_send_cap
+      - languages
+      - states
+      - timezones
+    ReminderRuleRequest:
       type: object
       properties:
         send_time:
           type: string
+          minLength: 1
         days_before:
           type: integer
           maximum: 7
@@ -1948,8 +1962,10 @@ components:
           minimum: 30
         quiet_start:
           type: string
+          minLength: 1
         quiet_end:
           type: string
+          minLength: 1
         delivery_weekdays:
           type: array
           items:
@@ -1991,37 +2007,41 @@ components:
         default_reminder_rule: {}
         default_question_flow: {}
       required:
+      - default_question_flow
+      - default_reminder_rule
       - fields
+      - is_active
       - key
       - name
-    ScheduleTypeInput:
+    ScheduleTypeInputRequest:
       type: object
       properties:
         key:
           type: string
+          minLength: 1
           pattern: ^[a-z][a-z0-9_]{1,49}$
         name:
           type: string
-          maxLength: 100
           minLength: 2
+          maxLength: 100
         is_active:
           type: boolean
           default: true
         fields:
           type: array
           items:
-            $ref: '#/components/schemas/FieldInput'
+            $ref: '#/components/schemas/FieldInputRequest'
         default_reminder_rule:
-          $ref: '#/components/schemas/ReminderRule'
+          $ref: '#/components/schemas/ReminderRuleRequest'
         default_question_flow:
-          $ref: '#/components/schemas/QuestionFlow'
+          $ref: '#/components/schemas/QuestionFlowRequest'
       required:
       - default_question_flow
       - default_reminder_rule
       - fields
       - key
       - name
-    SelectTenant:
+    SelectTenantRequest:
       type: object
       properties:
         tenant_id:
@@ -2029,6 +2049,19 @@ components:
           format: uuid
       required:
       - tenant_id
+    SendCapLimits:
+      type: object
+      properties:
+        default:
+          type: integer
+        min:
+          type: integer
+        max:
+          type: integer
+      required:
+      - default
+      - max
+      - min
     SignoffMethodEnum:
       enum:
       - client
@@ -2113,6 +2146,19 @@ components:
         * `UP` - Uttar Pradesh
         * `UK` - Uttarakhand
         * `WB` - West Bengal
+    StateOption:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        gst_code:
+          type: string
+      required:
+      - code
+      - gst_code
+      - name
     SupportSession:
       type: object
       properties:
@@ -2152,12 +2198,15 @@ components:
           type: integer
           readOnly: true
       required:
+      - end_reason
+      - ended_at
       - expires_at
       - id
       - is_active
       - reason
       - seconds_left
       - staff_email
+      - started_at
       - tenant_id
       - tenant_name
     SupportSessionEndReasonEnum:
@@ -2208,6 +2257,7 @@ components:
           format: date-time
           readOnly: true
       required:
+      - category
       - created_at
       - id
       - language
@@ -2218,7 +2268,7 @@ components:
       - schedule_type_name
       - tenant_id
       - tenant_name
-    TemplateCreate:
+    TemplateCreateRequest:
       type: object
       description: Template content; the spec 2.7 rules are applied by validation.validate_content().
       properties:
@@ -2233,7 +2283,7 @@ components:
         buttons:
           type: array
           items:
-            $ref: '#/components/schemas/Button'
+            $ref: '#/components/schemas/ButtonRequest'
         sample_values:
           type: object
           additionalProperties:
@@ -2243,6 +2293,7 @@ components:
           format: uuid
         name:
           type: string
+          minLength: 1
           maxLength: 512
           pattern: ^[a-z0-9_]{1,512}$
         language:
@@ -2303,6 +2354,7 @@ components:
             $ref: '#/components/schemas/Version'
           readOnly: true
       required:
+      - category
       - created_at
       - id
       - language
@@ -2314,18 +2366,19 @@ components:
       - tenant_id
       - tenant_name
       - versions
-    TemplateInput:
+    TemplateInputRequest:
       type: object
       description: The whole template as the editor saves it. Saving always creates
         a new version.
       properties:
         key:
           type: string
+          minLength: 1
           pattern: ^[a-z][a-z0-9_]{2,49}$
         name:
           type: string
-          maxLength: 100
           minLength: 2
+          maxLength: 100
         description:
           type: string
           default: ''
@@ -2336,11 +2389,11 @@ components:
         subscriber_fields:
           type: array
           items:
-            $ref: '#/components/schemas/FieldInput'
+            $ref: '#/components/schemas/FieldInputRequest'
         schedule_types:
           type: array
           items:
-            $ref: '#/components/schemas/ScheduleTypeInput'
+            $ref: '#/components/schemas/ScheduleTypeInputRequest'
       required:
       - key
       - name
@@ -2443,6 +2496,12 @@ components:
           type: integer
           readOnly: true
           nullable: true
+        industry_settings:
+          type: object
+          additionalProperties: {}
+          readOnly: true
+          description: 'The client''s own copy of the template defaults: reminder
+            rules, choice lists.'
         status:
           allOf:
           - $ref: '#/components/schemas/TenantStatusEnum'
@@ -2470,12 +2529,17 @@ components:
           readOnly: true
       required:
       - address_line1
+      - address_line2
       - city
       - contact_email
       - contact_name
       - contact_phone
       - created_at
+      - daily_send_cap
+      - default_language
+      - gstin
       - id
+      - industry_settings
       - industry_template
       - industry_template_name
       - industry_template_version
@@ -2487,54 +2551,58 @@ components:
       - status
       - suspended_at
       - suspension_reason
+      - timezone
       - updated_at
-    TenantCreate:
+    TenantCreateRequest:
       type: object
       description: 'Create client form (spec 2.4): client details plus the owner who
         is invited.'
       properties:
-        id:
-          type: string
-          format: uuid
-          readOnly: true
         name:
           type: string
-          maxLength: 100
           minLength: 2
+          maxLength: 100
         legal_name:
           type: string
-          maxLength: 200
           minLength: 2
+          maxLength: 200
         gstin:
           type: string
           nullable: true
           maxLength: 15
         address_line1:
           type: string
+          minLength: 1
           maxLength: 200
         address_line2:
           type: string
           maxLength: 200
         city:
           type: string
+          minLength: 1
           maxLength: 100
         state:
           $ref: '#/components/schemas/StateEnum'
         pin_code:
           type: string
+          minLength: 1
         contact_name:
           type: string
+          minLength: 1
           maxLength: 100
         contact_phone:
           type: string
+          minLength: 1
         contact_email:
           type: string
           format: email
+          minLength: 1
           maxLength: 254
         default_language:
           $ref: '#/components/schemas/LanguageEnum'
         timezone:
           type: string
+          minLength: 1
           maxLength: 50
         daily_send_cap:
           type: integer
@@ -2544,41 +2612,15 @@ components:
         industry_template:
           type: string
           format: uuid
-        industry_template_name:
-          type: string
-          readOnly: true
-          nullable: true
-        industry_template_version:
-          type: integer
-          readOnly: true
-          nullable: true
-        status:
-          allOf:
-          - $ref: '#/components/schemas/TenantStatusEnum'
-          readOnly: true
-        suspended_at:
-          type: string
-          format: date-time
-          readOnly: true
-          nullable: true
-        suspension_reason:
-          type: string
-          readOnly: true
         owner_email:
           type: string
           format: email
           writeOnly: true
-        created_at:
-          type: string
-          format: date-time
-          readOnly: true
-        updated_at:
-          type: string
-          format: date-time
-          readOnly: true
+          minLength: 1
         owner_name:
           type: string
           writeOnly: true
+          minLength: 1
           maxLength: 100
         owner_phone:
           type: string
@@ -2589,21 +2631,13 @@ components:
       - contact_email
       - contact_name
       - contact_phone
-      - created_at
-      - id
       - industry_template
-      - industry_template_name
-      - industry_template_version
       - legal_name
       - name
       - owner_email
       - owner_name
       - pin_code
       - state
-      - status
-      - suspended_at
-      - suspension_reason
-      - updated_at
     TenantRoleEnum:
       enum:
       - owner
@@ -2694,12 +2728,25 @@ components:
             $ref: '#/components/schemas/Event'
           readOnly: true
       required:
+      - approved_at
       - available_actions
       - body
+      - buttons
       - created_at
       - events
+      - footer
       - has_evidence
+      - header_text
       - id
+      - is_live
+      - provider_template_id
+      - rejection_reason
+      - sample_values
+      - signed_off_at
+      - signed_off_by_email
+      - signoff_method
+      - status
+      - submitted_at
       - version
   securitySchemes:
     cookieAuth:

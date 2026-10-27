@@ -431,6 +431,7 @@ All under `/api/admin/`. They need an authenticated, OTP-verified user with `pla
 | GET | `/api/auth/me` | Current user, roles, 2FA state, memberships | logged in |
 | POST | `/api/auth/tenant` | Choose the active tenant (users with several memberships) | logged in + 2FA |
 | GET/POST | `/api/auth/invites/<token>` · `/accept` | Invite check and accept | public |
+| GET | `/api/admin/reference-data` | States (with GST codes), languages, time zones and send-cap limits for forms | staff |
 | GET | `/api/admin/dashboard` | Tiles (2.2) | staff |
 | GET | `/api/admin/tenants` | List, search, filter | staff |
 | POST | `/api/admin/tenants` | Create client (3.1) | SA |

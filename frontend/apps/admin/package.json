@@ -9,7 +9,8 @@
     "start": "next start --port 3000",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "next typegen && tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@hookform/resolvers": "6.0.1",
@@ -24,6 +25,7 @@
     "zod": "4.6.7"
   },
   "devDependencies": {
+    "@playwright/test": "1.56.1",
     "@saas/config": "workspace:*",
     "@tailwindcss/postcss": "4.3.3",
     "@testing-library/dom": "^10.4.2",

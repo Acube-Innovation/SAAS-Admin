@@ -5,6 +5,7 @@ from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from apps.accounts.models import Membership, TenantRole
 from apps.accounts.permissions import IsPlatformStaff, IsSuperAdmin
@@ -20,6 +21,7 @@ from .serializers import (
     AuditLogSerializer,
     MembershipAdminSerializer,
     ReasonSerializer,
+    ReferenceDataSerializer,
     SupportSessionSerializer,
     TenantCreateSerializer,
     TenantSerializer,
@@ -117,7 +119,7 @@ class TenantViewSet(
         return Response(TenantSerializer(self.get_queryset().get(pk=pk)).data)
 
     @extend_schema(responses=MembershipAdminSerializer(many=True))
-    @action(detail=True, methods=["get"])
+    @action(detail=True, methods=["get"], pagination_class=None)
     def users(self, request, pk=None):
         tenant = self.get_object()
         with tenant_context(tenant):
@@ -195,3 +197,23 @@ class SupportSessionViewSet(viewsets.GenericViewSet):
         if request.session.get(SUPPORT_SESSION_KEY) == str(session.pk):
             del request.session[SUPPORT_SESSION_KEY]
         return Response(SupportSessionSerializer(session).data)
+
+
+@extend_schema(tags=["admin: reference data"])
+class ReferenceDataView(APIView):
+    """Choice lists for admin forms, so the UI uses exactly the server's lists (spec 2.4)."""
+
+    permission_classes = [IsPlatformStaff]
+
+    @extend_schema(responses=ReferenceDataSerializer)
+    def get(self, request):
+        from apps.core.constants import STATES, Language
+
+        return Response(
+            {
+                "states": [{"code": c, "name": n, "gst_code": g} for c, n, g in STATES],
+                "languages": [{"code": c, "name": str(n)} for c, n in Language.choices],
+                "timezones": ["Asia/Kolkata"],
+                "daily_send_cap": {"default": 5000, "min": 1, "max": 100_000},
+            }
+        )

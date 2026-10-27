@@ -12,6 +12,7 @@ import { nextRoute } from "@/lib/auth";
 
 import { icons } from "./icons";
 import { Sidebar } from "./sidebar";
+import { SupportBanner } from "./support-banner";
 
 /**
  * Protected layout: checks the session and 2FA with the API on every load and sends the user to
@@ -99,6 +100,7 @@ export function ConsoleShell({ children }: { children: React.ReactNode }) {
             </Button>
           </div>
         </header>
+        <SupportBanner />
         <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6">{children}</main>
       </div>
     </div>

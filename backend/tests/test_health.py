@@ -45,3 +45,15 @@ def test_openapi_schema_is_published(client):
 
     assert response.status_code == 200
     assert b"/api/health" in response.content
+
+
+def test_schema_marks_response_fields_present_but_keeps_request_fields_optional(client):
+    import yaml
+
+    schema = yaml.safe_load(client.get("/api/schema").content)
+    components = schema["components"]["schemas"]
+    tenant = components["Tenant"]
+    assert {"status", "timezone", "daily_send_cap", "industry_settings"} <= set(tenant["required"])
+    request = components["TenantCreateRequest"]
+    assert "daily_send_cap" not in request.get("required", [])  # has a default: optional input
+    assert "PatchedTenantRequest" in components

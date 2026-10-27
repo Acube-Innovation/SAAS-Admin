@@ -101,6 +101,20 @@ scripts/generate-api-client.sh    # writes openapi.yaml and src/schema.d.ts; com
 
 CI fails if the committed client doesn't match the backend.
 
+## End-to-end tests (Playwright)
+
+`frontend/apps/admin/e2e` covers Workflows 3.1 (onboard a client), 3.2 (suspend / reactivate) and 3.3 (support access)
+in a real browser against the running API. With `docker compose up` running:
+
+```bash
+cd frontend/apps/admin
+pnpm exec playwright install chromium   # once (or set E2E_CHROME_PATH=/usr/bin/google-chrome)
+pnpm e2e
+```
+
+Each run creates its own super admin and support user (via `createplatformuser`) and signs them in with real 2FA.
+The tests create clients in your local database. CI runs the same suite against a fresh database (`e2e` job).
+
 ## Tests and lint
 
 Backend (with `db` and `redis` running from Docker Compose):

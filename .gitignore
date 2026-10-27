@@ -35,3 +35,6 @@ infra/terraform/**/.terraform/
 .DS_Store
 .idea/
 .vscode/
+**/e2e/.auth/
+**/playwright-report/
+**/test-results/
