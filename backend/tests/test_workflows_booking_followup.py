@@ -445,3 +445,64 @@ def test_other_tenants_cannot_see_the_queue(api, demo):
     assert (
         api.post(f"/api/portal/follow-ups/{item.pk}/resolve", {}, format="json").status_code == 404
     )
+
+
+# --- deliveries: print and CSV (spec 2.3) --------------------------------------------------------
+
+
+def test_printing_marks_jobs_and_later_cancellations_are_flagged(api, demo):
+    as_role(api, demo, "office_staff")
+    response = api.post(
+        "/api/portal/deliveries/printed", {"date": TOMORROW.isoformat()}, format="json"
+    )
+    with tenant_context(demo):
+        pending = Job.objects.filter(scheduled_date=TOMORROW, status="pending")
+        assert response.json()["printed"] == pending.count() > 0
+        assert not pending.filter(printed_at=None).exists()
+        job = pending.select_related("schedule").first()
+    data = api.get("/api/portal/deliveries", {"date": TOMORROW.isoformat()}).json()
+    assert data["printed_at"] and data["changed_after_print"] == []
+
+    run(demo, services.cancel_booking, job.schedule, "Customer called to cancel")
+    data = api.get("/api/portal/deliveries", {"date": TOMORROW.isoformat()}).json()
+    assert [j["booking_reference"] for j in data["changed_after_print"]] == [
+        job.schedule.booking_reference
+    ]
+    assert data["changed_after_print"][0]["status"] == "cancelled"
+    listed = [j["id"] for area in data["areas"] for j in area["jobs"]]
+    assert str(job.pk) not in listed
+    with db_context(platform=True):
+        assert AuditLog.objects.filter(
+            tenant=demo, object_type="jobs.job", after__has_key="printed"
+        ).exists()
+
+
+def test_delivery_csv_matches_the_list(api, demo):
+    import csv as csvlib
+
+    as_role(api, demo, "office_staff")
+    data = api.get("/api/portal/deliveries", {"date": TOMORROW.isoformat()}).json()
+    response = api.get("/api/portal/deliveries/export", {"date": TOMORROW.isoformat()})
+    assert (
+        response["Content-Disposition"]
+        == f'attachment; filename="deliveries-{TOMORROW.isoformat()}.csv"'
+    )
+    rows = list(csvlib.DictReader(io.StringIO(response.content.decode().lstrip("﻿"))))
+    assert len(rows) == data["confirmed"] > 0
+    expected = sorted(j["booking_reference"] for area in data["areas"] for j in area["jobs"])
+    assert sorted(r["booking_reference"] for r in rows) == expected
+    assert set(rows[0]) == {
+        "area",
+        "staff",
+        "booking_reference",
+        "customer_name",
+        "mobile_number",
+        "address",
+        "cylinder_type",
+        "quantity",
+        "status",
+    }
+    with db_context(platform=True):
+        assert AuditLog.objects.filter(
+            tenant=demo, action="export", object_type="jobs.job"
+        ).exists()

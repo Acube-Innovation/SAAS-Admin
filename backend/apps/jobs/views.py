@@ -1,6 +1,9 @@
+import csv
 import datetime as dt
+import io
 
 from django.db.models import Count
+from django.http import HttpResponse
 from django.utils import timezone
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import mixins, viewsets
@@ -10,8 +13,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.accounts.permissions import tenant_roles
+from apps.audit.api import safe_cell
 from apps.audit.mixins import AuditedModelMixin
 from apps.audit.models import Action
+from apps.audit.services import write_audit
 from apps.core.exceptions import ApiError
 from apps.core.models import Tenant
 from apps.core.portal import PortalViewMixin
@@ -27,6 +32,8 @@ from .serializers import (
     FollowUpSerializer,
     NoteSerializer,
     OptionalNoteSerializer,
+    PrintedResultSerializer,
+    PrintedSerializer,
     ReassignSerializer,
     StaffMemberSerializer,
 )
@@ -64,31 +71,37 @@ ALL_ROLES = tenant_roles("owner", "manager", "office_staff")
 MANAGERS = tenant_roles("owner", "manager")
 
 
+def _delivery_day(request, tenant):
+    raw = request.query_params.get("date")
+    try:
+        return dt.date.fromisoformat(raw) if raw else next_delivery_day(tenant)
+    except (TypeError, ValueError):
+        raise ApiError("validation_error", "date: use YYYY-MM-DD.", 400) from None
+
+
+def _jobs_for(tenant, day):
+    return (
+        Job.objects.filter(tenant=tenant, scheduled_date=day)
+        .select_related("assigned_staff", "schedule__subscriber__area__default_staff")
+        .order_by("schedule__subscriber__area__name", "schedule__subscriber__customer_name")
+    )
+
+
+DATE_PARAM = OpenApiParameter("date", str, description="YYYY-MM-DD; default: next delivery day")
+
+
 @extend_schema(tags=["portal: deliveries and follow-up"])
 class DeliveriesView(APIView):
     """Confirmed bookings for a date, grouped by area, with each job's staff member."""
 
     permission_classes = [ALL_ROLES]
 
-    @extend_schema(
-        parameters=[
-            OpenApiParameter("date", str, description="YYYY-MM-DD; default: next delivery day")
-        ],
-        responses=DeliveriesSerializer,
-    )
+    @extend_schema(parameters=[DATE_PARAM], responses=DeliveriesSerializer)
     def get(self, request):
         tenant = Tenant.objects.get(pk=request.tenant_id)
-        raw = request.query_params.get("date")
-        try:
-            day = dt.date.fromisoformat(raw) if raw else next_delivery_day(tenant)
-        except ValueError:
-            raise ApiError("validation_error", "date: use YYYY-MM-DD.", 400) from None
-        jobs = (
-            Job.objects.filter(tenant=tenant, scheduled_date=day)
-            .exclude(status=Job.Status.CANCELLED)
-            .select_related("assigned_staff", "schedule__subscriber__area__default_staff")
-            .order_by("schedule__subscriber__area__name", "schedule__subscriber__customer_name")
-        )
+        day = _delivery_day(request, tenant)
+        all_jobs = list(_jobs_for(tenant, day))
+        jobs = [job for job in all_jobs if job.status != Job.Status.CANCELLED]
         groups = {}
         for job in jobs:
             area = job.schedule.subscriber.area
@@ -119,8 +132,96 @@ class DeliveriesView(APIView):
             ),
             "confirmed": len(jobs),
             "not_confirmed": {outcome or "awaiting": n for outcome, n in others},
+            # Spec 2.3: outcome changes after printing are flagged (the driver has a stale list).
+            "changed_after_print": [
+                job for job in all_jobs if job.status == Job.Status.CANCELLED and job.printed_at
+            ],
+            "printed_at": max((job.printed_at for job in jobs if job.printed_at), default=None),
         }
         return Response(DeliveriesSerializer(data).data)
+
+
+@extend_schema(tags=["portal: deliveries and follow-up"])
+class DeliveriesPrintedView(APIView):
+    """Record that the delivery list for a date was printed (later cancellations get flagged)."""
+
+    permission_classes = [ALL_ROLES]
+
+    @extend_schema(request=PrintedSerializer, responses=PrintedResultSerializer)
+    def post(self, request):
+        tenant = Tenant.objects.get(pk=request.tenant_id)
+        data = PrintedSerializer(data=request.data)
+        data.is_valid(raise_exception=True)
+        day = data.validated_data["date"]
+        now = timezone.now()
+        count = Job.objects.filter(
+            tenant=tenant, scheduled_date=day, status=Job.Status.PENDING
+        ).update(printed_at=now, updated_at=now)
+        write_audit(
+            Action.UPDATE,
+            object_type="jobs.job",
+            after={"printed": day.isoformat(), "jobs": count},
+            tenant=tenant,
+        )
+        return Response({"date": day, "printed": count, "printed_at": now})
+
+
+CSV_COLUMNS = [
+    "area",
+    "staff",
+    "booking_reference",
+    "customer_name",
+    "mobile_number",
+    "address",
+    "cylinder_type",
+    "quantity",
+    "status",
+]
+
+
+@extend_schema(tags=["portal: deliveries and follow-up"])
+class DeliveriesExportView(APIView):
+    """The delivery list for a date as CSV (one row per confirmed booking). Audited."""
+
+    permission_classes = [ALL_ROLES]
+
+    @extend_schema(parameters=[DATE_PARAM], responses={(200, "text/csv"): str})
+    def get(self, request):
+        tenant = Tenant.objects.get(pk=request.tenant_id)
+        day = _delivery_day(request, tenant)
+        jobs = [job for job in _jobs_for(tenant, day) if job.status != Job.Status.CANCELLED]
+        buffer = io.StringIO()
+        writer = csv.writer(buffer)
+        writer.writerow(CSV_COLUMNS)
+        for job in jobs:
+            schedule, subscriber = job.schedule, job.schedule.subscriber
+            writer.writerow(
+                [
+                    safe_cell(v)
+                    for v in [
+                        subscriber.area.name if subscriber.area else "",
+                        job.assigned_staff.name if job.assigned_staff else "",
+                        schedule.booking_reference,
+                        subscriber.customer_name,
+                        subscriber.mobile_number,
+                        subscriber.address,
+                        schedule.custom_fields.get("cylinder_type", ""),
+                        schedule.custom_fields.get("quantity", 1),
+                        job.status,
+                    ]
+                ]
+            )
+        write_audit(
+            Action.EXPORT,
+            object_type="jobs.job",
+            after={"deliveries": day.isoformat(), "rows": len(jobs)},
+            tenant=tenant,
+        )
+        response = HttpResponse(
+            "\ufeff" + buffer.getvalue(), content_type="text/csv; charset=utf-8"
+        )
+        response["Content-Disposition"] = f'attachment; filename="deliveries-{day.isoformat()}.csv"'
+        return response
 
 
 @extend_schema(tags=["portal: deliveries and follow-up"])

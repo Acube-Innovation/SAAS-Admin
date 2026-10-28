@@ -350,7 +350,9 @@ systems under `/api/v1/` (API key auth, per-key rate limits): subscribers, sched
 | POST | `bookings/{id}/set-date` · `bookings/bulk-set-date` | Give one or many bookings a delivery date (restarts the reminder cycle; cancelled ones are skipped) | all |
 | POST | `bookings/{id}/cancel` | Cancel with a reason (5–500 characters) | all |
 | GET | `bookings/{id}/timeline` | Events, reminder attempts and replies, oldest first | all |
-| GET | `deliveries?date=` | Confirmed bookings for a date (default: next delivery day) grouped by area, plus counts of the other outcomes | all |
+| GET | `deliveries?date=` | Confirmed bookings for a date (default: next delivery day) grouped by area, plus counts of the other outcomes; each row says whether it changed after the list was printed (`changed_after_print`) | all |
+| POST | `deliveries/printed` | Record that the list for `date` was printed (marks the jobs `printed_at`) | all |
+| GET | `deliveries/export?date=` | The same list as CSV (audited) | all |
 | POST | `jobs/{id}/reassign` | Change the staff member of a pending delivery | owner, manager |
 | GET | `follow-ups` · `follow-ups/{id}` | Open and contacted items (`status`, `outcome`, `area`, `age` = `normal` / `amber` / `red`), oldest first, with the last reply and failure reason | all |
 | POST | `follow-ups/{id}/set-date` · `contacted` · `note` · `cancel-booking` · `resolve` | Workflow 3.2 actions | all |

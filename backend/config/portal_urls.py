@@ -3,7 +3,14 @@
 from django.urls import path
 from rest_framework.routers import SimpleRouter
 
-from apps.jobs.views import DeliveriesView, FollowUpViewSet, JobViewSet, StaffMemberViewSet
+from apps.jobs.views import (
+    DeliveriesExportView,
+    DeliveriesPrintedView,
+    DeliveriesView,
+    FollowUpViewSet,
+    JobViewSet,
+    StaffMemberViewSet,
+)
 from apps.portal.team import AgencyView, ReminderSettingsView, TeamViewSet
 from apps.portal.views import ChecklistView, HomeView, PortalConfigView
 from apps.schedules.views import BookingViewSet
@@ -30,5 +37,7 @@ urlpatterns = [
     path("agency", AgencyView.as_view(), name="portal-agency"),
     path("reminder-settings", ReminderSettingsView.as_view(), name="portal-reminder-settings"),
     path("deliveries", DeliveriesView.as_view(), name="portal-deliveries"),
+    path("deliveries/printed", DeliveriesPrintedView.as_view(), name="portal-deliveries-printed"),
+    path("deliveries/export", DeliveriesExportView.as_view(), name="portal-deliveries-export"),
     *router.urls,
 ]

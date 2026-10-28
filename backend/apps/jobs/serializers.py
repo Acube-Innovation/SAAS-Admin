@@ -33,6 +33,8 @@ class StaffMemberSerializer(serializers.ModelSerializer):
 class DeliveryJobSerializer(serializers.Serializer):
     id = serializers.UUIDField()
     status = serializers.CharField()
+    printed_at = serializers.DateTimeField(allow_null=True)
+    cancelled_reason = serializers.CharField(allow_blank=True)
     assigned_staff = serializers.UUIDField(source="assigned_staff_id", allow_null=True)
     assigned_staff_name = serializers.CharField(source="assigned_staff.name", default=None)
     booking_id = serializers.UUIDField(source="schedule_id")
@@ -62,6 +64,18 @@ class DeliveriesSerializer(serializers.Serializer):
     areas = DeliveryAreaSerializer(many=True)
     confirmed = serializers.IntegerField()
     not_confirmed = serializers.DictField(child=serializers.IntegerField())
+    changed_after_print = DeliveryJobSerializer(many=True, help_text="Printed, then cancelled")
+    printed_at = serializers.DateTimeField(allow_null=True)
+
+
+class PrintedSerializer(serializers.Serializer):
+    date = serializers.DateField()
+
+
+class PrintedResultSerializer(serializers.Serializer):
+    date = serializers.DateField()
+    printed = serializers.IntegerField()
+    printed_at = serializers.DateTimeField()
 
 
 class ReassignSerializer(serializers.Serializer):

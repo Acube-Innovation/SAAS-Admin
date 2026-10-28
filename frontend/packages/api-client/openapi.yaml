@@ -1730,12 +1730,6 @@ paths:
           format: uuid
         description: A UUID string identifying this schedule.
         required: true
-      - name: page
-        required: false
-        in: query
-        description: A page number within the paginated result set.
-        schema:
-          type: integer
       tags:
       - 'portal: bookings'
       security:
@@ -1745,7 +1739,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedTimelineEntryList'
+                type: array
+                items:
+                  $ref: '#/components/schemas/TimelineEntry'
           description: ''
   /api/portal/bookings/bulk-set-date:
     post:
@@ -1841,6 +1837,56 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Deliveries'
+          description: ''
+  /api/portal/deliveries/export:
+    get:
+      operationId: portal_deliveries_export_retrieve
+      description: The delivery list for a date as CSV (one row per confirmed booking).
+        Audited.
+      parameters:
+      - in: query
+        name: date
+        schema:
+          type: string
+        description: 'YYYY-MM-DD; default: next delivery day'
+      tags:
+      - 'portal: deliveries and follow-up'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            text/csv:
+              schema:
+                type: string
+          description: ''
+  /api/portal/deliveries/printed:
+    post:
+      operationId: portal_deliveries_printed_create
+      description: Record that the delivery list for a date was printed (later cancellations
+        get flagged).
+      tags:
+      - 'portal: deliveries and follow-up'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrintedRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PrintedRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PrintedRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrintedResult'
           description: ''
   /api/portal/follow-ups:
     get:
@@ -3486,11 +3532,22 @@ components:
           type: object
           additionalProperties:
             type: integer
+        changed_after_print:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeliveryJob'
+          description: Printed, then cancelled
+        printed_at:
+          type: string
+          format: date-time
+          nullable: true
       required:
       - areas
+      - changed_after_print
       - confirmed
       - date
       - not_confirmed
+      - printed_at
     DeliveryArea:
       type: object
       properties:
@@ -3521,6 +3578,12 @@ components:
           format: uuid
         status:
           type: string
+        printed_at:
+          type: string
+          format: date-time
+          nullable: true
+        cancelled_reason:
+          type: string
         assigned_staff:
           type: string
           format: uuid
@@ -3550,10 +3613,12 @@ components:
       - assigned_staff_name
       - booking_id
       - booking_reference
+      - cancelled_reason
       - customer_name
       - cylinder_type
       - id
       - mobile_number
+      - printed_at
       - quantity
       - status
     EntityEnum:
@@ -4625,31 +4690,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Tenant'
-    PaginatedTimelineEntryList:
-      type: object
-      required:
-      - count
-      - next
-      - previous
-      - results
-      properties:
-        count:
-          type: integer
-          example: 123
-        next:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=4
-        previous:
-          type: string
-          nullable: true
-          format: uri
-          example: http://api.example.org/accounts/?page=2
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/TimelineEntry'
     PatchedAreaRequest:
       type: object
       properties:
@@ -4876,6 +4916,29 @@ components:
         * `manager` - manager
         * `office_staff` - office_staff
         * `support` - support
+    PrintedRequest:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+      required:
+      - date
+    PrintedResult:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        printed:
+          type: integer
+        printed_at:
+          type: string
+          format: date-time
+      required:
+      - date
+      - printed
+      - printed_at
     QualityRatingEnum:
       enum:
       - GREEN

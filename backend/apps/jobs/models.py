@@ -44,6 +44,8 @@ class Job(TenantScopedModel):
     )
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
     cancelled_reason = models.CharField(max_length=100, blank=True)
+    # Set when the delivery list is printed; a later cancellation is flagged to the office.
+    printed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ["scheduled_date", "created_at"]

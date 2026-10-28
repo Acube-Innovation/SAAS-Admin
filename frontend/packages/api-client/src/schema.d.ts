@@ -932,6 +932,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/portal/deliveries/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The delivery list for a date as CSV (one row per confirmed booking). Audited. */
+        get: operations["portal_deliveries_export_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/deliveries/printed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Record that the delivery list for a date was printed (later cancellations get flagged). */
+        post: operations["portal_deliveries_printed_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/portal/follow-ups": {
         parameters: {
             query?: never;
@@ -1651,6 +1685,10 @@ export interface components {
             not_confirmed: {
                 [key: string]: number;
             };
+            /** @description Printed, then cancelled */
+            changed_after_print: components["schemas"]["DeliveryJob"][];
+            /** Format: date-time */
+            printed_at: string | null;
         };
         DeliveryArea: {
             /** Format: uuid */
@@ -1663,6 +1701,9 @@ export interface components {
             /** Format: uuid */
             id: string;
             status: string;
+            /** Format: date-time */
+            printed_at: string | null;
+            cancelled_reason: string;
             /** Format: uuid */
             assigned_staff: string | null;
             assigned_staff_name: string;
@@ -2156,21 +2197,6 @@ export interface components {
             previous: string | null;
             results: components["schemas"]["Tenant"][];
         };
-        PaginatedTimelineEntryList: {
-            /** @example 123 */
-            count: number;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=4
-             */
-            next: string | null;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=2
-             */
-            previous: string | null;
-            results: components["schemas"]["TimelineEntry"][];
-        };
         PatchedAreaRequest: {
             name?: string;
             code?: string;
@@ -2268,6 +2294,17 @@ export interface components {
          * @enum {string}
          */
         PortalRoleEnum: "owner" | "manager" | "office_staff" | "support";
+        PrintedRequest: {
+            /** Format: date */
+            date: string;
+        };
+        PrintedResult: {
+            /** Format: date */
+            date: string;
+            printed: number;
+            /** Format: date-time */
+            printed_at: string;
+        };
         /**
          * @description * `GREEN` - GREEN
          *     * `YELLOW` - YELLOW
@@ -4196,10 +4233,7 @@ export interface operations {
     };
     portal_bookings_timeline_list: {
         parameters: {
-            query?: {
-                /** @description A page number within the paginated result set. */
-                page?: number;
-            };
+            query?: never;
             header?: never;
             path: {
                 /** @description A UUID string identifying this schedule. */
@@ -4214,7 +4248,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedTimelineEntryList"];
+                    "application/json": components["schemas"]["TimelineEntry"][];
                 };
             };
         };
@@ -4306,6 +4340,53 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Deliveries"];
+                };
+            };
+        };
+    };
+    portal_deliveries_export_retrieve: {
+        parameters: {
+            query?: {
+                /** @description YYYY-MM-DD; default: next delivery day */
+                date?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
+                };
+            };
+        };
+    };
+    portal_deliveries_printed_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PrintedRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PrintedRequest"];
+                "multipart/form-data": components["schemas"]["PrintedRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PrintedResult"];
                 };
             };
         };

@@ -168,7 +168,7 @@ class BookingViewSet(
         return Response(self._fresh(schedule))
 
     @extend_schema(responses=TimelineEntrySerializer(many=True))
-    @action(detail=True, methods=["get"])
+    @action(detail=True, methods=["get"], pagination_class=None)
     def timeline(self, request, pk=None):
         """Every status change, reminder attempt, reply and note, oldest first (spec 2.3)."""
         schedule = self.get_object()
