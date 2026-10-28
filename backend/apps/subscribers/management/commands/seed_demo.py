@@ -27,8 +27,9 @@ from apps.core.tenancy import tenant_context
 from apps.industry.models import IndustryTemplate
 from apps.industry.seed import seed_gas_agency
 from apps.industry.services import assign_template
-from apps.jobs.models import StaffMember
+from apps.jobs.models import FollowUpItem, Job, StaffMember
 from apps.schedules.models import Attempt, Outcome, Response, Schedule, ScheduleEvent
+from apps.schedules.services import FOLLOW_UP_OUTCOMES, plan_job
 from apps.subscribers.models import Area, Subscriber
 
 IST = zoneinfo.ZoneInfo("Asia/Kolkata")
@@ -287,6 +288,7 @@ class Command(BaseCommand):
         ScheduleEvent.objects.bulk_create(events, batch_size=1000)
         Attempt.objects.bulk_create(attempts, batch_size=1000)
         Response.objects.bulk_create(responses, batch_size=1000)
+        jobs, follow_ups = self.follow_through(tenant, schedules, today, rng)
         return {
             "areas": len(areas),
             "staff": len(staff),
@@ -295,6 +297,8 @@ class Command(BaseCommand):
             "messages": sum(a.channel == Attempt.Channel.WHATSAPP for a in attempts),
             "calls": sum(a.channel == Attempt.Channel.VOICE for a in attempts),
             "responses": len(responses),
+            "delivery jobs": jobs,
+            "follow-up items": follow_ups,
         }
 
     @staticmethod
@@ -360,10 +364,7 @@ class Command(BaseCommand):
             delivery_status=Attempt.DeliveryStatus.READ,
             cost_paise=WHATSAPP_COST_PAISE,
         )
-        attempts.append(message)
-        events.append(
-            self.event(tenant, schedule, "reminder_sent", sent_at, {"channel": "whatsapp"})
-        )
+        attempts.append(message)  # the timeline shows attempts and replies from their own tables
         replied_at = sent_at + dt.timedelta(minutes=rng.randint(2, 180))
 
         if outcome is None:
@@ -380,16 +381,19 @@ class Command(BaseCommand):
             # No reply after the wait: some got a follow-up voice call that wasn't answered.
             if rng.random() < 0.5:
                 attempts.append(self.call(tenant, schedule, sent_at, rng, answered=False))
+            # Decided when the wait (and any call) is over.
+            replied_at = sent_at + dt.timedelta(hours=4, minutes=45)
         elif outcome in BUTTONS and rng.random() < 0.15:
             # Answered on a voice call after missing the WhatsApp message.
             message.delivery_status = Attempt.DeliveryStatus.DELIVERED
             call = self.call(tenant, schedule, sent_at, rng, answered=True)
             attempts.append(call)
+            replied_at = call.sent_at + dt.timedelta(seconds=40)
             responses.append(
                 Response(
                     tenant=tenant,
                     attempt=call,
-                    received_at=call.sent_at + dt.timedelta(seconds=40),
+                    received_at=replied_at,
                     transcript=CALL_TRANSCRIPTS[outcome],
                     recording_key=f"recordings/demo/{call.id}.mp3",
                     outcome=outcome,
@@ -432,22 +436,95 @@ class Command(BaseCommand):
                 )
             )
 
-        if outcome == Outcome.RESCHEDULE:
+        # Half the "change date" answers pick a day; the rest need a call (follow-up queue).
+        if outcome == Outcome.RESCHEDULE and rng.random() < 0.5:
             schedule.new_date_requested = scheduled + dt.timedelta(days=rng.randint(1, 4))
         schedule.outcome = outcome
         schedule.status = Schedule.Status.CLOSED
-        if responses:
-            events.append(
-                self.event(
-                    tenant,
-                    schedule,
-                    "reply_received",
-                    responses[-1].received_at,
-                    {"outcome": outcome},
-                )
-            )
+        schedule.answered_at = replied_at
         events.append(self.event(tenant, schedule, "outcome_set", replied_at, {"outcome": outcome}))
         return schedule, more
+
+    def follow_through(self, tenant, schedules, today, rng):
+        """
+        Jobs and follow-up items as Workflows 3.1 and 3.2 leave them (same rules as
+        apps.schedules.services): confirmed -> job for the area's default staff; a picked new day
+        -> booking moved; any other outcome -> follow-up item, older ones already worked.
+        """
+        jobs, items, events, moved = [], [], [], []
+        for schedule in schedules:
+            outcome = schedule.outcome
+            answered = getattr(schedule, "answered_at", None) or timezone.now()
+            if outcome == Outcome.CONFIRMED and schedule.scheduled_date:
+                job = plan_job(schedule)
+                if schedule.scheduled_date < today:
+                    job.status = Job.Status.DONE
+                jobs.append(job)
+                events.append(
+                    self.event(
+                        tenant,
+                        schedule,
+                        "job_created",
+                        answered,
+                        {"staff": job.assigned_staff.name if job.assigned_staff else None},
+                    )
+                )
+            elif (
+                outcome == Outcome.RESCHEDULE
+                and schedule.new_date_requested
+                and schedule.new_date_requested >= today
+            ):
+                previous = schedule.scheduled_date
+                schedule.scheduled_date, schedule.new_date_requested = (
+                    schedule.new_date_requested,
+                    None,
+                )
+                schedule.status, schedule.outcome = Schedule.Status.BOOKED, ""
+                moved.append(schedule)
+                events.append(
+                    self.event(
+                        tenant,
+                        schedule,
+                        "date_changed",
+                        answered,
+                        {
+                            "previous_date": previous.isoformat(),
+                            "scheduled_date": schedule.scheduled_date.isoformat(),
+                            "reason": "customer_reschedule",
+                        },
+                    )
+                )
+            elif outcome in FOLLOW_UP_OUTCOMES:
+                item = FollowUpItem(
+                    tenant=tenant, schedule=schedule, outcome=outcome, opened_at=answered
+                )
+                age = timezone.now() - answered
+                if age > dt.timedelta(days=2):
+                    item.status, item.resolution = FollowUpItem.Status.RESOLVED, "resolved"
+                    item.resolved_at = answered + dt.timedelta(hours=rng.randint(2, 30))
+                elif rng.random() < 0.3:
+                    item.status, item.contacted_at = (
+                        FollowUpItem.Status.CONTACTED,
+                        answered + dt.timedelta(hours=1),
+                    )
+                    item.notes = [
+                        {
+                            "at": item.contacted_at.isoformat(),
+                            "by": "staff@demo-gas.test",
+                            "text": "Called; customer will confirm by evening.",
+                        }
+                    ]
+                items.append(item)
+                events.append(
+                    self.event(tenant, schedule, "follow_up_opened", answered, {"outcome": outcome})
+                )
+        Schedule.objects.bulk_update(
+            moved, ["scheduled_date", "new_date_requested", "status", "outcome"], batch_size=1000
+        )
+        Job.objects.bulk_create(jobs, batch_size=1000)
+        FollowUpItem.objects.bulk_create(items, batch_size=1000)
+        ScheduleEvent.objects.bulk_create(events, batch_size=1000)
+        return len(jobs), len(items)
 
     @staticmethod
     def call(tenant, schedule, after, rng, answered):

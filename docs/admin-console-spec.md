@@ -379,8 +379,8 @@ Two repositories: **SAAS-Admin** (below: backend for both apps, admin console, i
 │  │  ├─ industry/               industry templates                                (Step 6)
 │  │  ├─ messaging_templates/    WhatsApp templates + provider interface           (Step 7)
 │  │  ├─ subscribers/            areas, subscribers, CSV import engine, seed_demo  (Step 13)
-│  │  ├─ schedules/              bookings, timeline, attempts, responses (models)  (Step 13; API Step 14)
-│  │  ├─ jobs/                   staff members (Step 13); jobs, follow-up          (Step 14)
+│  │  ├─ schedules/              bookings API, timeline, hooks, bookings import   (Steps 13-14)
+│  │  ├─ jobs/                   staff, jobs, deliveries, follow-up queue          (Steps 13-14)
 │  │  ├─ content_view/  change_requests/
 │  │  ├─ billing/  integrations/                                                   (client portal steps)
 │  └─ tests/

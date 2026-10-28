@@ -68,7 +68,24 @@ def test_data_is_consistent(demo):
                 .exclude(attempts__channel="voice")
                 .exists()
             )
-        assert not Schedule.objects.filter(outcome="reschedule", new_date_requested=None).exists()
+        # "Change date" without a picked day waits in the follow-up queue (Workflow 3.2).
+        waiting = Schedule.objects.filter(outcome="reschedule", new_date_requested=None)
+        assert waiting.exists()
+        assert not waiting.filter(follow_ups__isnull=True).exists()
+        # Confirmed deliveries have a job with the area's default staff member.
+        confirmed = Schedule.objects.filter(outcome="confirmed").exclude(scheduled_date=None)
+        assert not confirmed.filter(jobs__isnull=True).exists()
+        with_area = confirmed.exclude(subscriber__area=None).select_related("subscriber__area")
+        for schedule in with_area[:30]:
+            assert (
+                schedule.jobs.get().assigned_staff_id == schedule.subscriber.area.default_staff_id
+            )
+        # Every other follow-up outcome has an item; confirmed ones never do.
+        for outcome in ["not_available", "no_response", "failed", "needs_review"]:
+            assert not Schedule.objects.filter(outcome=outcome, follow_ups__isnull=True).exists(), (
+                outcome
+            )
+        assert not Schedule.objects.filter(outcome="confirmed", follow_ups__isnull=False).exists()
         failed = Schedule.objects.filter(outcome="failed")
         assert failed.exists() and not failed.exclude(attempts__delivery_status="failed").exists()
         assert (
@@ -122,3 +139,17 @@ def test_weak_password_is_refused(gas_template):
 
     with pytest.raises(ValidationError):
         seed("--name", "Weak", stdin="12345678\n")
+
+
+def test_outcomes_come_after_the_answers_they_are_based_on(demo):
+    tenant, _output = demo
+    with tenant_context(tenant):
+        for schedule in Schedule.objects.exclude(outcome="").prefetch_related(
+            "attempts__responses", "events"
+        ):
+            decided = [e.occurred_at for e in schedule.events.all() if e.kind == "outcome_set"]
+            if not decided:
+                continue
+            replies = [r.received_at for a in schedule.attempts.all() for r in a.responses.all()]
+            sends = [a.sent_at for a in schedule.attempts.all() if a.sent_at]
+            assert all(decided[-1] >= t for t in replies + sends), schedule.booking_reference

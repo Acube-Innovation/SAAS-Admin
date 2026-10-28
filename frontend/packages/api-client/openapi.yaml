@@ -1478,6 +1478,281 @@ paths:
               schema:
                 $ref: '#/components/schemas/Area'
           description: ''
+  /api/portal/bookings:
+    get:
+      operationId: portal_bookings_list
+      description: Bookings (spec 2.3). Date changes, cancel and outcomes go through
+        apps.schedules.services.
+      parameters:
+      - in: query
+        name: area
+        schema:
+          type: string
+        description: Area id, or 'none'
+      - in: query
+        name: date
+        schema:
+          type: string
+        description: Delivery date (scheduled_date), YYYY-MM-DD
+      - in: query
+        name: date_from
+        schema:
+          type: string
+      - in: query
+        name: date_to
+        schema:
+          type: string
+      - in: query
+        name: no_date
+        schema:
+          type: boolean
+        description: Only bookings with no delivery date yet
+      - in: query
+        name: outcome
+        schema:
+          type: string
+        description: An outcome, or 'none'
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Booking reference, customer name or mobile
+      - in: query
+        name: status
+        schema:
+          type: string
+      tags:
+      - 'portal: bookings'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBookingList'
+          description: ''
+    post:
+      operationId: portal_bookings_create
+      description: Bookings (spec 2.3). Date changes, cancel and outcomes go through
+        apps.schedules.services.
+      tags:
+      - 'portal: bookings'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BookingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BookingRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+  /api/portal/bookings/{id}:
+    get:
+      operationId: portal_bookings_retrieve
+      description: Bookings (spec 2.3). Date changes, cancel and outcomes go through
+        apps.schedules.services.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this schedule.
+        required: true
+      tags:
+      - 'portal: bookings'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+    patch:
+      operationId: portal_bookings_partial_update
+      description: Bookings (spec 2.3). Date changes, cancel and outcomes go through
+        apps.schedules.services.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this schedule.
+        required: true
+      tags:
+      - 'portal: bookings'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBookingRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBookingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBookingRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+  /api/portal/bookings/{id}/cancel:
+    post:
+      operationId: portal_bookings_cancel_create
+      description: Bookings (spec 2.3). Date changes, cancel and outcomes go through
+        apps.schedules.services.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this schedule.
+        required: true
+      tags:
+      - 'portal: bookings'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelReasonRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CancelReasonRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CancelReasonRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+  /api/portal/bookings/{id}/set-date:
+    post:
+      operationId: portal_bookings_set_date_create
+      description: Bookings (spec 2.3). Date changes, cancel and outcomes go through
+        apps.schedules.services.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this schedule.
+        required: true
+      tags:
+      - 'portal: bookings'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetDateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SetDateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SetDateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+  /api/portal/bookings/{id}/timeline:
+    get:
+      operationId: portal_bookings_timeline_list
+      description: Every status change, reminder attempt, reply and note, oldest first
+        (spec 2.3).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this schedule.
+        required: true
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - 'portal: bookings'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTimelineEntryList'
+          description: ''
+  /api/portal/bookings/bulk-set-date:
+    post:
+      operationId: portal_bookings_bulk_set_date_create
+      description: Bookings (spec 2.3). Date changes, cancel and outcomes go through
+        apps.schedules.services.
+      tags:
+      - 'portal: bookings'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkSetDateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BulkSetDateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BulkSetDateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkSetDateResult'
+          description: ''
   /api/portal/config:
     get:
       operationId: portal_config_retrieve
@@ -1493,6 +1768,277 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PortalConfig'
+          description: ''
+  /api/portal/deliveries:
+    get:
+      operationId: portal_deliveries_retrieve
+      description: Confirmed bookings for a date, grouped by area, with each job's
+        staff member.
+      parameters:
+      - in: query
+        name: date
+        schema:
+          type: string
+        description: 'YYYY-MM-DD; default: next delivery day'
+      tags:
+      - 'portal: deliveries and follow-up'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deliveries'
+          description: ''
+  /api/portal/follow-ups:
+    get:
+      operationId: portal_follow_ups_list
+      description: 'The follow-up queue: every booking whose outcome is not Confirmed
+        (spec 2.4).'
+      parameters:
+      - in: query
+        name: age
+        schema:
+          type: string
+          enum:
+          - amber
+          - normal
+          - red
+      - in: query
+        name: area
+        schema:
+          type: string
+      - in: query
+        name: outcome
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - contacted
+          - open
+          - resolved
+      tags:
+      - 'portal: deliveries and follow-up'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFollowUpList'
+          description: ''
+  /api/portal/follow-ups/{id}:
+    get:
+      operationId: portal_follow_ups_retrieve
+      description: 'The follow-up queue: every booking whose outcome is not Confirmed
+        (spec 2.4).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this follow up item.
+        required: true
+      tags:
+      - 'portal: deliveries and follow-up'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowUp'
+          description: ''
+  /api/portal/follow-ups/{id}/cancel-booking:
+    post:
+      operationId: portal_follow_ups_cancel_booking_create
+      description: 'The follow-up queue: every booking whose outcome is not Confirmed
+        (spec 2.4).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this follow up item.
+        required: true
+      tags:
+      - 'portal: deliveries and follow-up'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelReasonRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CancelReasonRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CancelReasonRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowUp'
+          description: ''
+  /api/portal/follow-ups/{id}/contacted:
+    post:
+      operationId: portal_follow_ups_contacted_create
+      description: 'The follow-up queue: every booking whose outcome is not Confirmed
+        (spec 2.4).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this follow up item.
+        required: true
+      tags:
+      - 'portal: deliveries and follow-up'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OptionalNoteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OptionalNoteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OptionalNoteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowUp'
+          description: ''
+  /api/portal/follow-ups/{id}/note:
+    post:
+      operationId: portal_follow_ups_note_create
+      description: 'The follow-up queue: every booking whose outcome is not Confirmed
+        (spec 2.4).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this follow up item.
+        required: true
+      tags:
+      - 'portal: deliveries and follow-up'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NoteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/NoteRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowUp'
+          description: ''
+  /api/portal/follow-ups/{id}/resolve:
+    post:
+      operationId: portal_follow_ups_resolve_create
+      description: 'The follow-up queue: every booking whose outcome is not Confirmed
+        (spec 2.4).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this follow up item.
+        required: true
+      tags:
+      - 'portal: deliveries and follow-up'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OptionalNoteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OptionalNoteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OptionalNoteRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowUp'
+          description: ''
+  /api/portal/follow-ups/{id}/set-date:
+    post:
+      operationId: portal_follow_ups_set_date_create
+      description: 'The follow-up queue: every booking whose outcome is not Confirmed
+        (spec 2.4).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this follow up item.
+        required: true
+      tags:
+      - 'portal: deliveries and follow-up'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetDateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SetDateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SetDateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowUp'
           description: ''
   /api/portal/imports:
     get:
@@ -1624,6 +2170,7 @@ paths:
         schema:
           type: string
           enum:
+          - bookings
           - subscribers
         required: true
       tags:
@@ -1636,6 +2183,43 @@ paths:
             text/csv:
               schema:
                 type: string
+          description: ''
+  /api/portal/jobs/{id}/reassign:
+    post:
+      operationId: portal_jobs_reassign_create
+      description: |-
+        `scoped(queryset)` filters to the request's tenant (RLS does too; this keeps queries explicit)
+        and adds `tenant` to the serializer context.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this job.
+        required: true
+      tags:
+      - 'portal: deliveries and follow-up'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReassignRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReassignRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReassignRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeliveryJob'
           description: ''
   /api/portal/staff:
     get:
@@ -1924,6 +2508,16 @@ components:
         * `provider_pause` - provider_pause
         * `client_approve` - client_approve
         * `client_send_back` - client_send_back
+    AnswerOutcomeEnum:
+      enum:
+      - confirmed
+      - not_available
+      - reschedule
+      type: string
+      description: |-
+        * `confirmed` - confirmed
+        * `not_available` - not_available
+        * `reschedule` - reschedule
     AnswerRequest:
       type: object
       properties:
@@ -1936,7 +2530,7 @@ components:
           minLength: 1
           maxLength: 25
         outcome:
-          $ref: '#/components/schemas/OutcomeEnum'
+          $ref: '#/components/schemas/AnswerOutcomeEnum'
         pick_next_delivery_days:
           type: integer
           maximum: 10
@@ -2217,16 +2811,228 @@ components:
     BlankEnum:
       enum:
       - ''
+    Booking:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        booking_reference:
+          type: string
+          maxLength: 50
+        subscriber:
+          type: string
+          format: uuid
+        subscriber_name:
+          type: string
+          readOnly: true
+        subscriber_mobile:
+          type: string
+          readOnly: true
+        subscriber_external_ref:
+          type: string
+          readOnly: true
+        area_name:
+          type: string
+          readOnly: true
+        schedule_type:
+          type: string
+        booking_date:
+          type: string
+          format: date
+        scheduled_date:
+          type: string
+          format: date
+          nullable: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/BookingStatusEnum'
+          readOnly: true
+        outcome:
+          allOf:
+          - $ref: '#/components/schemas/BookingOutcomeEnum'
+          readOnly: true
+        new_date_requested:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+        remarks:
+          type: string
+          maxLength: 500
+        custom_fields: {}
+        cancelled_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        cancel_reason:
+          type: string
+          readOnly: true
+        job:
+          allOf:
+          - $ref: '#/components/schemas/JobSummary'
+          nullable: true
+          readOnly: true
+        follow_up:
+          allOf:
+          - $ref: '#/components/schemas/FollowUpSummary'
+          nullable: true
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - area_name
+      - booking_date
+      - booking_reference
+      - cancel_reason
+      - cancelled_at
+      - created_at
+      - custom_fields
+      - follow_up
+      - id
+      - job
+      - new_date_requested
+      - outcome
+      - remarks
+      - schedule_type
+      - scheduled_date
+      - status
+      - subscriber
+      - subscriber_external_ref
+      - subscriber_mobile
+      - subscriber_name
+      - updated_at
+    BookingOutcomeEnum:
+      enum:
+      - confirmed
+      - reschedule
+      - not_available
+      - needs_review
+      - no_response
+      - failed
+      - opted_out
+      - skipped
+      type: string
+      description: |-
+        * `confirmed` - Confirmed
+        * `reschedule` - Reschedule
+        * `not_available` - Not available
+        * `needs_review` - Needs review
+        * `no_response` - No response
+        * `failed` - Failed
+        * `opted_out` - Opted out
+        * `skipped` - Skipped
+    BookingRequest:
+      type: object
+      properties:
+        booking_reference:
+          type: string
+          minLength: 1
+          maxLength: 50
+        subscriber:
+          type: string
+          format: uuid
+        subscriber_ref:
+          type: string
+          writeOnly: true
+          minLength: 1
+          description: Pick the subscriber by external_ref instead of id
+        schedule_type:
+          type: string
+          minLength: 1
+        booking_date:
+          type: string
+          format: date
+        scheduled_date:
+          type: string
+          format: date
+          nullable: true
+        remarks:
+          type: string
+          maxLength: 500
+        custom_fields: {}
+      required:
+      - booking_date
+      - booking_reference
+    BookingStatusEnum:
+      enum:
+      - booked
+      - reminded
+      - awaiting_reply
+      - closed
+      - cancelled
+      type: string
+      description: |-
+        * `booked` - Booked
+        * `reminded` - Reminded
+        * `awaiting_reply` - Awaiting reply
+        * `closed` - Closed
+        * `cancelled` - Cancelled
+    BulkSetDateRequest:
+      type: object
+      properties:
+        ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+          maxItems: 500
+          minItems: 1
+        scheduled_date:
+          type: string
+          format: date
+      required:
+      - ids
+      - scheduled_date
+    BulkSetDateResult:
+      type: object
+      properties:
+        updated:
+          type: array
+          items:
+            type: string
+            format: uuid
+        skipped_cancelled:
+          type: array
+          items:
+            type: string
+            format: uuid
+        not_found:
+          type: array
+          items:
+            type: string
+            format: uuid
+      required:
+      - not_found
+      - skipped_cancelled
+      - updated
     ButtonRequest:
       type: object
       properties:
         text:
           type: string
         outcome:
-          $ref: '#/components/schemas/OutcomeEnum'
+          $ref: '#/components/schemas/AnswerOutcomeEnum'
       required:
       - outcome
       - text
+    CancelReasonRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          minLength: 5
+          maxLength: 500
+      required:
+      - reason
     CategoryEnum:
       enum:
       - utility
@@ -2293,11 +3099,100 @@ components:
       - quality_alert
       - quality_rating
       - templates_awaiting_action
+    Deliveries:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        areas:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeliveryArea'
+        confirmed:
+          type: integer
+        not_confirmed:
+          type: object
+          additionalProperties:
+            type: integer
+      required:
+      - areas
+      - confirmed
+      - date
+      - not_confirmed
+    DeliveryArea:
+      type: object
+      properties:
+        area_id:
+          type: string
+          format: uuid
+          nullable: true
+        area_name:
+          type: string
+          nullable: true
+        default_staff_name:
+          type: string
+          nullable: true
+        jobs:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeliveryJob'
+      required:
+      - area_id
+      - area_name
+      - default_staff_name
+      - jobs
+    DeliveryJob:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+        assigned_staff:
+          type: string
+          format: uuid
+          nullable: true
+        assigned_staff_name:
+          type: string
+        booking_id:
+          type: string
+          format: uuid
+        booking_reference:
+          type: string
+        customer_name:
+          type: string
+        mobile_number:
+          type: string
+        address:
+          type: string
+        cylinder_type:
+          type: string
+          readOnly: true
+        quantity:
+          type: integer
+          readOnly: true
+      required:
+      - address
+      - assigned_staff
+      - assigned_staff_name
+      - booking_id
+      - booking_reference
+      - customer_name
+      - cylinder_type
+      - id
+      - mobile_number
+      - quantity
+      - status
     EntityEnum:
       enum:
       - subscribers
+      - bookings
       type: string
-      description: '* `subscribers` - subscribers'
+      description: |-
+        * `subscribers` - subscribers
+        * `bookings` - bookings
     Event:
       type: object
       properties:
@@ -2417,6 +3312,114 @@ components:
         * `phone` - Phone
         * `choice` - Choice
         * `boolean` - Yes / No
+    FollowUp:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        outcome:
+          type: string
+        status:
+          type: string
+        opened_at:
+          type: string
+          format: date-time
+        contacted_at:
+          type: string
+          format: date-time
+          nullable: true
+        notes:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        age_minutes:
+          type: integer
+          readOnly: true
+        ageing:
+          type: string
+          readOnly: true
+          description: normal (<4 h), amber (4-24 h), red (>24 h)
+        booking_id:
+          type: string
+          format: uuid
+        booking_reference:
+          type: string
+        scheduled_date:
+          type: string
+          format: date
+          nullable: true
+        new_date_requested:
+          type: string
+          format: date
+          nullable: true
+        customer_name:
+          type: string
+        mobile_number:
+          type: string
+        area_name:
+          type: string
+        last_reply:
+          type: string
+          readOnly: true
+          description: The customer's latest message (needs review)
+        failure_reason:
+          type: string
+          readOnly: true
+      required:
+      - age_minutes
+      - ageing
+      - area_name
+      - booking_id
+      - booking_reference
+      - contacted_at
+      - customer_name
+      - failure_reason
+      - id
+      - last_reply
+      - mobile_number
+      - new_date_requested
+      - notes
+      - opened_at
+      - outcome
+      - scheduled_date
+      - status
+    FollowUpSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        outcome:
+          type: string
+          maxLength: 15
+        status:
+          $ref: '#/components/schemas/FollowUpSummaryStatusEnum'
+        opened_at:
+          type: string
+          format: date-time
+        contacted_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - contacted_at
+      - id
+      - opened_at
+      - outcome
+      - status
+    FollowUpSummaryStatusEnum:
+      enum:
+      - open
+      - contacted
+      - resolved
+      type: string
+      description: |-
+        * `open` - Open
+        * `contacted` - Contacted
+        * `resolved` - Resolved
     Health:
       type: object
       properties:
@@ -2638,6 +3641,41 @@ components:
       - requires_2fa
       - role
       - tenant_name
+    JobSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        scheduled_date:
+          type: string
+          format: date
+        assigned_staff:
+          type: string
+          format: uuid
+          nullable: true
+        assigned_staff_name:
+          type: string
+          readOnly: true
+        status:
+          $ref: '#/components/schemas/JobSummaryStatusEnum'
+      required:
+      - assigned_staff
+      - assigned_staff_name
+      - id
+      - scheduled_date
+      - status
+    JobSummaryStatusEnum:
+      enum:
+      - pending
+      - done
+      - cancelled
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `done` - Done
+        * `cancelled` - Cancelled
     LanguageEnum:
       enum:
       - ml
@@ -2767,6 +3805,22 @@ components:
       - failed
       - replied
       - sent
+    NoteRequest:
+      type: object
+      properties:
+        text:
+          type: string
+          minLength: 1
+          maxLength: 1000
+      required:
+      - text
+    OptionalNoteRequest:
+      type: object
+      properties:
+        note:
+          type: string
+          default: ''
+          maxLength: 1000
     OtpCodeRequest:
       type: object
       properties:
@@ -2788,16 +3842,6 @@ components:
       required:
       - otpauth_url
       - secret
-    OutcomeEnum:
-      enum:
-      - confirmed
-      - not_available
-      - reschedule
-      type: string
-      description: |-
-        * `confirmed` - confirmed
-        * `not_available` - not_available
-        * `reschedule` - reschedule
     PaginatedAuditEntryList:
       type: object
       required:
@@ -2848,6 +3892,56 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AuditLog'
+    PaginatedBookingList:
+      type: object
+      required:
+      - count
+      - next
+      - previous
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Booking'
+    PaginatedFollowUpList:
+      type: object
+      required:
+      - count
+      - next
+      - previous
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/FollowUp'
     PaginatedImportJobList:
       type: object
       required:
@@ -2973,6 +4067,31 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Tenant'
+    PaginatedTimelineEntryList:
+      type: object
+      required:
+      - count
+      - next
+      - previous
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/TimelineEntry'
     PatchedAreaRequest:
       type: object
       properties:
@@ -2989,6 +4108,35 @@ components:
           nullable: true
         is_active:
           type: boolean
+    PatchedBookingRequest:
+      type: object
+      properties:
+        booking_reference:
+          type: string
+          minLength: 1
+          maxLength: 50
+        subscriber:
+          type: string
+          format: uuid
+        subscriber_ref:
+          type: string
+          writeOnly: true
+          minLength: 1
+          description: Pick the subscriber by external_ref instead of id
+        schedule_type:
+          type: string
+          minLength: 1
+        booking_date:
+          type: string
+          format: date
+        scheduled_date:
+          type: string
+          format: date
+          nullable: true
+        remarks:
+          type: string
+          maxLength: 500
+        custom_fields: {}
     PatchedStaffMemberRequest:
       type: object
       properties:
@@ -3177,6 +4325,15 @@ components:
           maxLength: 500
       required:
       - reason
+    ReassignRequest:
+      type: object
+      properties:
+        assigned_staff:
+          type: string
+          format: uuid
+          nullable: true
+      required:
+      - assigned_staff
     ReferenceData:
       type: object
       properties:
@@ -3325,6 +4482,14 @@ components:
       - default
       - max
       - min
+    SetDateRequest:
+      type: object
+      properties:
+        scheduled_date:
+          type: string
+          format: date
+      required:
+      - scheduled_date
     SignoffMethodEnum:
       enum:
       - client
@@ -4111,6 +5276,24 @@ components:
       description: |-
         * `active` - Active
         * `suspended` - Suspended
+    TimelineEntry:
+      type: object
+      properties:
+        at:
+          type: string
+          format: date-time
+        kind:
+          type: string
+        data:
+          type: object
+          additionalProperties: {}
+        actor_email:
+          type: string
+      required:
+      - actor_email
+      - at
+      - data
+      - kind
     Version:
       type: object
       properties:

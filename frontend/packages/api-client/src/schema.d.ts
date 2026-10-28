@@ -757,6 +757,110 @@ export interface paths {
         patch: operations["portal_areas_partial_update"];
         trace?: never;
     };
+    "/api/portal/bookings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Bookings (spec 2.3). Date changes, cancel and outcomes go through apps.schedules.services. */
+        get: operations["portal_bookings_list"];
+        put?: never;
+        /** @description Bookings (spec 2.3). Date changes, cancel and outcomes go through apps.schedules.services. */
+        post: operations["portal_bookings_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/bookings/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Bookings (spec 2.3). Date changes, cancel and outcomes go through apps.schedules.services. */
+        get: operations["portal_bookings_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description Bookings (spec 2.3). Date changes, cancel and outcomes go through apps.schedules.services. */
+        patch: operations["portal_bookings_partial_update"];
+        trace?: never;
+    };
+    "/api/portal/bookings/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Bookings (spec 2.3). Date changes, cancel and outcomes go through apps.schedules.services. */
+        post: operations["portal_bookings_cancel_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/bookings/{id}/set-date": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Bookings (spec 2.3). Date changes, cancel and outcomes go through apps.schedules.services. */
+        post: operations["portal_bookings_set_date_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/bookings/{id}/timeline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Every status change, reminder attempt, reply and note, oldest first (spec 2.3). */
+        get: operations["portal_bookings_timeline_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/bookings/bulk-set-date": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Bookings (spec 2.3). Date changes, cancel and outcomes go through apps.schedules.services. */
+        post: operations["portal_bookings_bulk_set_date_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/portal/config": {
         parameters: {
             query?: never;
@@ -768,6 +872,142 @@ export interface paths {
         get: operations["portal_config_retrieve"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/deliveries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Confirmed bookings for a date, grouped by area, with each job's staff member. */
+        get: operations["portal_deliveries_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/follow-ups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The follow-up queue: every booking whose outcome is not Confirmed (spec 2.4). */
+        get: operations["portal_follow_ups_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/follow-ups/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The follow-up queue: every booking whose outcome is not Confirmed (spec 2.4). */
+        get: operations["portal_follow_ups_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/follow-ups/{id}/cancel-booking": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description The follow-up queue: every booking whose outcome is not Confirmed (spec 2.4). */
+        post: operations["portal_follow_ups_cancel_booking_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/follow-ups/{id}/contacted": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description The follow-up queue: every booking whose outcome is not Confirmed (spec 2.4). */
+        post: operations["portal_follow_ups_contacted_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/follow-ups/{id}/note": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description The follow-up queue: every booking whose outcome is not Confirmed (spec 2.4). */
+        post: operations["portal_follow_ups_note_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/follow-ups/{id}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description The follow-up queue: every booking whose outcome is not Confirmed (spec 2.4). */
+        post: operations["portal_follow_ups_resolve_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/follow-ups/{id}/set-date": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description The follow-up queue: every booking whose outcome is not Confirmed (spec 2.4). */
+        post: operations["portal_follow_ups_set_date_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -854,6 +1094,26 @@ export interface paths {
         get: operations["portal_imports_template_retrieve"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/jobs/{id}/reassign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description `scoped(queryset)` filters to the request's tenant (RLS does too; this keeps queries explicit)
+         *     and adds `tenant` to the serializer context.
+         */
+        post: operations["portal_jobs_reassign_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -966,10 +1226,17 @@ export interface components {
          * @enum {string}
          */
         ActionEnum: "provider_approve" | "provider_reject" | "provider_pause" | "client_approve" | "client_send_back";
+        /**
+         * @description * `confirmed` - confirmed
+         *     * `not_available` - not_available
+         *     * `reschedule` - reschedule
+         * @enum {string}
+         */
+        AnswerOutcomeEnum: "confirmed" | "not_available" | "reschedule";
         AnswerRequest: {
             key: string;
             label: string;
-            outcome: components["schemas"]["OutcomeEnum"];
+            outcome: components["schemas"]["AnswerOutcomeEnum"];
             pick_next_delivery_days?: number;
         };
         Area: {
@@ -1073,9 +1340,88 @@ export interface components {
         };
         /** @enum {unknown} */
         BlankEnum: "";
+        Booking: {
+            /** Format: uuid */
+            readonly id: string;
+            booking_reference: string;
+            /** Format: uuid */
+            subscriber: string;
+            readonly subscriber_name: string;
+            readonly subscriber_mobile: string;
+            readonly subscriber_external_ref: string;
+            readonly area_name: string;
+            schedule_type: string;
+            /** Format: date */
+            booking_date: string;
+            /** Format: date */
+            scheduled_date: string | null;
+            readonly status: components["schemas"]["BookingStatusEnum"];
+            readonly outcome: components["schemas"]["BookingOutcomeEnum"];
+            /** Format: date */
+            readonly new_date_requested: string | null;
+            remarks: string;
+            custom_fields: unknown;
+            /** Format: date-time */
+            readonly cancelled_at: string | null;
+            readonly cancel_reason: string;
+            readonly job: components["schemas"]["JobSummary"] | null;
+            readonly follow_up: components["schemas"]["FollowUpSummary"] | null;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /**
+         * @description * `confirmed` - Confirmed
+         *     * `reschedule` - Reschedule
+         *     * `not_available` - Not available
+         *     * `needs_review` - Needs review
+         *     * `no_response` - No response
+         *     * `failed` - Failed
+         *     * `opted_out` - Opted out
+         *     * `skipped` - Skipped
+         * @enum {string}
+         */
+        BookingOutcomeEnum: "confirmed" | "reschedule" | "not_available" | "needs_review" | "no_response" | "failed" | "opted_out" | "skipped";
+        BookingRequest: {
+            booking_reference: string;
+            /** Format: uuid */
+            subscriber?: string;
+            /** @description Pick the subscriber by external_ref instead of id */
+            subscriber_ref?: string;
+            schedule_type?: string;
+            /** Format: date */
+            booking_date: string;
+            /** Format: date */
+            scheduled_date?: string | null;
+            remarks?: string;
+            custom_fields?: unknown;
+        };
+        /**
+         * @description * `booked` - Booked
+         *     * `reminded` - Reminded
+         *     * `awaiting_reply` - Awaiting reply
+         *     * `closed` - Closed
+         *     * `cancelled` - Cancelled
+         * @enum {string}
+         */
+        BookingStatusEnum: "booked" | "reminded" | "awaiting_reply" | "closed" | "cancelled";
+        BulkSetDateRequest: {
+            ids: string[];
+            /** Format: date */
+            scheduled_date: string;
+        };
+        BulkSetDateResult: {
+            updated: string[];
+            skipped_cancelled: string[];
+            not_found: string[];
+        };
         ButtonRequest: {
             text: string;
-            outcome: components["schemas"]["OutcomeEnum"];
+            outcome: components["schemas"]["AnswerOutcomeEnum"];
+        };
+        CancelReasonRequest: {
+            reason: string;
         };
         /**
          * @description * `utility` - Utility
@@ -1112,11 +1458,44 @@ export interface components {
             /** Format: date-time */
             generated_at: string;
         };
+        Deliveries: {
+            /** Format: date */
+            date: string;
+            areas: components["schemas"]["DeliveryArea"][];
+            confirmed: number;
+            not_confirmed: {
+                [key: string]: number;
+            };
+        };
+        DeliveryArea: {
+            /** Format: uuid */
+            area_id: string | null;
+            area_name: string | null;
+            default_staff_name: string | null;
+            jobs: components["schemas"]["DeliveryJob"][];
+        };
+        DeliveryJob: {
+            /** Format: uuid */
+            id: string;
+            status: string;
+            /** Format: uuid */
+            assigned_staff: string | null;
+            assigned_staff_name: string;
+            /** Format: uuid */
+            booking_id: string;
+            booking_reference: string;
+            customer_name: string;
+            mobile_number: string;
+            address: string;
+            readonly cylinder_type: string;
+            readonly quantity: number;
+        };
         /**
          * @description * `subscribers` - subscribers
+         *     * `bookings` - bookings
          * @enum {string}
          */
-        EntityEnum: "subscribers";
+        EntityEnum: "subscribers" | "bookings";
         Event: {
             action: string;
             from_status: string;
@@ -1162,6 +1541,52 @@ export interface components {
          * @enum {string}
          */
         FieldTypeEnum: "text" | "number" | "date" | "phone" | "choice" | "boolean";
+        FollowUp: {
+            /** Format: uuid */
+            id: string;
+            outcome: string;
+            status: string;
+            /** Format: date-time */
+            opened_at: string;
+            /** Format: date-time */
+            contacted_at: string | null;
+            notes: {
+                [key: string]: unknown;
+            }[];
+            readonly age_minutes: number;
+            /** @description normal (<4 h), amber (4-24 h), red (>24 h) */
+            readonly ageing: string;
+            /** Format: uuid */
+            booking_id: string;
+            booking_reference: string;
+            /** Format: date */
+            scheduled_date: string | null;
+            /** Format: date */
+            new_date_requested: string | null;
+            customer_name: string;
+            mobile_number: string;
+            area_name: string;
+            /** @description The customer's latest message (needs review) */
+            readonly last_reply: string;
+            readonly failure_reason: string;
+        };
+        FollowUpSummary: {
+            /** Format: uuid */
+            readonly id: string;
+            outcome: string;
+            status: components["schemas"]["FollowUpSummaryStatusEnum"];
+            /** Format: date-time */
+            opened_at: string;
+            /** Format: date-time */
+            contacted_at: string | null;
+        };
+        /**
+         * @description * `open` - Open
+         *     * `contacted` - Contacted
+         *     * `resolved` - Resolved
+         * @enum {string}
+         */
+        FollowUpSummaryStatusEnum: "open" | "contacted" | "resolved";
         Health: {
             status: string;
             database: string;
@@ -1243,6 +1668,23 @@ export interface components {
             needs_new_password: boolean;
             requires_2fa: boolean;
         };
+        JobSummary: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: date */
+            scheduled_date: string;
+            /** Format: uuid */
+            assigned_staff: string | null;
+            readonly assigned_staff_name: string;
+            status: components["schemas"]["JobSummaryStatusEnum"];
+        };
+        /**
+         * @description * `pending` - Pending
+         *     * `done` - Done
+         *     * `cancelled` - Cancelled
+         * @enum {string}
+         */
+        JobSummaryStatusEnum: "pending" | "done" | "cancelled";
         /**
          * @description * `ml` - Malayalam
          *     * `en` - English
@@ -1301,6 +1743,13 @@ export interface components {
             failed: number;
             replied: number;
         };
+        NoteRequest: {
+            text: string;
+        };
+        OptionalNoteRequest: {
+            /** @default  */
+            note: string;
+        };
         OtpCodeRequest: {
             otp_code: string;
         };
@@ -1310,13 +1759,6 @@ export interface components {
             /** @description Hex key, for manual entry. */
             secret: string;
         };
-        /**
-         * @description * `confirmed` - confirmed
-         *     * `not_available` - not_available
-         *     * `reschedule` - reschedule
-         * @enum {string}
-         */
-        OutcomeEnum: "confirmed" | "not_available" | "reschedule";
         PaginatedAuditEntryList: {
             /** @example 123 */
             count: number;
@@ -1346,6 +1788,36 @@ export interface components {
              */
             previous: string | null;
             results: components["schemas"]["AuditLog"][];
+        };
+        PaginatedBookingList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous: string | null;
+            results: components["schemas"]["Booking"][];
+        };
+        PaginatedFollowUpList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous: string | null;
+            results: components["schemas"]["FollowUp"][];
         };
         PaginatedImportJobList: {
             /** @example 123 */
@@ -1422,12 +1894,41 @@ export interface components {
             previous: string | null;
             results: components["schemas"]["Tenant"][];
         };
+        PaginatedTimelineEntryList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous: string | null;
+            results: components["schemas"]["TimelineEntry"][];
+        };
         PatchedAreaRequest: {
             name?: string;
             code?: string;
             /** Format: uuid */
             default_staff?: string | null;
             is_active?: boolean;
+        };
+        PatchedBookingRequest: {
+            booking_reference?: string;
+            /** Format: uuid */
+            subscriber?: string;
+            /** @description Pick the subscriber by external_ref instead of id */
+            subscriber_ref?: string;
+            schedule_type?: string;
+            /** Format: date */
+            booking_date?: string;
+            /** Format: date */
+            scheduled_date?: string | null;
+            remarks?: string;
+            custom_fields?: unknown;
         };
         PatchedStaffMemberRequest: {
             name?: string;
@@ -1508,6 +2009,10 @@ export interface components {
         ReasonRequest: {
             reason: string;
         };
+        ReassignRequest: {
+            /** Format: uuid */
+            assigned_staff: string | null;
+        };
         ReferenceData: {
             states: components["schemas"]["StateOption"][];
             languages: components["schemas"]["LanguageOption"][];
@@ -1552,6 +2057,10 @@ export interface components {
             default: number;
             min: number;
             max: number;
+        };
+        SetDateRequest: {
+            /** Format: date */
+            scheduled_date: string;
         };
         /**
          * @description * `client` - Client
@@ -1866,6 +2375,15 @@ export interface components {
          * @enum {string}
          */
         TenantStatusEnum: "active" | "suspended";
+        TimelineEntry: {
+            /** Format: date-time */
+            at: string;
+            kind: string;
+            data: {
+                [key: string]: unknown;
+            };
+            actor_email: string;
+        };
         Version: {
             /** Format: uuid */
             readonly id: string;
@@ -3156,6 +3674,222 @@ export interface operations {
             };
         };
     };
+    portal_bookings_list: {
+        parameters: {
+            query?: {
+                /** @description Area id, or 'none' */
+                area?: string;
+                /** @description Delivery date (scheduled_date), YYYY-MM-DD */
+                date?: string;
+                date_from?: string;
+                date_to?: string;
+                /** @description Only bookings with no delivery date yet */
+                no_date?: boolean;
+                /** @description An outcome, or 'none' */
+                outcome?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Booking reference, customer name or mobile */
+                search?: string;
+                status?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedBookingList"];
+                };
+            };
+        };
+    };
+    portal_bookings_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BookingRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["BookingRequest"];
+                "multipart/form-data": components["schemas"]["BookingRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Booking"];
+                };
+            };
+        };
+    };
+    portal_bookings_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this schedule. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Booking"];
+                };
+            };
+        };
+    };
+    portal_bookings_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this schedule. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedBookingRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedBookingRequest"];
+                "multipart/form-data": components["schemas"]["PatchedBookingRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Booking"];
+                };
+            };
+        };
+    };
+    portal_bookings_cancel_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this schedule. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CancelReasonRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CancelReasonRequest"];
+                "multipart/form-data": components["schemas"]["CancelReasonRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Booking"];
+                };
+            };
+        };
+    };
+    portal_bookings_set_date_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this schedule. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetDateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SetDateRequest"];
+                "multipart/form-data": components["schemas"]["SetDateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Booking"];
+                };
+            };
+        };
+    };
+    portal_bookings_timeline_list: {
+        parameters: {
+            query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+            };
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this schedule. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedTimelineEntryList"];
+                };
+            };
+        };
+    };
+    portal_bookings_bulk_set_date_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BulkSetDateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["BulkSetDateRequest"];
+                "multipart/form-data": components["schemas"]["BulkSetDateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BulkSetDateResult"];
+                };
+            };
+        };
+    };
     portal_config_retrieve: {
         parameters: {
             query?: never;
@@ -3171,6 +3905,216 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PortalConfig"];
+                };
+            };
+        };
+    };
+    portal_deliveries_retrieve: {
+        parameters: {
+            query?: {
+                /** @description YYYY-MM-DD; default: next delivery day */
+                date?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Deliveries"];
+                };
+            };
+        };
+    };
+    portal_follow_ups_list: {
+        parameters: {
+            query?: {
+                age?: "amber" | "normal" | "red";
+                area?: string;
+                outcome?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                status?: "contacted" | "open" | "resolved";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedFollowUpList"];
+                };
+            };
+        };
+    };
+    portal_follow_ups_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this follow up item. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FollowUp"];
+                };
+            };
+        };
+    };
+    portal_follow_ups_cancel_booking_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this follow up item. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CancelReasonRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CancelReasonRequest"];
+                "multipart/form-data": components["schemas"]["CancelReasonRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FollowUp"];
+                };
+            };
+        };
+    };
+    portal_follow_ups_contacted_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this follow up item. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["OptionalNoteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["OptionalNoteRequest"];
+                "multipart/form-data": components["schemas"]["OptionalNoteRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FollowUp"];
+                };
+            };
+        };
+    };
+    portal_follow_ups_note_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this follow up item. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NoteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["NoteRequest"];
+                "multipart/form-data": components["schemas"]["NoteRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FollowUp"];
+                };
+            };
+        };
+    };
+    portal_follow_ups_resolve_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this follow up item. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["OptionalNoteRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["OptionalNoteRequest"];
+                "multipart/form-data": components["schemas"]["OptionalNoteRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FollowUp"];
+                };
+            };
+        };
+    };
+    portal_follow_ups_set_date_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this follow up item. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetDateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SetDateRequest"];
+                "multipart/form-data": components["schemas"]["SetDateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FollowUp"];
                 };
             };
         };
@@ -3290,7 +4234,7 @@ export interface operations {
     portal_imports_template_retrieve: {
         parameters: {
             query: {
-                entity: "subscribers";
+                entity: "bookings" | "subscribers";
             };
             header?: never;
             path?: never;
@@ -3304,6 +4248,34 @@ export interface operations {
                 };
                 content: {
                     "text/csv": string;
+                };
+            };
+        };
+    };
+    portal_jobs_reassign_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this job. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReassignRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ReassignRequest"];
+                "multipart/form-data": components["schemas"]["ReassignRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeliveryJob"];
                 };
             };
         };

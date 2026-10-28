@@ -202,5 +202,5 @@ class ImportJobSerializer(serializers.ModelSerializer):
 
 
 class ImportUploadSerializer(serializers.Serializer):
-    entity = serializers.ChoiceField(choices=["subscribers"])
+    entity = serializers.ChoiceField(choices=["subscribers", "bookings"])
     file = serializers.FileField()

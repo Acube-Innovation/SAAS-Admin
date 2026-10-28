@@ -266,6 +266,12 @@ class SubscriberAdapter:
 
 
 ADAPTERS = {adapter.entity: adapter for adapter in [SubscriberAdapter()]}
+# Every entity the engine can import (bookings registers itself from apps.schedules).
+ENTITIES = ("subscribers", "bookings")
+
+
+def register_adapter(adapter):
+    ADAPTERS[adapter.entity] = adapter
 
 
 def adapter_for(entity: str):

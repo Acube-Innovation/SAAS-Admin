@@ -208,7 +208,9 @@ class ImportJobViewSet(
         return response
 
     @extend_schema(
-        parameters=[OpenApiParameter("entity", str, enum=["subscribers"], required=True)],
+        parameters=[
+            OpenApiParameter("entity", str, enum=["subscribers", "bookings"], required=True)
+        ],
         responses={(200, "text/csv"): str},
     )
     @action(detail=False, methods=["get"])

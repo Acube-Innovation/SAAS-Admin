@@ -217,6 +217,10 @@ SPECTACULAR_SETTINGS = {
         "TenantRoleEnum": "apps.accounts.models.TenantRole",
         "LanguageEnum": "apps.core.constants.Language",
         "TemplateVersionStatusEnum": "apps.messaging_templates.models.VersionStatus",
+        "BookingOutcomeEnum": "apps.schedules.models.Outcome",
+        "AnswerOutcomeEnum": "apps.industry.serializers.OUTCOMES",
+        "BookingStatusEnum": "apps.schedules.models.Schedule.Status",
+        "SubscriberStatusEnum": "apps.subscribers.models.Subscriber.Status",
     },
 }
 

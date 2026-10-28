@@ -216,6 +216,19 @@ with a **test event**, HMAC-SHA256 signing secret, delivery log (retries for 24 
   booking (resolves, no further messages), add note, resolve.
 - A later reply on the same booking replaces the outcome (latest wins). History keeps every answer.
 
+Implementation notes (Step 14):
+- All booking state changes go through `apps.schedules.services`; each writes a timeline event and an audit entry.
+- A new delivery date (set date, bulk set date, edit, follow-up "set new date", import, customer reschedule) clears
+  the outcome, sets the status back to `booked`, cancels a pending job for the old date, resolves an open follow-up
+  (`new_date`) and calls `on_schedule_date_changed(schedule)` (`apps.schedules.hooks`; the reminder engine connects
+  to the `schedule_date_changed` signal).
+- `reschedule` with a picked day in the future moves the booking there; without a day it opens a follow-up item.
+- A non-confirmed answer after a confirmed one cancels the pending job; a later "yes" resolves the follow-up item
+  (`confirmed`) and creates a new job. `opted_out` also marks the subscriber opted out. `skipped` opens no item.
+- At most one live job and one unresolved follow-up item per booking (database constraints).
+- Cancelled bookings take no further changes (`409 booking_cancelled`); resolved items take no actions
+  (`409 follow_up_resolved`).
+
 ### 3.3 Content approval and change requests
 
 1. Platform staff send a template version to the client (admin 3.4): it shows in **Messages and voice** with
@@ -241,6 +254,11 @@ with a **test event**, HMAC-SHA256 signing secret, delivery log (retries for 24 
    `booking_reference` (bookings) and skips error rows.
 5. An **error file** (original columns + `error` column) is available to download.
 6. The import is audited with counts.
+
+Bookings import: columns `booking_reference`, `subscriber_ref` (the subscriber's `external_ref`), `booking_date`,
+`scheduled_date`, the schedule type's custom fields (gas: `cylinder_type`, `quantity` default 1, 1–99) and `remarks`.
+Booking date not in the future, delivery date not in the past. A new delivery date on an existing booking restarts
+its reminder cycle; an import never changes an existing booking's subscriber.
 
 Import details (subscribers):
 - Headers match a field's key or its label, ignoring case and spacing (`Consumer number` = `external_ref`).
@@ -289,8 +307,8 @@ All are tenant-scoped (`tenant_id` + RLS) with UUID keys.
 | ScheduleEvent | schedules | timeline entries: `kind`, `occurred_at`, `data`, `actor` |
 | Attempt | schedules | `schedule`, `channel` (`whatsapp`, `voice`), `sent_at`, `provider_message_id` (unique when set), `delivery_status`, `failure_reason`, `cost_paise` |
 | Response | schedules | `attempt`, `received_at`, `raw_text`, `button_payload`, `transcript`, `recording_key`, `outcome`, `confidence` |
-| Job | jobs | `schedule`, `scheduled_date`, `assigned_staff`, `status` (`pending`, `done`, `cancelled`) |
-| FollowUpItem | jobs | `schedule`, `outcome`, `status` (`open`, `contacted`, `resolved`), `notes`, `resolved_at` |
+| Job | jobs | `schedule`, `scheduled_date`, `assigned_staff`, `status` (`pending`, `done`, `cancelled`), `cancelled_reason` |
+| FollowUpItem | jobs | `schedule`, `outcome`, `status` (`open`, `contacted`, `resolved`), `notes` (list of `at`, `by`, `text`), `opened_at`, `contacted_at`, `resolved_at`, `resolution` |
 | ChangeRequest / ChangeRequestComment | change_requests | admin spec 2.9 |
 | Wallet / WalletTransaction / Invoice / PaymentMandate | billing | paise amounts, `idempotency_key` / provider event id unique |
 | ApiKey / WebhookEndpoint / WebhookDelivery | integrations | `key_hash`, `prefix`, `revoked_at`; `url`, `secret`; `attempts`, `status` |
@@ -307,10 +325,18 @@ systems under `/api/v1/` (API key auth, per-key rate limits): subscribers, sched
 | POST | `subscribers/{id}/deactivate` | Set inactive (there is no delete) | all |
 | GET POST PATCH | `areas` · `areas/{id}` | List (`active=true`; with subscriber counts), add, edit / deactivate | read: all · write: owner, manager |
 | GET POST PATCH | `staff` · `staff/{id}` | Delivery staff | owner, manager |
-| GET | `imports/template?entity=subscribers` | CSV header from the industry template's active fields | all |
+| GET | `imports/template?entity=subscribers\|bookings` | CSV header from the industry template's active fields | all |
 | GET POST | `imports` · `imports/{id}` | Upload (multipart `entity`, `file`) and follow the preview | all |
 | POST | `imports/{id}/confirm` | Import the valid rows (once, after the preview) | all |
 | GET | `imports/{id}/error-file` | Original columns + `error` for every rejected row | all |
+| GET POST PATCH | `bookings` · `bookings/{id}` | List (`date`, `date_from`/`date_to`, `no_date`, `status`, `outcome` / `none`, `area`, `search`; 50 per page), add (subscriber by id or `subscriber_ref`), edit (a new `scheduled_date` goes through set-date) | all |
+| POST | `bookings/{id}/set-date` · `bookings/bulk-set-date` | Give one or many bookings a delivery date (restarts the reminder cycle; cancelled ones are skipped) | all |
+| POST | `bookings/{id}/cancel` | Cancel with a reason (5–500 characters) | all |
+| GET | `bookings/{id}/timeline` | Events, reminder attempts and replies, oldest first | all |
+| GET | `deliveries?date=` | Confirmed bookings for a date (default: next delivery day) grouped by area, plus counts of the other outcomes | all |
+| POST | `jobs/{id}/reassign` | Change the staff member of a pending delivery | owner, manager |
+| GET | `follow-ups` · `follow-ups/{id}` | Open and contacted items (`status`, `outcome`, `area`, `age` = `normal` / `amber` / `red`), oldest first, with the last reply and failure reason | all |
+| POST | `follow-ups/{id}/set-date` · `contacted` · `note` · `cancel-booking` · `resolve` | Workflow 3.2 actions | all |
 
 Platform staff in a support session can read everything above and change nothing. A suspended tenant reads only.
 
