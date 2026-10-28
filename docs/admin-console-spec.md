@@ -390,7 +390,7 @@ Two repositories: **SAAS-Admin** (below: backend for both apps, admin console, i
 │     ├─ ui/                     shared components
 │     ├─ api-client/             typed client generated from /api/schema
 │     └─ config/                 shared tsconfig, eslint, tailwind preset
-└─ infra/terraform/              AWS staging/production                        (Step 12)
+└─ infra/terraform/              AWS staging: bootstrap/, environments/, modules/ (Step 12)
 ```
 
 ---
@@ -477,8 +477,9 @@ Errors use `{"code": "...", "detail": "...", "fields": {...}}`.
    `CREATE POLICY tenant_isolation ON … USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
    WITH CHECK (same)`. `NULLIF` makes "no tenant set" match no rows instead of raising an error. A test fails for
    any `TenantScopedModel` whose table lacks RLS, FORCE or the policy.
-3. Database roles (created by `infra/docker/postgres/init-roles.sh`):
-   - `postgres`: superuser, used only to bootstrap the roles. Django never connects as it.
+3. Database roles (created by `infra/docker/postgres/init-roles.sh` locally and in CI; on RDS by
+   `manage.py ensure_db_roles`, run as the RDS admin user before every migrate):
+   - `postgres` (RDS: `dbadmin`): used only to bootstrap the roles. The app never connects as it.
    - `app_owner`: owns the database, schema and tables; runs migrations (`DJANGO_DB_ROLE=owner`) and tests.
      `NOSUPERUSER NOBYPASSRLS`, so FORCE RLS applies to it too.
    - `app_user`: the API and workers (`DJANGO_DB_ROLE=app`, the default). `NOSUPERUSER NOBYPASSRLS`, never a

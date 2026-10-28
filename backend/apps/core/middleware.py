@@ -27,3 +27,23 @@ class TenantMiddleware:
         platform = bool(signed_in and user.is_platform_staff and is_verified and is_verified())
         with db_context(tenant=tenant, user=user.pk if signed_in else None, platform=platform):
             return self.get_response(request)
+
+
+class HealthCheckMiddleware:
+    """
+    Answers /api/health before host validation. Load balancer health checks reach each task by its
+    private IP, which is not (and should not be) in ALLOWED_HOSTS. Must be first in MIDDLEWARE.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+        from .views import HealthView
+
+        self.health = HealthView.as_view()
+
+    def __call__(self, request):
+        if request.path == "/api/health" and request.method in ("GET", "HEAD"):
+            response = self.health(request)
+            response.render()
+            return response
+        return self.get_response(request)

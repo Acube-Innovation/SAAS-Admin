@@ -50,6 +50,8 @@ INSTALLED_APPS = [
 AUTH_USER_MODEL = "accounts.User"
 
 MIDDLEWARE = [
+    # First: health checks arrive with the task's IP as Host, before ALLOWED_HOSTS is checked.
+    "apps.core.middleware.HealthCheckMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -108,6 +110,8 @@ DATABASES = {
         "HOST": env("POSTGRES_HOST", "localhost"),
         "PORT": env("POSTGRES_PORT", "5432"),
         "CONN_MAX_AGE": int(env("POSTGRES_CONN_MAX_AGE", "60")),
+        # "require" on AWS (RDS enforces TLS); "prefer" locally.
+        "OPTIONS": {"sslmode": env("POSTGRES_SSLMODE", "prefer")},
     }
 }
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -223,6 +227,9 @@ EMAIL_HOST_USER = env("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", True)
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", "no-reply@localhost")
+# Amazon SES (EMAIL_BACKEND=apps.core.email.SesEmailBackend) uses the task's IAM role.
+AWS_SES_REGION_NAME = env("AWS_SES_REGION_NAME", "ap-south-1")
+AWS_SES_CONFIGURATION_SET = env("AWS_SES_CONFIGURATION_SET", "")
 
 # Behind the AWS load balancer, the client IP is the first X-Forwarded-For entry (staging, prod).
 AUDIT_TRUST_X_FORWARDED_FOR = env_bool("AUDIT_TRUST_X_FORWARDED_FOR", False)

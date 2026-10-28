@@ -18,7 +18,7 @@ frontend/           Turborepo + pnpm workspace
   packages/ui       Shared UI components + translation helper (also in SAAS-Client)
   packages/api-client  Typed API client
   packages/config   Shared tsconfig, ESLint and Tailwind theme
-infra/terraform/    AWS infrastructure (from Step 12)
+infra/terraform/    AWS ap-south-1 staging (ECS Fargate, RDS, ElastiCache, S3, SES); see its README
 docs/               Specs and screenshots
 ```
 
@@ -139,6 +139,10 @@ pnpm check                        # turbo: lint, typecheck, test, build
 ```
 
 CI (`.github/workflows/ci.yml`) runs the same commands on every pull request and on pushes to `main`.
+It also checks the Terraform (`fmt`, `validate`, `tflint`, `terraform test` with a mocked AWS provider).
+On `main`, once every job passes, it builds the images, pushes them to ECR, runs migrations and deploys
+to staging (`scripts/deploy-ecs.sh`). This is enabled by the `STAGING_DEPLOY` variable. First-time AWS
+set-up: [infra/terraform/README.md](infra/terraform/README.md).
 
 ## Settings
 

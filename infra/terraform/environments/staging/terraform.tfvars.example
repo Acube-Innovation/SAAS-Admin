@@ -1,0 +1,11 @@
+# Copy to terraform.tfvars (not committed) and fill in.
+admin_domain = "admin.staging.example.com"
+email_domain = "staging.example.com"
+
+# Optional: a Route 53 hosted zone that holds admin_domain and email_domain. With it, Terraform
+# creates the certificate validation, SES DKIM and admin DNS records. Without it, add the records
+# printed in the outputs at your DNS provider (see infra/terraform/README.md).
+route53_zone_id = ""
+
+# Bootstrap output: github_deploy_roles.staging.name
+github_deploy_role_name = "schedule-saas-github-deploy-staging"

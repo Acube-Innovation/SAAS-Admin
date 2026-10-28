@@ -7,7 +7,11 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # Never cancel a run on main: it may be in the middle of a deploy (migrations).
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
 
 jobs:
   backend:
@@ -174,3 +178,87 @@ jobs:
             frontend/apps/admin/playwright-report
             frontend/apps/admin/test-results
             api.log
+
+  terraform:
+    name: Terraform (fmt, validate, lint, tests)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra/terraform
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.13.4
+      - uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: v0.59.1
+      - run: terraform fmt -check -recursive
+      - name: Validate and test (mocked AWS provider, no credentials)
+        run: |
+          for stack in bootstrap environments/staging; do
+            terraform -chdir=$stack init -backend=false -input=false
+            terraform -chdir=$stack validate
+          done
+          terraform -chdir=environments/staging test
+      - run: tflint --init --config "$PWD/.tflint.hcl"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - run: |
+          for stack in bootstrap environments/staging modules/ecs_service; do
+            tflint --config "$PWD/.tflint.hcl" --chdir $stack
+          done
+
+  deploy-staging:
+    name: Deploy to staging
+    # Every test job must pass first. Turned on by the STAGING_DEPLOY variable once AWS exists.
+    needs: [backend, frontend, e2e, terraform]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.STAGING_DEPLOY == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: ${{ vars.STAGING_URL }}
+    concurrency:
+      group: deploy-staging
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write # OIDC: short-lived AWS credentials, no stored keys
+    env:
+      API_IMAGE: ${{ vars.ECR_API_REPOSITORY }}:${{ github.sha }}
+      ADMIN_IMAGE: ${{ vars.ECR_ADMIN_REPOSITORY }}:${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+      - uses: aws-actions/amazon-ecr-login@v2
+      - uses: docker/setup-buildx-action@v3
+      - name: Build and push the API image
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.API_IMAGE }}
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,scope=api,mode=max
+      - name: Build and push the admin console image
+        uses: docker/build-push-action@v6
+        with:
+          context: frontend
+          file: frontend/apps/admin/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ env.ADMIN_IMAGE }}
+          cache-from: type=gha,scope=admin
+          cache-to: type=gha,scope=admin,mode=max
+      - name: Migrate and roll out
+        run: scripts/deploy-ecs.sh
+        env:
+          ECS_CLUSTER: ${{ vars.ECS_CLUSTER }}
+          ECS_NAME_PREFIX: ${{ vars.ECS_NAME_PREFIX }}
+          ECS_PRIVATE_SUBNETS: ${{ vars.ECS_PRIVATE_SUBNETS }}
+          ECS_TASKS_SECURITY_GROUP: ${{ vars.ECS_TASKS_SECURITY_GROUP }}
+          STAGING_URL: ${{ vars.STAGING_URL }}
