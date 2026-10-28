@@ -41,6 +41,7 @@ class Action:
     INVITE_ACCEPTED = "invite_accepted"
     SUPPORT_START = "support_start"
     SUPPORT_END = "support_end"
+    RECORDING_PLAYED = "recording_played"
 
 
 class AuditLog(models.Model):

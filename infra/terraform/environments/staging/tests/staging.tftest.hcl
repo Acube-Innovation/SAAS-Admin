@@ -115,6 +115,14 @@ run "network_keeps_data_stores_private" {
     error_message = "Staging uses a single NAT gateway by default"
   }
   assert {
+    condition = anytrue([
+      for r in aws_s3_bucket_lifecycle_configuration.files.rule :
+      r.id == "expire-recordings" && r.status == "Enabled" && one(r.filter).prefix == "recordings/"
+      && one(r.expiration).days == 90 && one(r.noncurrent_version_expiration).noncurrent_days == 1
+    ])
+    error_message = "Call recordings must expire 90 days after upload (portal spec 2.8)."
+  }
+  assert {
     condition     = aws_s3_bucket_public_access_block.files.restrict_public_buckets
     error_message = "Files bucket blocks public access"
   }

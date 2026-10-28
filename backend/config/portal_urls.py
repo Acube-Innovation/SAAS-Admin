@@ -19,6 +19,13 @@ from apps.jobs.views import (
 )
 from apps.portal.team import AgencyView, ReminderSettingsView, TeamViewSet
 from apps.portal.views import ChecklistView, HomeView, PortalConfigView
+from apps.reports.views import (
+    CommunicationLogViewSet,
+    FollowUpAgeingView,
+    ReminderResultsView,
+    ReportExportView,
+    SubscriberHealthView,
+)
 from apps.schedules.views import BookingViewSet
 from apps.subscribers.views import (
     AreaViewSet,
@@ -39,6 +46,7 @@ router.register("content/templates", ContentTemplateViewSet, basename="portal-co
 router.register(
     "content/voice-scripts", ContentVoiceScriptViewSet, basename="portal-content-voice-script"
 )
+router.register("communication-log", CommunicationLogViewSet, basename="portal-communication-log")
 router.register("change-requests", PortalChangeRequestViewSet, basename="portal-change-request")
 
 urlpatterns = [
@@ -51,5 +59,9 @@ urlpatterns = [
     path("deliveries/printed", DeliveriesPrintedView.as_view(), name="portal-deliveries-printed"),
     path("deliveries/export", DeliveriesExportView.as_view(), name="portal-deliveries-export"),
     path("content/question-flows", QuestionFlowView.as_view(), name="portal-question-flows"),
+    path("reports/reminder-results", ReminderResultsView.as_view(), name="portal-report-results"),
+    path("reports/follow-up-ageing", FollowUpAgeingView.as_view(), name="portal-report-ageing"),
+    path("reports/subscriber-health", SubscriberHealthView.as_view(), name="portal-report-health"),
+    path("reports/<slug:report>/export", ReportExportView.as_view(), name="portal-report-export"),
     *router.urls,
 ]

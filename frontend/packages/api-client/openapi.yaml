@@ -2183,6 +2183,128 @@ paths:
               schema:
                 $ref: '#/components/schemas/Checklist'
           description: ''
+  /api/portal/communication-log:
+    get:
+      operationId: portal_communication_log_list
+      description: Every message and call with its replies; call transcripts; 5-minute
+        recording links.
+      parameters:
+      - in: query
+        name: booking
+        schema:
+          type: string
+      - in: query
+        name: channel
+        schema:
+          type: string
+          enum:
+          - voice
+          - whatsapp
+      - in: query
+        name: date_from
+        schema:
+          type: string
+          format: date
+        description: From this day (India time), inclusive
+      - in: query
+        name: date_to
+        schema:
+          type: string
+          format: date
+        description: To this day (India time), inclusive
+      - in: query
+        name: delivery_status
+        schema:
+          type: string
+          enum:
+          - answered
+          - delivered
+          - failed
+          - queued
+          - read
+          - sent
+      - in: query
+        name: has_recording
+        schema:
+          type: boolean
+      - in: query
+        name: outcome
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Booking reference, name, mobile or consumer no.
+      - in: query
+        name: subscriber
+        schema:
+          type: string
+      tags:
+      - 'portal: communication log and reports'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedLogEntryList'
+          description: ''
+  /api/portal/communication-log/{id}:
+    get:
+      operationId: portal_communication_log_retrieve
+      description: Every message and call with its replies; call transcripts; 5-minute
+        recording links.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this attempt.
+        required: true
+      tags:
+      - 'portal: communication log and reports'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogEntry'
+          description: ''
+  /api/portal/communication-log/{id}/recording:
+    get:
+      operationId: portal_communication_log_recording_retrieve
+      description: A presigned link to the call recording, valid for 5 minutes. Every
+        play is audited.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this attempt.
+        required: true
+      tags:
+      - 'portal: communication log and reports'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordingLink'
+          description: ''
   /api/portal/config:
     get:
       operationId: portal_config_retrieve
@@ -2931,6 +3053,172 @@ paths:
               schema:
                 $ref: '#/components/schemas/ReminderSettings'
           description: ''
+  /api/portal/reports/{report}/export:
+    get:
+      operationId: portal_reports_export_retrieve
+      description: Any report as CSV, with the same filters as the screen. Every export
+        is audited.
+      parameters:
+      - in: query
+        name: area
+        schema:
+          type: string
+        description: An area id, or `none`
+      - in: query
+        name: booking
+        schema:
+          type: string
+      - in: query
+        name: channel
+        schema:
+          type: string
+          enum:
+          - voice
+          - whatsapp
+      - in: query
+        name: cylinder_type
+        schema:
+          type: string
+      - in: query
+        name: date_from
+        schema:
+          type: string
+          format: date
+        description: From this day (India time), inclusive
+      - in: query
+        name: date_to
+        schema:
+          type: string
+          format: date
+        description: To this day (India time), inclusive
+      - in: query
+        name: delivery_status
+        schema:
+          type: string
+          enum:
+          - answered
+          - delivered
+          - failed
+          - queued
+          - read
+          - sent
+      - in: query
+        name: has_recording
+        schema:
+          type: boolean
+      - in: query
+        name: outcome
+        schema:
+          type: string
+      - in: path
+        name: report
+        schema:
+          type: string
+        required: true
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Booking reference, name, mobile or consumer no.
+      - in: query
+        name: subscriber
+        schema:
+          type: string
+      tags:
+      - 'portal: communication log and reports'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            text/csv:
+              schema:
+                type: string
+          description: ''
+  /api/portal/reports/follow-up-ageing:
+    get:
+      operationId: portal_reports_follow_up_ageing_retrieve
+      description: 'Follow-up ageing: open items by waiting time, per outcome.'
+      parameters:
+      - in: query
+        name: area
+        schema:
+          type: string
+        description: An area id, or `none`
+      - in: query
+        name: outcome
+        schema:
+          type: string
+      tags:
+      - 'portal: communication log and reports'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FollowUpAgeing'
+          description: ''
+  /api/portal/reports/reminder-results:
+    get:
+      operationId: portal_reports_reminder_results_retrieve
+      description: 'Reminder results: sent, delivered, replied, and each outcome as
+        count and share.'
+      parameters:
+      - in: query
+        name: area
+        schema:
+          type: string
+        description: An area id, or `none`
+      - in: query
+        name: cylinder_type
+        schema:
+          type: string
+      - in: query
+        name: date_from
+        schema:
+          type: string
+          format: date
+        description: From this day (India time), inclusive
+      - in: query
+        name: date_to
+        schema:
+          type: string
+          format: date
+        description: To this day (India time), inclusive
+      tags:
+      - 'portal: communication log and reports'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReminderResults'
+          description: ''
+  /api/portal/reports/subscriber-health:
+    get:
+      operationId: portal_reports_subscriber_health_retrieve
+      description: 'Subscriber health: no consent, opted out, failed numbers; by area.'
+      parameters:
+      - in: query
+        name: area
+        schema:
+          type: string
+        description: An area id, or `none`
+      tags:
+      - 'portal: communication log and reports'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriberHealth'
+          description: ''
   /api/portal/staff:
     get:
       operationId: portal_staff_list
@@ -3519,6 +3807,16 @@ components:
       - in_progress
       type: string
       description: '* `in_progress` - in_progress'
+    AgeingBucket:
+      type: object
+      properties:
+        bucket:
+          $ref: '#/components/schemas/BucketEnum'
+        count:
+          type: integer
+      required:
+      - bucket
+      - count
     Agency:
       type: object
       properties:
@@ -4057,6 +4355,18 @@ components:
         * `awaiting_reply` - Awaiting reply
         * `closed` - Closed
         * `cancelled` - Cancelled
+    BucketEnum:
+      enum:
+      - under_4h
+      - 4_to_24h
+      - 1_to_3_days
+      - over_3_days
+      type: string
+      description: |-
+        * `under_4h` - under_4h
+        * `4_to_24h` - 4_to_24h
+        * `1_to_3_days` - 1_to_3_days
+        * `over_3_days` - over_3_days
     BulkSetDateRequest:
       type: object
       properties:
@@ -4348,6 +4658,14 @@ components:
           $ref: '#/components/schemas/TenantRoleEnum'
       required:
       - role
+    ChannelEnum:
+      enum:
+      - whatsapp
+      - voice
+      type: string
+      description: |-
+        * `whatsapp` - WhatsApp
+        * `voice` - Voice call
     ChannelOrderEnum:
       enum:
       - whatsapp
@@ -4788,6 +5106,22 @@ components:
       - printed_at
       - quantity
       - status
+    DeliveryStatusEnum:
+      enum:
+      - queued
+      - sent
+      - delivered
+      - read
+      - answered
+      - failed
+      type: string
+      description: |-
+        * `queued` - Queued
+        * `sent` - Sent
+        * `delivered` - Delivered
+        * `read` - Read
+        * `answered` - Answered
+        * `failed` - Failed
     EntityEnum:
       enum:
       - subscribers
@@ -5004,6 +5338,29 @@ components:
       - outcome
       - scheduled_date
       - status
+    FollowUpAgeing:
+      type: object
+      properties:
+        total:
+          type: integer
+        buckets:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgeingBucket'
+        by_outcome:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+          description: 'Per outcome: `outcome`, `total` and a count per bucket key'
+        generated_at:
+          type: string
+          format: date-time
+      required:
+      - buckets
+      - by_outcome
+      - generated_at
+      - total
     FollowUpSummary:
       type: object
       properties:
@@ -5052,6 +5409,26 @@ components:
       - database
       - redis
       - status
+    HealthArea:
+      type: object
+      properties:
+        area:
+          type: string
+          nullable: true
+        total:
+          type: integer
+        no_consent:
+          type: integer
+        opted_out:
+          type: integer
+        failed_numbers:
+          type: integer
+      required:
+      - area
+      - failed_numbers
+      - no_consent
+      - opted_out
+      - total
     Home:
       type: object
       properties:
@@ -5539,6 +5916,112 @@ components:
       - template_id
       - template_name
       - version
+    LogEntry:
+      type: object
+      description: One message or call with its replies (Communication log, spec 2.8).
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        channel:
+          allOf:
+          - $ref: '#/components/schemas/ChannelEnum'
+          readOnly: true
+        sent_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        delivery_status:
+          allOf:
+          - $ref: '#/components/schemas/DeliveryStatusEnum'
+          readOnly: true
+        failure_reason:
+          type: string
+          readOnly: true
+        cost_paise:
+          type: integer
+          readOnly: true
+        booking_id:
+          type: string
+          format: uuid
+        booking_reference:
+          type: string
+        subscriber_id:
+          type: string
+          format: uuid
+        customer_name:
+          type: string
+        mobile_number:
+          type: string
+        area_name:
+          type: string
+          nullable: true
+        responses:
+          type: array
+          items:
+            $ref: '#/components/schemas/LogResponse'
+      required:
+      - area_name
+      - booking_id
+      - booking_reference
+      - channel
+      - cost_paise
+      - customer_name
+      - delivery_status
+      - failure_reason
+      - id
+      - mobile_number
+      - responses
+      - sent_at
+      - subscriber_id
+    LogResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        received_at:
+          type: string
+          format: date-time
+          readOnly: true
+        raw_text:
+          type: string
+          readOnly: true
+        button_payload:
+          type: string
+          readOnly: true
+        transcript:
+          type: string
+          readOnly: true
+        outcome:
+          allOf:
+          - $ref: '#/components/schemas/BookingOutcomeEnum'
+          readOnly: true
+        confidence:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,3})?$
+          readOnly: true
+          nullable: true
+        has_recording:
+          type: boolean
+          readOnly: true
+        recording_expired:
+          type: boolean
+          readOnly: true
+      required:
+      - button_payload
+      - confidence
+      - has_recording
+      - id
+      - outcome
+      - raw_text
+      - received_at
+      - recording_expired
+      - transcript
     LoginRequest:
       type: object
       properties:
@@ -5683,6 +6166,22 @@ components:
       required:
       - otpauth_url
       - secret
+    OutcomeShare:
+      type: object
+      properties:
+        outcome:
+          type: string
+          description: An outcome, or `awaiting` for no outcome yet
+        count:
+          type: integer
+        share:
+          type: number
+          format: double
+          description: Percent of reminded bookings
+      required:
+      - count
+      - outcome
+      - share
     PaginatedAdminChangeRequestList:
       type: object
       required:
@@ -5858,6 +6357,31 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ImportJob'
+    PaginatedLogEntryList:
+      type: object
+      required:
+      - count
+      - next
+      - previous
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/LogEntry'
     PaginatedStaffMemberList:
       type: object
       required:
@@ -6286,6 +6810,22 @@ components:
           nullable: true
       required:
       - assigned_staff
+    RecordingLink:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+        expires_in:
+          type: integer
+          description: Seconds the link stays valid (300)
+        expires_at:
+          type: string
+          format: date-time
+      required:
+      - expires_at
+      - expires_in
+      - url
     ReferenceData:
       type: object
       properties:
@@ -6313,6 +6853,49 @@ components:
       - states
       - timezones
       - whatsapp_dev_controls
+    ReminderResults:
+      type: object
+      properties:
+        date_from:
+          type: string
+          format: date
+        date_to:
+          type: string
+          format: date
+        sent:
+          type: integer
+          description: WhatsApp messages sent in the range
+        delivered:
+          type: integer
+        failed:
+          type: integer
+        replied:
+          type: integer
+        calls:
+          type: integer
+        calls_answered:
+          type: integer
+        cost_paise:
+          type: integer
+        reminded:
+          type: integer
+          description: Bookings with a reminder in the range
+        outcomes:
+          type: array
+          items:
+            $ref: '#/components/schemas/OutcomeShare'
+      required:
+      - calls
+      - calls_answered
+      - cost_paise
+      - date_from
+      - date_to
+      - delivered
+      - failed
+      - outcomes
+      - reminded
+      - replied
+      - sent
     ReminderRuleRequest:
       type: object
       properties:
@@ -6863,6 +7446,29 @@ components:
       - status
       - updated_at
       - whatsapp_consent
+    SubscriberHealth:
+      type: object
+      properties:
+        total:
+          type: integer
+          description: Active subscribers
+        no_consent:
+          type: integer
+        opted_out:
+          type: integer
+        failed_numbers:
+          type: integer
+          description: Latest WhatsApp message in the last 30 days failed
+        by_area:
+          type: array
+          items:
+            $ref: '#/components/schemas/HealthArea'
+      required:
+      - by_area
+      - failed_numbers
+      - no_consent
+      - opted_out
+      - total
     SubscriberRequest:
       type: object
       properties:

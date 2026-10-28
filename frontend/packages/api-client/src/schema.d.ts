@@ -1067,6 +1067,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/portal/communication-log": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Every message and call with its replies; call transcripts; 5-minute recording links. */
+        get: operations["portal_communication_log_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/communication-log/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Every message and call with its replies; call transcripts; 5-minute recording links. */
+        get: operations["portal_communication_log_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/communication-log/{id}/recording": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description A presigned link to the call recording, valid for 5 minutes. Every play is audited. */
+        get: operations["portal_communication_log_recording_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/portal/config": {
         parameters: {
             query?: never;
@@ -1517,6 +1568,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/portal/reports/{report}/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Any report as CSV, with the same filters as the screen. Every export is audited. */
+        get: operations["portal_reports_export_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/reports/follow-up-ageing": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Follow-up ageing: open items by waiting time, per outcome. */
+        get: operations["portal_reports_follow_up_ageing_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/reports/reminder-results": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Reminder results: sent, delivered, replied, and each outcome as count and share. */
+        get: operations["portal_reports_reminder_results_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/reports/subscriber-health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Subscriber health: no consent, opted out, failed numbers; by area. */
+        get: operations["portal_reports_subscriber_health_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/portal/staff": {
         parameters: {
             query?: never;
@@ -1743,6 +1862,10 @@ export interface components {
          * @enum {string}
          */
         AdminChangeRequestUpdateStatusEnum: "in_progress";
+        AgeingBucket: {
+            bucket: components["schemas"]["BucketEnum"];
+            count: number;
+        };
         Agency: {
             /** Format: uuid */
             readonly id: string;
@@ -1942,6 +2065,14 @@ export interface components {
          * @enum {string}
          */
         BookingStatusEnum: "booked" | "reminded" | "awaiting_reply" | "closed" | "cancelled";
+        /**
+         * @description * `under_4h` - under_4h
+         *     * `4_to_24h` - 4_to_24h
+         *     * `1_to_3_days` - 1_to_3_days
+         *     * `over_3_days` - over_3_days
+         * @enum {string}
+         */
+        BucketEnum: "under_4h" | "4_to_24h" | "1_to_3_days" | "over_3_days";
         BulkSetDateRequest: {
             ids: string[];
             /** Format: date */
@@ -2049,6 +2180,12 @@ export interface components {
         ChangeRoleRequest: {
             role: components["schemas"]["TenantRoleEnum"];
         };
+        /**
+         * @description * `whatsapp` - WhatsApp
+         *     * `voice` - Voice call
+         * @enum {string}
+         */
+        ChannelEnum: "whatsapp" | "voice";
         /**
          * @description * `whatsapp` - whatsapp
          *     * `voice` - voice
@@ -2213,6 +2350,16 @@ export interface components {
             readonly quantity: number;
         };
         /**
+         * @description * `queued` - Queued
+         *     * `sent` - Sent
+         *     * `delivered` - Delivered
+         *     * `read` - Read
+         *     * `answered` - Answered
+         *     * `failed` - Failed
+         * @enum {string}
+         */
+        DeliveryStatusEnum: "queued" | "sent" | "delivered" | "read" | "answered" | "failed";
+        /**
          * @description * `subscribers` - subscribers
          *     * `bookings` - bookings
          * @enum {string}
@@ -2298,6 +2445,16 @@ export interface components {
             readonly last_reply: string;
             readonly failure_reason: string;
         };
+        FollowUpAgeing: {
+            total: number;
+            buckets: components["schemas"]["AgeingBucket"][];
+            /** @description Per outcome: `outcome`, `total` and a count per bucket key */
+            by_outcome: {
+                [key: string]: unknown;
+            }[];
+            /** Format: date-time */
+            generated_at: string;
+        };
         FollowUpSummary: {
             /** Format: uuid */
             readonly id: string;
@@ -2319,6 +2476,13 @@ export interface components {
             status: string;
             database: string;
             redis: string;
+        };
+        HealthArea: {
+            area: string | null;
+            total: number;
+            no_consent: number;
+            opted_out: number;
+            failed_numbers: number;
         };
         Home: {
             /** Format: date */
@@ -2517,6 +2681,40 @@ export interface components {
             status: string;
             is_live: boolean;
         };
+        /** @description One message or call with its replies (Communication log, spec 2.8). */
+        LogEntry: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly channel: components["schemas"]["ChannelEnum"];
+            /** Format: date-time */
+            readonly sent_at: string | null;
+            readonly delivery_status: components["schemas"]["DeliveryStatusEnum"];
+            readonly failure_reason: string;
+            readonly cost_paise: number;
+            /** Format: uuid */
+            booking_id: string;
+            booking_reference: string;
+            /** Format: uuid */
+            subscriber_id: string;
+            customer_name: string;
+            mobile_number: string;
+            area_name: string | null;
+            responses: components["schemas"]["LogResponse"][];
+        };
+        LogResponse: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: date-time */
+            readonly received_at: string;
+            readonly raw_text: string;
+            readonly button_payload: string;
+            readonly transcript: string;
+            readonly outcome: components["schemas"]["BookingOutcomeEnum"];
+            /** Format: decimal */
+            readonly confidence: string | null;
+            readonly has_recording: boolean;
+            readonly recording_expired: boolean;
+        };
         LoginRequest: {
             /** Format: email */
             email: string;
@@ -2578,6 +2776,16 @@ export interface components {
             otpauth_url: string;
             /** @description Hex key, for manual entry. */
             secret: string;
+        };
+        OutcomeShare: {
+            /** @description An outcome, or `awaiting` for no outcome yet */
+            outcome: string;
+            count: number;
+            /**
+             * Format: double
+             * @description Percent of reminded bookings
+             */
+            share: number;
         };
         PaginatedAdminChangeRequestList: {
             /** @example 123 */
@@ -2683,6 +2891,21 @@ export interface components {
              */
             previous: string | null;
             results: components["schemas"]["ImportJob"][];
+        };
+        PaginatedLogEntryList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous: string | null;
+            results: components["schemas"]["LogEntry"][];
         };
         PaginatedStaffMemberList: {
             /** @example 123 */
@@ -2891,6 +3114,14 @@ export interface components {
             /** Format: uuid */
             assigned_staff: string | null;
         };
+        RecordingLink: {
+            /** Format: uri */
+            url: string;
+            /** @description Seconds the link stays valid (300) */
+            expires_in: number;
+            /** Format: date-time */
+            expires_at: string;
+        };
         ReferenceData: {
             states: components["schemas"]["StateOption"][];
             languages: components["schemas"]["LanguageOption"][];
@@ -2898,6 +3129,23 @@ export interface components {
             daily_send_cap: components["schemas"]["SendCapLimits"];
             /** @description Development only: the Simulate panel (stub provider + DEBUG) is available. */
             whatsapp_dev_controls: boolean;
+        };
+        ReminderResults: {
+            /** Format: date */
+            date_from: string;
+            /** Format: date */
+            date_to: string;
+            /** @description WhatsApp messages sent in the range */
+            sent: number;
+            delivered: number;
+            failed: number;
+            replied: number;
+            calls: number;
+            calls_answered: number;
+            cost_paise: number;
+            /** @description Bookings with a reminder in the range */
+            reminded: number;
+            outcomes: components["schemas"]["OutcomeShare"][];
         };
         ReminderRuleRequest: {
             send_time: string;
@@ -3099,6 +3347,15 @@ export interface components {
             readonly created_at: string;
             /** Format: date-time */
             readonly updated_at: string;
+        };
+        SubscriberHealth: {
+            /** @description Active subscribers */
+            total: number;
+            no_consent: number;
+            opted_out: number;
+            /** @description Latest WhatsApp message in the last 30 days failed */
+            failed_numbers: number;
+            by_area: components["schemas"]["HealthArea"][];
         };
         SubscriberRequest: {
             customer_name: string;
@@ -5203,6 +5460,84 @@ export interface operations {
             };
         };
     };
+    portal_communication_log_list: {
+        parameters: {
+            query?: {
+                booking?: string;
+                channel?: "voice" | "whatsapp";
+                /** @description From this day (India time), inclusive */
+                date_from?: string;
+                /** @description To this day (India time), inclusive */
+                date_to?: string;
+                delivery_status?: "answered" | "delivered" | "failed" | "queued" | "read" | "sent";
+                has_recording?: boolean;
+                outcome?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Booking reference, name, mobile or consumer no. */
+                search?: string;
+                subscriber?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedLogEntryList"];
+                };
+            };
+        };
+    };
+    portal_communication_log_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this attempt. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogEntry"];
+                };
+            };
+        };
+    };
+    portal_communication_log_recording_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this attempt. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecordingLink"];
+                };
+            };
+        };
+    };
     portal_config_retrieve: {
         parameters: {
             query?: never;
@@ -5852,6 +6187,115 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ReminderSettings"];
+                };
+            };
+        };
+    };
+    portal_reports_export_retrieve: {
+        parameters: {
+            query?: {
+                /** @description An area id, or `none` */
+                area?: string;
+                booking?: string;
+                channel?: "voice" | "whatsapp";
+                cylinder_type?: string;
+                /** @description From this day (India time), inclusive */
+                date_from?: string;
+                /** @description To this day (India time), inclusive */
+                date_to?: string;
+                delivery_status?: "answered" | "delivered" | "failed" | "queued" | "read" | "sent";
+                has_recording?: boolean;
+                outcome?: string;
+                /** @description Booking reference, name, mobile or consumer no. */
+                search?: string;
+                subscriber?: string;
+            };
+            header?: never;
+            path: {
+                report: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
+                };
+            };
+        };
+    };
+    portal_reports_follow_up_ageing_retrieve: {
+        parameters: {
+            query?: {
+                /** @description An area id, or `none` */
+                area?: string;
+                outcome?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FollowUpAgeing"];
+                };
+            };
+        };
+    };
+    portal_reports_reminder_results_retrieve: {
+        parameters: {
+            query?: {
+                /** @description An area id, or `none` */
+                area?: string;
+                cylinder_type?: string;
+                /** @description From this day (India time), inclusive */
+                date_from?: string;
+                /** @description To this day (India time), inclusive */
+                date_to?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReminderResults"];
+                };
+            };
+        };
+    };
+    portal_reports_subscriber_health_retrieve: {
+        parameters: {
+            query?: {
+                /** @description An area id, or `none` */
+                area?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriberHealth"];
                 };
             };
         };

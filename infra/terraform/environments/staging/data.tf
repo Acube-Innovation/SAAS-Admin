@@ -139,6 +139,21 @@ resource "aws_s3_bucket_lifecycle_configuration" "files" {
       days_after_initiation = 7
     }
   }
+  # Call recordings are kept for 90 days (portal spec 2.8). The app writes them under
+  # recordings/<tenant>/ (apps/schedules/recordings.py) and stops offering a link at 90 days.
+  rule {
+    id     = "expire-recordings"
+    status = "Enabled"
+    filter {
+      prefix = "recordings/"
+    }
+    expiration {
+      days = 90
+    }
+    noncurrent_version_expiration {
+      noncurrent_days = 1
+    }
+  }
 }
 
 resource "aws_s3_bucket_policy" "files_tls_only" {

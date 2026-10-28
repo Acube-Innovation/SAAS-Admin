@@ -7,14 +7,19 @@ voice calls, replies and outcomes. Deterministic (same --seed, same data). Local
 """
 
 import datetime as dt
+import io
+import math
 import random
 import secrets
 import sys
 import uuid
+import wave
 import zoneinfo
 
 from django.conf import settings
 from django.contrib.auth import password_validation
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
@@ -37,6 +42,7 @@ from apps.messaging_templates.models import (
     WhatsAppTemplateVersion,
 )
 from apps.schedules.models import Attempt, Outcome, Response, Schedule, ScheduleEvent
+from apps.schedules.recordings import recording_key
 from apps.schedules.services import FOLLOW_UP_OUTCOMES, plan_job
 from apps.subscribers.models import Area, Subscriber
 
@@ -182,6 +188,24 @@ BUTTONS = {
 }
 WHATSAPP_COST_PAISE = 15
 VOICE_COST_PAISE = 150
+
+
+def demo_recording(seconds: float = 3.0, rate: int = 8000) -> bytes:
+    """A small mono WAV standing in for a call recording: two soft tones, like a short exchange."""
+    frames = bytearray()
+    for n in range(int(seconds * rate)):
+        t = n / rate
+        tone = 440 if t < seconds / 2 else 330
+        envelope = min(1.0, (t % (seconds / 2)) * 8, ((seconds / 2) - t % (seconds / 2)) * 8)
+        sample = int(9000 * envelope * math.sin(2 * math.pi * tone * t))
+        frames += sample.to_bytes(2, "little", signed=True)
+    buffer = io.BytesIO()
+    with wave.open(buffer, "wb") as out:
+        out.setnchannels(1)
+        out.setsampwidth(2)
+        out.setframerate(rate)
+        out.writeframes(bytes(frames))
+    return buffer.getvalue()
 
 
 class Command(BaseCommand):
@@ -335,6 +359,10 @@ class Command(BaseCommand):
         ScheduleEvent.objects.bulk_create(events, batch_size=1000)
         Attempt.objects.bulk_create(attempts, batch_size=1000)
         Response.objects.bulk_create(responses, batch_size=1000)
+        recordings = [r.recording_key for r in responses if r.recording_key]
+        audio = demo_recording()
+        for key in recordings:  # a short placeholder clip per call, so the player works locally
+            default_storage.save(key, ContentFile(audio))
         jobs, follow_ups = self.follow_through(tenant, schedules, today, rng)
         return {
             "areas": len(areas),
@@ -346,6 +374,7 @@ class Command(BaseCommand):
             "responses": len(responses),
             "delivery jobs": jobs,
             "follow-up items": follow_ups,
+            "recordings": len(recordings),
         }
 
     def create_content(self, tenant, template, owner):
@@ -536,7 +565,7 @@ class Command(BaseCommand):
                     attempt=call,
                     received_at=replied_at,
                     transcript=CALL_TRANSCRIPTS[outcome],
-                    recording_key=f"recordings/demo/{call.id}.mp3",
+                    recording_key=recording_key(tenant.id, call.id, "wav"),
                     outcome=outcome,
                     confidence=round(rng.uniform(0.82, 0.99), 3),
                 )

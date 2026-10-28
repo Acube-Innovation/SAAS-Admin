@@ -132,6 +132,14 @@ Actions: **set new date** (restarts the reminder cycle), **mark contacted**, **c
 
 CSV export for each report. Exports are audited.
 
+Dates are India days, inclusive; the default range is the last 7 days and at most 366. *Reminder results*: `sent`,
+`delivered` (delivered or read), `failed` and `replied` count WhatsApp messages sent in the range; `calls` and
+`calls_answered` count voice attempts; `reminded` is the number of bookings with a reminder in the range, and each
+outcome's share is of those bookings (`awaiting` = no outcome yet). *Follow-up ageing*: open and contacted items in
+buckets under 4 h, 4–24 h, 1–3 days, over 3 days. *Subscriber health*: active subscribers without WhatsApp consent,
+opted out, or whose latest WhatsApp message in the last 30 days failed. *Message log*: one CSV row per reply (or per
+attempt without a reply).
+
 ### 2.6 Messages and voice (view-only), approvals, change requests
 
 - **View-only** list of the tenant's WhatsApp templates (live version per language) shown in a **WhatsApp phone
@@ -158,6 +166,14 @@ CSV export for each report. Exports are audited.
 Every `Attempt` (message or call) with subscriber, booking, channel, time, delivery status and cost, plus its
 `Response`s. Transcript view for calls. Recording player using **S3 presigned links valid for 5 minutes**. Every
 play is audited. Recordings expire after 90 days (S3 lifecycle rule).
+
+- Recordings are stored at `recordings/<tenant_id>/<attempt_id>.<ext>` (`apps/schedules/recordings.py`), so one
+  lifecycle rule on the `recordings/` prefix (`expire-recordings` in `infra/terraform/environments/staging/data.tf`)
+  deletes them 90 days after upload. From day 90 the API answers `410 recording_expired` and the screen says the
+  recording was deleted.
+- The link is fetched only when someone presses Play, and each fetch writes a `recording_played` audit entry
+  (attempt, key, `expires_in`). The player drops the link when it expires; Play again asks for a new one.
+- Storage keys never appear in API responses (`has_recording`, `recording_expired` only).
 
 ### 2.9 Wallet and billing / Plan
 
@@ -362,6 +378,10 @@ systems under `/api/v1/` (API key auth, per-key rate limits): subscribers, sched
 | GET | `content/question-flows` | Each schedule type's answers and the outcome each records | all |
 | GET POST | `change-requests` · `change-requests/{id}` | List (`status`; 50 per page), raise (`request_type`, `subject` 5–150, `description` ≤ 2,000); detail with comments (staff shown by name only) and the linked version. No edit or delete (`405`) | read: all · raise: owner, manager |
 | POST | `change-requests/{id}/comments` | Comment (1–2,000 characters); closed requests answer `409 request_closed` | owner, manager |
+| GET | `communication-log` · `communication-log/{id}` | Every attempt with its replies, newest first (`date_from`/`date_to`, `channel`, `delivery_status`, `outcome`, `booking`, `subscriber`, `has_recording`, `search`; 50 per page) | all |
+| GET | `communication-log/{id}/recording` | `{url, expires_in: 300, expires_at}`: a presigned link to the call recording. Audited (`recording_played`). `404 no_recording`, `410 recording_expired` after 90 days | owner, manager (support: view) |
+| GET | `reports/reminder-results` · `reports/follow-up-ageing` · `reports/subscriber-health` | Reports (2.5) with their filters | owner, manager (support: view) |
+| GET | `reports/{report}/export` | CSV of `reminder-results`, `follow-up-ageing`, `subscriber-health` or `message-log` with the same filters (formula cells neutralised, ≤ 50,000 rows). Audited (`export`, `reports.<report>`) | owner, manager (support: view) |
 
 Platform staff in a support session can read everything above and change nothing. A suspended tenant reads only.
 

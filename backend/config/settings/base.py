@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "apps.portal",
     "apps.content_view",
     "apps.change_requests",
+    "apps.reports",
 ]
 
 AUTH_USER_MODEL = "accounts.User"
