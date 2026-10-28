@@ -1753,11 +1753,40 @@ paths:
               schema:
                 $ref: '#/components/schemas/BulkSetDateResult'
           description: ''
+  /api/portal/checklist:
+    post:
+      operationId: portal_checklist_create
+      description: The owner ticks a manual checklist item or skips auto top-up (Workflow
+        3.6).
+      tags:
+      - portal
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChecklistActionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ChecklistActionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ChecklistActionRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Checklist'
+          description: ''
   /api/portal/config:
     get:
       operationId: portal_config_retrieve
-      description: 'The tenant''s industry configuration: field labels, choice lists,
-        schedule types.'
+      description: |-
+        Everything the portal shell needs: the user's role here (menu, spec 1.1), the agency's status
+        (read-only banner) and the industry template's labels and choice lists.
       tags:
       - portal
       security:
@@ -2039,6 +2068,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/FollowUp'
+          description: ''
+  /api/portal/home:
+    get:
+      operationId: portal_home_retrieve
+      description: 'Home (spec 2.1): tomorrow''s bookings, follow-up queue, alerts.
+        Refreshed every 30 s.'
+      tags:
+      - portal
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Home'
           description: ''
   /api/portal/imports:
     get:
@@ -2494,20 +2539,6 @@ components:
           maxLength: 100
       required:
       - password
-    ActionEnum:
-      enum:
-      - provider_approve
-      - provider_reject
-      - provider_pause
-      - client_approve
-      - client_send_back
-      type: string
-      description: |-
-        * `provider_approve` - provider_approve
-        * `provider_reject` - provider_reject
-        * `provider_pause` - provider_pause
-        * `client_approve` - client_approve
-        * `client_send_back` - client_send_back
     AnswerOutcomeEnum:
       enum:
       - confirmed
@@ -3046,6 +3077,70 @@ components:
       description: |-
         * `whatsapp` - whatsapp
         * `voice` - voice
+    Checklist:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChecklistItem'
+        complete:
+          type: boolean
+      required:
+      - complete
+      - items
+    ChecklistActionActionEnum:
+      enum:
+      - done
+      - skip
+      - unskip
+      type: string
+      description: |-
+        * `done` - done
+        * `skip` - skip
+        * `unskip` - unskip
+    ChecklistActionRequest:
+      type: object
+      properties:
+        item:
+          $ref: '#/components/schemas/ItemEnum'
+        action:
+          $ref: '#/components/schemas/ChecklistActionActionEnum'
+      required:
+      - action
+      - item
+    ChecklistItem:
+      type: object
+      properties:
+        key:
+          $ref: '#/components/schemas/KeyEnum'
+        done:
+          type: boolean
+        skipped:
+          type: boolean
+        can_skip:
+          type: boolean
+        manual:
+          type: boolean
+          description: Ticked by the owner (the others tick themselves)
+      required:
+      - can_skip
+      - done
+      - key
+      - manual
+      - skipped
+    CodeEnum:
+      enum:
+      - tenant_suspended
+      - template_paused
+      - no_live_template
+      - send_cap_reached
+      type: string
+      description: |-
+        * `tenant_suspended` - tenant_suspended
+        * `template_paused` - template_paused
+        * `no_live_template` - no_live_template
+        * `send_cap_reached` - send_cap_reached
     ConsentSourceEnum:
       enum:
       - paper_form
@@ -3433,6 +3528,102 @@ components:
       - database
       - redis
       - status
+    Home:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        tomorrow:
+          type: string
+          format: date
+        tomorrow_counts:
+          $ref: '#/components/schemas/HomeTomorrowCounts'
+        follow_up:
+          $ref: '#/components/schemas/HomeFollowUp'
+        no_date:
+          type: integer
+        alerts:
+          type: array
+          items:
+            $ref: '#/components/schemas/HomeAlert'
+        sent_today:
+          type: integer
+        daily_send_cap:
+          type: integer
+        checklist:
+          allOf:
+          - $ref: '#/components/schemas/Checklist'
+          nullable: true
+          description: Owner only (Workflow 3.6)
+        generated_at:
+          type: string
+          format: date-time
+      required:
+      - alerts
+      - checklist
+      - daily_send_cap
+      - date
+      - follow_up
+      - generated_at
+      - no_date
+      - sent_today
+      - tomorrow
+      - tomorrow_counts
+    HomeAlert:
+      type: object
+      properties:
+        code:
+          $ref: '#/components/schemas/CodeEnum'
+        severity:
+          $ref: '#/components/schemas/SeverityEnum'
+      required:
+      - code
+      - severity
+    HomeFollowUp:
+      type: object
+      properties:
+        open:
+          type: integer
+        oldest_minutes:
+          type: integer
+          nullable: true
+        by_ageing:
+          type: object
+          additionalProperties:
+            type: integer
+      required:
+      - by_ageing
+      - oldest_minutes
+      - open
+    HomeTomorrowCounts:
+      type: object
+      properties:
+        total:
+          type: integer
+        confirmed:
+          type: integer
+        reschedule:
+          type: integer
+        not_available:
+          type: integer
+        no_response:
+          type: integer
+        awaiting_reply:
+          type: integer
+        needs_review:
+          type: integer
+        not_reminded_yet:
+          type: integer
+      required:
+      - awaiting_reply
+      - confirmed
+      - needs_review
+      - no_response
+      - not_available
+      - not_reminded_yet
+      - reschedule
+      - total
     ImportJob:
       type: object
       properties:
@@ -3641,6 +3832,16 @@ components:
       - requires_2fa
       - role
       - tenant_name
+    ItemEnum:
+      enum:
+      - agency_details
+      - auto_top_up
+      - reminder_settings
+      type: string
+      description: |-
+        * `agency_details` - agency_details
+        * `auto_top_up` - auto_top_up
+        * `reminder_settings` - reminder_settings
     JobSummary:
       type: object
       properties:
@@ -3676,6 +3877,24 @@ components:
         * `pending` - Pending
         * `done` - Done
         * `cancelled` - Cancelled
+    KeyEnum:
+      enum:
+      - agency_details
+      - areas
+      - reminder_settings
+      - import_subscribers
+      - import_bookings
+      - invite_team
+      - auto_top_up
+      type: string
+      description: |-
+        * `agency_details` - agency_details
+        * `areas` - areas
+        * `reminder_settings` - reminder_settings
+        * `import_subscribers` - import_subscribers
+        * `import_bookings` - import_bookings
+        * `invite_team` - invite_team
+        * `auto_top_up` - auto_top_up
     LanguageEnum:
       enum:
       - ml
@@ -4266,8 +4485,21 @@ components:
     PortalConfig:
       type: object
       properties:
+        tenant_id:
+          type: string
+          format: uuid
         tenant_name:
           type: string
+        tenant_status:
+          $ref: '#/components/schemas/TenantStatusEnum'
+        suspended_at:
+          type: string
+          format: date-time
+          nullable: true
+        suspension_reason:
+          type: string
+        role:
+          $ref: '#/components/schemas/PortalConfigRoleEnum'
         default_language:
           type: string
         template:
@@ -4284,10 +4516,27 @@ components:
             additionalProperties: {}
       required:
       - default_language
+      - role
       - schedule_types
       - subscriber_fields
+      - suspended_at
+      - suspension_reason
       - template
+      - tenant_id
       - tenant_name
+      - tenant_status
+    PortalConfigRoleEnum:
+      enum:
+      - owner
+      - manager
+      - office_staff
+      - support
+      type: string
+      description: |-
+        * `owner` - owner
+        * `manager` - manager
+        * `office_staff` - office_staff
+        * `support` - support
     QualityRatingEnum:
       enum:
       - GREEN
@@ -4490,6 +4739,14 @@ components:
           format: date
       required:
       - scheduled_date
+    SeverityEnum:
+      enum:
+      - error
+      - warn
+      type: string
+      description: |-
+        * `error` - error
+        * `warn` - warn
     SignoffMethodEnum:
       enum:
       - client
@@ -4498,11 +4755,25 @@ components:
       description: |-
         * `client` - Client
         * `manual` - Manual
+    SimulateActionEnum:
+      enum:
+      - provider_approve
+      - provider_reject
+      - provider_pause
+      - client_approve
+      - client_send_back
+      type: string
+      description: |-
+        * `provider_approve` - provider_approve
+        * `provider_reject` - provider_reject
+        * `provider_pause` - provider_pause
+        * `client_approve` - client_approve
+        * `client_send_back` - client_send_back
     SimulateRequest:
       type: object
       properties:
         action:
-          $ref: '#/components/schemas/ActionEnum'
+          $ref: '#/components/schemas/SimulateActionEnum'
         reason:
           type: string
           default: ''

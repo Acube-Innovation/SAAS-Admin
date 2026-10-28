@@ -4,13 +4,12 @@ from django.db import transaction
 from django.db.models import Count, Q
 from django.http import HttpResponse
 from django.utils.text import slugify
-from drf_spectacular.utils import OpenApiParameter, extend_schema, inline_serializer
-from rest_framework import mixins, serializers, viewsets
+from drf_spectacular.utils import OpenApiParameter, extend_schema
+from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from apps.accounts.permissions import tenant_roles
 from apps.audit.mixins import AuditedModelMixin
@@ -18,7 +17,6 @@ from apps.audit.models import Action
 from apps.core.exceptions import ApiError
 from apps.core.models import Tenant
 from apps.core.portal import PortalViewMixin
-from apps.industry.services import tenant_config
 
 from . import importer
 from .models import Area, ImportJob, Subscriber
@@ -31,35 +29,6 @@ from .serializers import (
 
 ALL_ROLES = tenant_roles("owner", "manager", "office_staff")
 MANAGERS = tenant_roles("owner", "manager")
-
-
-class PortalConfigView(APIView):
-    """The tenant's industry configuration: field labels, choice lists, schedule types."""
-
-    permission_classes = [ALL_ROLES]
-
-    @extend_schema(
-        tags=["portal"],
-        responses=inline_serializer(
-            "PortalConfig",
-            {
-                "tenant_name": serializers.CharField(),
-                "default_language": serializers.CharField(),
-                "template": serializers.CharField(),
-                "subscriber_fields": serializers.ListField(child=serializers.DictField()),
-                "schedule_types": serializers.ListField(child=serializers.DictField()),
-            },
-        ),
-    )
-    def get(self, request):
-        tenant = Tenant.objects.select_related("industry_template").get(pk=request.tenant_id)
-        return Response(
-            {
-                "tenant_name": tenant.name,
-                "default_language": tenant.default_language,
-                **tenant_config(tenant),
-            }
-        )
 
 
 @extend_schema(tags=["portal: areas and staff"])

@@ -4,11 +4,11 @@ from django.urls import path
 from rest_framework.routers import SimpleRouter
 
 from apps.jobs.views import DeliveriesView, FollowUpViewSet, JobViewSet, StaffMemberViewSet
+from apps.portal.views import ChecklistView, HomeView, PortalConfigView
 from apps.schedules.views import BookingViewSet
 from apps.subscribers.views import (
     AreaViewSet,
     ImportJobViewSet,
-    PortalConfigView,
     SubscriberViewSet,
 )
 
@@ -23,6 +23,8 @@ router.register("follow-ups", FollowUpViewSet, basename="portal-follow-up")
 
 urlpatterns = [
     path("config", PortalConfigView.as_view(), name="portal-config"),
+    path("home", HomeView.as_view(), name="portal-home"),
+    path("checklist", ChecklistView.as_view(), name="portal-checklist"),
     path("deliveries", DeliveriesView.as_view(), name="portal-deliveries"),
     *router.urls,
 ]

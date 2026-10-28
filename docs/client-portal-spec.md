@@ -280,6 +280,12 @@ Import details (subscribers):
    bookings → invite team → **set up auto top-up (skippable)**.
 3. Each item ticks when done. The checklist hides when everything is done or skipped.
 
+Implementation (Step 15): areas, subscribers, bookings and team tick themselves from the data (an active area, any
+subscriber, any booking, a second membership). Agency details and reminder settings are ticked by the owner until
+their screens exist (Step 16); auto top-up can only be skipped until billing (wallet and wallet-empty alerts arrive
+with billing; held reminders with the Phase 2 engine). Platform staff open the portal only through a support session
+(read-only, with a banner); a user in several agencies chooses one at sign-in and can switch.
+
 ---
 
 ## 4. Non-functional requirements
@@ -320,7 +326,9 @@ systems under `/api/v1/` (API key auth, per-key rate limits): subscribers, sched
 
 | Method | Path | Purpose | Roles (writes) |
 | --- | --- | --- | --- |
-| GET | `config` | Tenant name, default language, industry fields (labels, choices) and schedule types | all |
+| GET | `config` | The user's role here (`owner`, `manager`, `office_staff`, `support`), agency status (`tenant_status`, `suspended_at`, `suspension_reason`), default language, industry fields (labels, choices) and schedule types | all |
+| GET | `home` | Home (2.1): tomorrow's bookings by outcome, follow-up queue size and oldest age, bookings with no date, alerts (`tenant_suspended`, `template_paused`, `no_live_template`, `send_cap_reached`), sends today vs the daily cap, and the checklist (owner only) | all |
+| POST | `checklist` | Owner ticks `agency_details` / `reminder_settings` (`done`) or skips / unskips `auto_top_up` (Workflow 3.6) | owner |
 | GET POST PATCH | `subscribers` · `subscribers/{id}` | List (search, `area` / `none`, `status`, `consent`, `opted_out`; 50 per page), add, edit | all |
 | POST | `subscribers/{id}/deactivate` | Set inactive (there is no delete) | all |
 | GET POST PATCH | `areas` · `areas/{id}` | List (`active=true`; with subscriber counts), add, edit / deactivate | read: all · write: owner, manager |

@@ -861,6 +861,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/portal/checklist": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description The owner ticks a manual checklist item or skips auto top-up (Workflow 3.6). */
+        post: operations["portal_checklist_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/portal/config": {
         parameters: {
             query?: never;
@@ -868,7 +885,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description The tenant's industry configuration: field labels, choice lists, schedule types. */
+        /**
+         * @description Everything the portal shell needs: the user's role here (menu, spec 1.1), the agency's status
+         *     (read-only banner) and the industry template's labels and choice lists.
+         */
         get: operations["portal_config_retrieve"];
         put?: never;
         post?: never;
@@ -1008,6 +1028,23 @@ export interface paths {
         put?: never;
         /** @description The follow-up queue: every booking whose outcome is not Confirmed (spec 2.4). */
         post: operations["portal_follow_ups_set_date_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/home": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Home (spec 2.1): tomorrow's bookings, follow-up queue, alerts. Refreshed every 30 s. */
+        get: operations["portal_home_retrieve"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1218,15 +1255,6 @@ export interface components {
             full_name?: string;
         };
         /**
-         * @description * `provider_approve` - provider_approve
-         *     * `provider_reject` - provider_reject
-         *     * `provider_pause` - provider_pause
-         *     * `client_approve` - client_approve
-         *     * `client_send_back` - client_send_back
-         * @enum {string}
-         */
-        ActionEnum: "provider_approve" | "provider_reject" | "provider_pause" | "client_approve" | "client_send_back";
-        /**
          * @description * `confirmed` - confirmed
          *     * `not_available` - not_available
          *     * `reschedule` - reschedule
@@ -1434,6 +1462,37 @@ export interface components {
          * @enum {string}
          */
         ChannelOrderEnum: "whatsapp" | "voice";
+        Checklist: {
+            items: components["schemas"]["ChecklistItem"][];
+            complete: boolean;
+        };
+        /**
+         * @description * `done` - done
+         *     * `skip` - skip
+         *     * `unskip` - unskip
+         * @enum {string}
+         */
+        ChecklistActionActionEnum: "done" | "skip" | "unskip";
+        ChecklistActionRequest: {
+            item: components["schemas"]["ItemEnum"];
+            action: components["schemas"]["ChecklistActionActionEnum"];
+        };
+        ChecklistItem: {
+            key: components["schemas"]["KeyEnum"];
+            done: boolean;
+            skipped: boolean;
+            can_skip: boolean;
+            /** @description Ticked by the owner (the others tick themselves) */
+            manual: boolean;
+        };
+        /**
+         * @description * `tenant_suspended` - tenant_suspended
+         *     * `template_paused` - template_paused
+         *     * `no_live_template` - no_live_template
+         *     * `send_cap_reached` - send_cap_reached
+         * @enum {string}
+         */
+        CodeEnum: "tenant_suspended" | "template_paused" | "no_live_template" | "send_cap_reached";
         /**
          * @description * `paper_form` - Paper form
          *     * `verbal` - Verbal
@@ -1592,6 +1651,43 @@ export interface components {
             database: string;
             redis: string;
         };
+        Home: {
+            /** Format: date */
+            date: string;
+            /** Format: date */
+            tomorrow: string;
+            tomorrow_counts: components["schemas"]["HomeTomorrowCounts"];
+            follow_up: components["schemas"]["HomeFollowUp"];
+            no_date: number;
+            alerts: components["schemas"]["HomeAlert"][];
+            sent_today: number;
+            daily_send_cap: number;
+            /** @description Owner only (Workflow 3.6) */
+            checklist: components["schemas"]["Checklist"] | null;
+            /** Format: date-time */
+            generated_at: string;
+        };
+        HomeAlert: {
+            code: components["schemas"]["CodeEnum"];
+            severity: components["schemas"]["SeverityEnum"];
+        };
+        HomeFollowUp: {
+            open: number;
+            oldest_minutes: number | null;
+            by_ageing: {
+                [key: string]: number;
+            };
+        };
+        HomeTomorrowCounts: {
+            total: number;
+            confirmed: number;
+            reschedule: number;
+            not_available: number;
+            no_response: number;
+            awaiting_reply: number;
+            needs_review: number;
+            not_reminded_yet: number;
+        };
         ImportJob: {
             /** Format: uuid */
             readonly id: string;
@@ -1668,6 +1764,13 @@ export interface components {
             needs_new_password: boolean;
             requires_2fa: boolean;
         };
+        /**
+         * @description * `agency_details` - agency_details
+         *     * `auto_top_up` - auto_top_up
+         *     * `reminder_settings` - reminder_settings
+         * @enum {string}
+         */
+        ItemEnum: "agency_details" | "auto_top_up" | "reminder_settings";
         JobSummary: {
             /** Format: uuid */
             readonly id: string;
@@ -1685,6 +1788,17 @@ export interface components {
          * @enum {string}
          */
         JobSummaryStatusEnum: "pending" | "done" | "cancelled";
+        /**
+         * @description * `agency_details` - agency_details
+         *     * `areas` - areas
+         *     * `reminder_settings` - reminder_settings
+         *     * `import_subscribers` - import_subscribers
+         *     * `import_bookings` - import_bookings
+         *     * `invite_team` - invite_team
+         *     * `auto_top_up` - auto_top_up
+         * @enum {string}
+         */
+        KeyEnum: "agency_details" | "areas" | "reminder_settings" | "import_subscribers" | "import_bookings" | "invite_team" | "auto_top_up";
         /**
          * @description * `ml` - Malayalam
          *     * `en` - English
@@ -1981,7 +2095,14 @@ export interface components {
             };
         };
         PortalConfig: {
+            /** Format: uuid */
+            tenant_id: string;
             tenant_name: string;
+            tenant_status: components["schemas"]["TenantStatusEnum"];
+            /** Format: date-time */
+            suspended_at: string | null;
+            suspension_reason: string;
+            role: components["schemas"]["PortalConfigRoleEnum"];
             default_language: string;
             template: string;
             subscriber_fields: {
@@ -1991,6 +2112,14 @@ export interface components {
                 [key: string]: unknown;
             }[];
         };
+        /**
+         * @description * `owner` - owner
+         *     * `manager` - manager
+         *     * `office_staff` - office_staff
+         *     * `support` - support
+         * @enum {string}
+         */
+        PortalConfigRoleEnum: "owner" | "manager" | "office_staff" | "support";
         /**
          * @description * `GREEN` - GREEN
          *     * `YELLOW` - YELLOW
@@ -2063,13 +2192,28 @@ export interface components {
             scheduled_date: string;
         };
         /**
+         * @description * `error` - error
+         *     * `warn` - warn
+         * @enum {string}
+         */
+        SeverityEnum: "error" | "warn";
+        /**
          * @description * `client` - Client
          *     * `manual` - Manual
          * @enum {string}
          */
         SignoffMethodEnum: "client" | "manual";
+        /**
+         * @description * `provider_approve` - provider_approve
+         *     * `provider_reject` - provider_reject
+         *     * `provider_pause` - provider_pause
+         *     * `client_approve` - client_approve
+         *     * `client_send_back` - client_send_back
+         * @enum {string}
+         */
+        SimulateActionEnum: "provider_approve" | "provider_reject" | "provider_pause" | "client_approve" | "client_send_back";
         SimulateRequest: {
-            action: components["schemas"]["ActionEnum"];
+            action: components["schemas"]["SimulateActionEnum"];
             /** @default  */
             reason: string;
         };
@@ -3890,6 +4034,31 @@ export interface operations {
             };
         };
     };
+    portal_checklist_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChecklistActionRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ChecklistActionRequest"];
+                "multipart/form-data": components["schemas"]["ChecklistActionRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Checklist"];
+                };
+            };
+        };
+    };
     portal_config_retrieve: {
         parameters: {
             query?: never;
@@ -4115,6 +4284,25 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FollowUp"];
+                };
+            };
+        };
+    };
+    portal_home_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Home"];
                 };
             };
         };

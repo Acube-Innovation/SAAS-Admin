@@ -266,8 +266,7 @@ class SubscriberAdapter:
 
 
 ADAPTERS = {adapter.entity: adapter for adapter in [SubscriberAdapter()]}
-# Every entity the engine can import (bookings registers itself from apps.schedules).
-ENTITIES = ("subscribers", "bookings")
+# Bookings register their adapter from apps.schedules (AppConfig.ready).
 
 
 def register_adapter(adapter):
