@@ -29,6 +29,7 @@ class Action:
     DELETE = "delete"
     STATUS_CHANGE = "status_change"
     EXPORT = "export"
+    IMPORT = "import"
     LOGIN = "login"
     LOGIN_FAILED = "login_failed"
     ACCOUNT_LOCKED = "account_locked"

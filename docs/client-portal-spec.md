@@ -242,6 +242,19 @@ with a **test event**, HMAC-SHA256 signing secret, delivery log (retries for 24 
 5. An **error file** (original columns + `error` column) is available to download.
 6. The import is audited with counts.
 
+Import details (subscribers):
+- Headers match a field's key or its label, ignoring case and spacing (`Consumer number` = `external_ref`).
+  Unknown columns are ignored and listed in the preview. A missing required column or a repeated column fails the
+  whole file, as do a non-UTF-8 file and more than 50,000 rows.
+- Values: phones as in 2.2; dates `YYYY-MM-DD` or day first (`DD-MM-YYYY`, `DD/MM/YYYY`); yes/no as `yes`, `y`,
+  `true`, `1` / `no`, `n`, `false`, `0`; language as a code or name; area by name or code (must be active).
+- `whatsapp_consent = yes` without `consent_date` / `consent_source` records the import day and `import`.
+- Updates (existing `external_ref`): a blank cell leaves the stored value unchanged. An import never clears
+  `opted_out`. Custom fields are merged.
+- Confirm validates every row again (areas may have changed since the preview) and writes all valid rows in one
+  transaction: either all of them are saved or none. Imports stuck in a background step for 30 minutes are failed
+  (nothing saved) so the user can upload again.
+
 ### 3.6 First login (owner)
 
 1. Accept invite → set password → set up 2FA.
@@ -271,11 +284,11 @@ All are tenant-scoped (`tenant_id` + RLS) with UUID keys.
 | Area | subscribers | `name`, `code`, `default_staff`, `is_active` |
 | StaffMember | jobs | `name`, `phone`, `is_active` |
 | Subscriber | subscribers | see 2.2 |
-| ImportJob | subscribers | `entity`, `file` (S3), `status` (`uploaded`, `previewing`, `previewed`, `confirming`, `done`, `failed`), `total_rows`, `valid_rows`, `error_rows`, `errors` (JSONB / error file), `created_by` |
+| ImportJob | subscribers | `entity`, `file` (S3), `status` (`uploaded`, `previewing`, `previewed`, `confirming`, `done`, `failed`), `total_rows`, `valid_rows`, `error_rows`, `created_rows`, `updated_rows`, `errors` (first 200 rows; the error file has all), `summary` (`would_create`, `would_update`, `ignored_columns`), `error_file` (S3), `failure_reason`, `created_by`, `confirmed_by` |
 | Schedule | schedules | see 2.3 (+ `schedule_type`, `cancelled_at`, `cancel_reason`) |
-| ScheduleEvent | schedules | timeline entries: `kind`, `data`, `actor` |
-| Attempt | schedules | `schedule`, `channel`, `sent_at`, `provider_message_id` (unique), `delivery_status`, `cost_paise` |
-| Response | schedules | `attempt`, `raw_text`, `button_payload`, `transcript`, `recording_key`, `outcome`, `confidence` |
+| ScheduleEvent | schedules | timeline entries: `kind`, `occurred_at`, `data`, `actor` |
+| Attempt | schedules | `schedule`, `channel` (`whatsapp`, `voice`), `sent_at`, `provider_message_id` (unique when set), `delivery_status`, `failure_reason`, `cost_paise` |
+| Response | schedules | `attempt`, `received_at`, `raw_text`, `button_payload`, `transcript`, `recording_key`, `outcome`, `confidence` |
 | Job | jobs | `schedule`, `scheduled_date`, `assigned_staff`, `status` (`pending`, `done`, `cancelled`) |
 | FollowUpItem | jobs | `schedule`, `outcome`, `status` (`open`, `contacted`, `resolved`), `notes`, `resolved_at` |
 | ChangeRequest / ChangeRequestComment | change_requests | admin spec 2.9 |
@@ -286,6 +299,20 @@ All are tenant-scoped (`tenant_id` + RLS) with UUID keys.
 
 Under `/api/portal/`, scoped to the current tenant (from membership or a support session). Public API for clients'
 systems under `/api/v1/` (API key auth, per-key rate limits): subscribers, schedules, outcomes.
+
+| Method | Path | Purpose | Roles (writes) |
+| --- | --- | --- | --- |
+| GET | `config` | Tenant name, default language, industry fields (labels, choices) and schedule types | all |
+| GET POST PATCH | `subscribers` · `subscribers/{id}` | List (search, `area` / `none`, `status`, `consent`, `opted_out`; 50 per page), add, edit | all |
+| POST | `subscribers/{id}/deactivate` | Set inactive (there is no delete) | all |
+| GET POST PATCH | `areas` · `areas/{id}` | List (`active=true`; with subscriber counts), add, edit / deactivate | read: all · write: owner, manager |
+| GET POST PATCH | `staff` · `staff/{id}` | Delivery staff | owner, manager |
+| GET | `imports/template?entity=subscribers` | CSV header from the industry template's active fields | all |
+| GET POST | `imports` · `imports/{id}` | Upload (multipart `entity`, `file`) and follow the preview | all |
+| POST | `imports/{id}/confirm` | Import the valid rows (once, after the preview) | all |
+| GET | `imports/{id}/error-file` | Original columns + `error` for every rejected row | all |
+
+Platform staff in a support session can read everything above and change nothing. A suspended tenant reads only.
 
 ## 8. Rules
 

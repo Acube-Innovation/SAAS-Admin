@@ -45,6 +45,9 @@ INSTALLED_APPS = [
     "apps.platform_admin",
     "apps.industry",
     "apps.messaging_templates",
+    "apps.jobs",
+    "apps.subscribers",
+    "apps.schedules",
 ]
 
 AUTH_USER_MODEL = "accounts.User"
@@ -251,6 +254,10 @@ CELERY_BEAT_SCHEDULE = {
     "sync-whatsapp-template-statuses": {
         "task": "apps.messaging_templates.tasks.sync_template_statuses",
         "schedule": 600.0,
+    },
+    "fail-stale-imports": {
+        "task": "apps.subscribers.tasks.fail_stale_imports",
+        "schedule": 300.0,
     },
 }
 

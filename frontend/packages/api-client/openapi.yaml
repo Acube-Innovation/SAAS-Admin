@@ -1375,6 +1375,528 @@ paths:
           description: ''
         '503':
           description: No response body
+  /api/portal/areas:
+    get:
+      operationId: portal_areas_list
+      description: Areas / routes (spec 2.7). Everyone can list them (subscriber form);
+        owner/manager edit.
+      tags:
+      - 'portal: areas and staff'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Area'
+          description: ''
+    post:
+      operationId: portal_areas_create
+      description: Areas / routes (spec 2.7). Everyone can list them (subscriber form);
+        owner/manager edit.
+      tags:
+      - 'portal: areas and staff'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AreaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AreaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AreaRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Area'
+          description: ''
+  /api/portal/areas/{id}:
+    get:
+      operationId: portal_areas_retrieve
+      description: Areas / routes (spec 2.7). Everyone can list them (subscriber form);
+        owner/manager edit.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this area.
+        required: true
+      tags:
+      - 'portal: areas and staff'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Area'
+          description: ''
+    patch:
+      operationId: portal_areas_partial_update
+      description: Areas / routes (spec 2.7). Everyone can list them (subscriber form);
+        owner/manager edit.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this area.
+        required: true
+      tags:
+      - 'portal: areas and staff'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAreaRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAreaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAreaRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Area'
+          description: ''
+  /api/portal/config:
+    get:
+      operationId: portal_config_retrieve
+      description: 'The tenant''s industry configuration: field labels, choice lists,
+        schedule types.'
+      tags:
+      - portal
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortalConfig'
+          description: ''
+  /api/portal/imports:
+    get:
+      operationId: portal_imports_list
+      description: 'CSV imports (Workflow 3.5): template, upload, preview, confirm,
+        error file.'
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - 'portal: imports'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedImportJobList'
+          description: ''
+    post:
+      operationId: portal_imports_create
+      description: 'CSV imports (Workflow 3.5): template, upload, preview, confirm,
+        error file.'
+      tags:
+      - 'portal: imports'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ImportUploadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ImportUploadRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportJob'
+          description: ''
+  /api/portal/imports/{id}:
+    get:
+      operationId: portal_imports_retrieve
+      description: 'CSV imports (Workflow 3.5): template, upload, preview, confirm,
+        error file.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this import job.
+        required: true
+      tags:
+      - 'portal: imports'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportJob'
+          description: ''
+  /api/portal/imports/{id}/confirm:
+    post:
+      operationId: portal_imports_confirm_create
+      description: 'CSV imports (Workflow 3.5): template, upload, preview, confirm,
+        error file.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this import job.
+        required: true
+      tags:
+      - 'portal: imports'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImportJob'
+          description: ''
+  /api/portal/imports/{id}/error-file:
+    get:
+      operationId: portal_imports_error_file_retrieve
+      description: 'CSV imports (Workflow 3.5): template, upload, preview, confirm,
+        error file.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this import job.
+        required: true
+      tags:
+      - 'portal: imports'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            text/csv:
+              schema:
+                type: string
+          description: ''
+  /api/portal/imports/template:
+    get:
+      operationId: portal_imports_template_retrieve
+      description: 'CSV imports (Workflow 3.5): template, upload, preview, confirm,
+        error file.'
+      parameters:
+      - in: query
+        name: entity
+        schema:
+          type: string
+          enum:
+          - subscribers
+        required: true
+      tags:
+      - 'portal: imports'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            text/csv:
+              schema:
+                type: string
+          description: ''
+  /api/portal/staff:
+    get:
+      operationId: portal_staff_list
+      description: Delivery staff (portal spec 2.7). Owner and manager; no delete
+        (deactivate instead).
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - 'portal: areas and staff'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedStaffMemberList'
+          description: ''
+    post:
+      operationId: portal_staff_create
+      description: Delivery staff (portal spec 2.7). Owner and manager; no delete
+        (deactivate instead).
+      tags:
+      - 'portal: areas and staff'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StaffMemberRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/StaffMemberRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/StaffMemberRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffMember'
+          description: ''
+  /api/portal/staff/{id}:
+    get:
+      operationId: portal_staff_retrieve
+      description: Delivery staff (portal spec 2.7). Owner and manager; no delete
+        (deactivate instead).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this staff member.
+        required: true
+      tags:
+      - 'portal: areas and staff'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffMember'
+          description: ''
+    patch:
+      operationId: portal_staff_partial_update
+      description: Delivery staff (portal spec 2.7). Owner and manager; no delete
+        (deactivate instead).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this staff member.
+        required: true
+      tags:
+      - 'portal: areas and staff'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedStaffMemberRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedStaffMemberRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedStaffMemberRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StaffMember'
+          description: ''
+  /api/portal/subscribers:
+    get:
+      operationId: portal_subscribers_list
+      description: 'Subscribers (spec 2.2). No delete: deactivate instead.'
+      parameters:
+      - in: query
+        name: area
+        schema:
+          type: string
+        description: Area id, or 'none'
+      - in: query
+        name: consent
+        schema:
+          type: boolean
+      - in: query
+        name: opted_out
+        schema:
+          type: boolean
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Name, mobile or reference
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - active
+          - inactive
+      tags:
+      - 'portal: subscribers'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSubscriberList'
+          description: ''
+    post:
+      operationId: portal_subscribers_create
+      description: 'Subscribers (spec 2.2). No delete: deactivate instead.'
+      tags:
+      - 'portal: subscribers'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriberRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SubscriberRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SubscriberRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscriber'
+          description: ''
+  /api/portal/subscribers/{id}:
+    get:
+      operationId: portal_subscribers_retrieve
+      description: 'Subscribers (spec 2.2). No delete: deactivate instead.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this subscriber.
+        required: true
+      tags:
+      - 'portal: subscribers'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscriber'
+          description: ''
+    patch:
+      operationId: portal_subscribers_partial_update
+      description: 'Subscribers (spec 2.2). No delete: deactivate instead.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this subscriber.
+        required: true
+      tags:
+      - 'portal: subscribers'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSubscriberRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSubscriberRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSubscriberRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscriber'
+          description: ''
+  /api/portal/subscribers/{id}/deactivate:
+    post:
+      operationId: portal_subscribers_deactivate_create
+      description: 'Subscribers (spec 2.2). No delete: deactivate instead.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this subscriber.
+        required: true
+      tags:
+      - 'portal: subscribers'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscriber'
+          description: ''
 components:
   schemas:
     AcceptInviteRequest:
@@ -1423,6 +1945,68 @@ components:
       - key
       - label
       - outcome
+    Area:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        code:
+          type: string
+          maxLength: 20
+        default_staff:
+          type: string
+          format: uuid
+          nullable: true
+        default_staff_name:
+          type: string
+          readOnly: true
+        is_active:
+          type: boolean
+        subscriber_count:
+          type: integer
+          readOnly: true
+          default: 0
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - code
+      - created_at
+      - default_staff
+      - default_staff_name
+      - id
+      - is_active
+      - name
+      - subscriber_count
+      - updated_at
+    AreaRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        code:
+          type: string
+          maxLength: 20
+        default_staff:
+          type: string
+          format: uuid
+          nullable: true
+        is_active:
+          type: boolean
+      required:
+      - name
     AuditEntry:
       type: object
       properties:
@@ -1656,6 +2240,20 @@ components:
       description: |-
         * `whatsapp` - whatsapp
         * `voice` - voice
+    ConsentSourceEnum:
+      enum:
+      - paper_form
+      - verbal
+      - whatsapp_opt_in
+      - import
+      - other
+      type: string
+      description: |-
+        * `paper_form` - Paper form
+        * `verbal` - Verbal
+        * `whatsapp_opt_in` - WhatsApp opt-in
+        * `import` - Import
+        * `other` - Other
     Dashboard:
       type: object
       properties:
@@ -1695,6 +2293,11 @@ components:
       - quality_alert
       - quality_rating
       - templates_awaiting_action
+    EntityEnum:
+      enum:
+      - subscribers
+      type: string
+      description: '* `subscribers` - subscribers'
     Event:
       type: object
       properties:
@@ -1827,6 +2430,117 @@ components:
       - database
       - redis
       - status
+    ImportJob:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        entity:
+          type: string
+          readOnly: true
+        original_filename:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ImportJobStatusEnum'
+          readOnly: true
+        total_rows:
+          type: integer
+          readOnly: true
+        valid_rows:
+          type: integer
+          readOnly: true
+        error_rows:
+          type: integer
+          readOnly: true
+        created_rows:
+          type: integer
+          readOnly: true
+        updated_rows:
+          type: integer
+          readOnly: true
+        errors:
+          readOnly: true
+        summary:
+          readOnly: true
+        has_error_file:
+          type: boolean
+          readOnly: true
+        failure_reason:
+          type: string
+          readOnly: true
+        created_by_email:
+          type: string
+          readOnly: true
+          default: ''
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        previewed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        confirmed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        finished_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - confirmed_at
+      - created_at
+      - created_by_email
+      - created_rows
+      - entity
+      - error_rows
+      - errors
+      - failure_reason
+      - finished_at
+      - has_error_file
+      - id
+      - original_filename
+      - previewed_at
+      - status
+      - summary
+      - total_rows
+      - updated_rows
+      - valid_rows
+    ImportJobStatusEnum:
+      enum:
+      - uploaded
+      - previewing
+      - previewed
+      - confirming
+      - done
+      - failed
+      type: string
+      description: |-
+        * `uploaded` - Uploaded
+        * `previewing` - Checking rows
+        * `previewed` - Ready to confirm
+        * `confirming` - Importing
+        * `done` - Done
+        * `failed` - Failed
+    ImportUploadRequest:
+      type: object
+      properties:
+        entity:
+          $ref: '#/components/schemas/EntityEnum'
+        file:
+          type: string
+          format: binary
+      required:
+      - entity
+      - file
     IndustryTemplate:
       type: object
       properties:
@@ -2134,6 +2848,81 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AuditLog'
+    PaginatedImportJobList:
+      type: object
+      required:
+      - count
+      - next
+      - previous
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImportJob'
+    PaginatedStaffMemberList:
+      type: object
+      required:
+      - count
+      - next
+      - previous
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/StaffMember'
+    PaginatedSubscriberList:
+      type: object
+      required:
+      - count
+      - next
+      - previous
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subscriber'
     PaginatedTemplateList:
       type: object
       required:
@@ -2184,6 +2973,74 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Tenant'
+    PatchedAreaRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        code:
+          type: string
+          maxLength: 20
+        default_staff:
+          type: string
+          format: uuid
+          nullable: true
+        is_active:
+          type: boolean
+    PatchedStaffMemberRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        phone:
+          type: string
+          maxLength: 13
+        is_active:
+          type: boolean
+    PatchedSubscriberRequest:
+      type: object
+      properties:
+        customer_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        mobile_number:
+          type: string
+          minLength: 1
+          maxLength: 13
+        alternate_number:
+          type: string
+          maxLength: 13
+        external_ref:
+          type: string
+          minLength: 1
+          maxLength: 50
+        preferred_language:
+          $ref: '#/components/schemas/LanguageEnum'
+        address:
+          type: string
+          maxLength: 500
+        area:
+          type: string
+          format: uuid
+          nullable: true
+        whatsapp_consent:
+          type: boolean
+        consent_date:
+          type: string
+          format: date
+          nullable: true
+        consent_source:
+          oneOf:
+          - $ref: '#/components/schemas/ConsentSourceEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        status:
+          $ref: '#/components/schemas/SubscriberStatusEnum'
+        custom_fields: {}
     PatchedTenantRequest:
       type: object
       description: Client details and settings (spec 2.4 / 2.5). Validation matches
@@ -2258,6 +3115,31 @@ components:
           type: object
           additionalProperties:
             type: string
+    PortalConfig:
+      type: object
+      properties:
+        tenant_name:
+          type: string
+        default_language:
+          type: string
+        template:
+          type: string
+        subscriber_fields:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+        schedule_types:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+      required:
+      - default_language
+      - schedule_types
+      - subscriber_fields
+      - template
+      - tenant_name
     QualityRatingEnum:
       enum:
       - GREEN
@@ -2462,6 +3344,50 @@ components:
           maxLength: 1000
       required:
       - action
+    StaffMember:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        phone:
+          type: string
+          maxLength: 13
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - is_active
+      - name
+      - phone
+      - updated_at
+    StaffMemberRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        phone:
+          type: string
+          maxLength: 13
+        is_active:
+          type: boolean
+      required:
+      - name
     StateEnum:
       enum:
       - AN
@@ -2551,6 +3477,142 @@ components:
       - code
       - gst_code
       - name
+    Subscriber:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        customer_name:
+          type: string
+          maxLength: 100
+        mobile_number:
+          type: string
+          maxLength: 13
+        alternate_number:
+          type: string
+          maxLength: 13
+        external_ref:
+          type: string
+          maxLength: 50
+        preferred_language:
+          $ref: '#/components/schemas/LanguageEnum'
+        address:
+          type: string
+          maxLength: 500
+        area:
+          type: string
+          format: uuid
+          nullable: true
+        area_name:
+          type: string
+          readOnly: true
+        whatsapp_consent:
+          type: boolean
+        consent_date:
+          type: string
+          format: date
+          nullable: true
+        consent_source:
+          oneOf:
+          - $ref: '#/components/schemas/ConsentSourceEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        opted_out:
+          type: boolean
+          readOnly: true
+        opted_out_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        status:
+          $ref: '#/components/schemas/SubscriberStatusEnum'
+        custom_fields: {}
+        can_be_messaged:
+          type: boolean
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - address
+      - alternate_number
+      - area
+      - area_name
+      - can_be_messaged
+      - consent_date
+      - consent_source
+      - created_at
+      - custom_fields
+      - customer_name
+      - external_ref
+      - id
+      - mobile_number
+      - opted_out
+      - opted_out_at
+      - preferred_language
+      - status
+      - updated_at
+      - whatsapp_consent
+    SubscriberRequest:
+      type: object
+      properties:
+        customer_name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        mobile_number:
+          type: string
+          minLength: 1
+          maxLength: 13
+        alternate_number:
+          type: string
+          maxLength: 13
+        external_ref:
+          type: string
+          minLength: 1
+          maxLength: 50
+        preferred_language:
+          $ref: '#/components/schemas/LanguageEnum'
+        address:
+          type: string
+          maxLength: 500
+        area:
+          type: string
+          format: uuid
+          nullable: true
+        whatsapp_consent:
+          type: boolean
+        consent_date:
+          type: string
+          format: date
+          nullable: true
+        consent_source:
+          oneOf:
+          - $ref: '#/components/schemas/ConsentSourceEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        status:
+          $ref: '#/components/schemas/SubscriberStatusEnum'
+        custom_fields: {}
+      required:
+      - customer_name
+      - external_ref
+      - mobile_number
+      - whatsapp_consent
+    SubscriberStatusEnum:
+      enum:
+      - active
+      - inactive
+      type: string
+      description: |-
+        * `active` - Active
+        * `inactive` - Inactive
     SupportSession:
       type: object
       properties:

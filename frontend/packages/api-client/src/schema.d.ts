@@ -721,6 +721,234 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/portal/areas": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Areas / routes (spec 2.7). Everyone can list them (subscriber form); owner/manager edit. */
+        get: operations["portal_areas_list"];
+        put?: never;
+        /** @description Areas / routes (spec 2.7). Everyone can list them (subscriber form); owner/manager edit. */
+        post: operations["portal_areas_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/areas/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Areas / routes (spec 2.7). Everyone can list them (subscriber form); owner/manager edit. */
+        get: operations["portal_areas_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description Areas / routes (spec 2.7). Everyone can list them (subscriber form); owner/manager edit. */
+        patch: operations["portal_areas_partial_update"];
+        trace?: never;
+    };
+    "/api/portal/config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The tenant's industry configuration: field labels, choice lists, schedule types. */
+        get: operations["portal_config_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/imports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description CSV imports (Workflow 3.5): template, upload, preview, confirm, error file. */
+        get: operations["portal_imports_list"];
+        put?: never;
+        /** @description CSV imports (Workflow 3.5): template, upload, preview, confirm, error file. */
+        post: operations["portal_imports_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/imports/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description CSV imports (Workflow 3.5): template, upload, preview, confirm, error file. */
+        get: operations["portal_imports_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/imports/{id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description CSV imports (Workflow 3.5): template, upload, preview, confirm, error file. */
+        post: operations["portal_imports_confirm_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/imports/{id}/error-file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description CSV imports (Workflow 3.5): template, upload, preview, confirm, error file. */
+        get: operations["portal_imports_error_file_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/imports/template": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description CSV imports (Workflow 3.5): template, upload, preview, confirm, error file. */
+        get: operations["portal_imports_template_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/staff": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Delivery staff (portal spec 2.7). Owner and manager; no delete (deactivate instead). */
+        get: operations["portal_staff_list"];
+        put?: never;
+        /** @description Delivery staff (portal spec 2.7). Owner and manager; no delete (deactivate instead). */
+        post: operations["portal_staff_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/staff/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Delivery staff (portal spec 2.7). Owner and manager; no delete (deactivate instead). */
+        get: operations["portal_staff_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description Delivery staff (portal spec 2.7). Owner and manager; no delete (deactivate instead). */
+        patch: operations["portal_staff_partial_update"];
+        trace?: never;
+    };
+    "/api/portal/subscribers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Subscribers (spec 2.2). No delete: deactivate instead. */
+        get: operations["portal_subscribers_list"];
+        put?: never;
+        /** @description Subscribers (spec 2.2). No delete: deactivate instead. */
+        post: operations["portal_subscribers_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/subscribers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Subscribers (spec 2.2). No delete: deactivate instead. */
+        get: operations["portal_subscribers_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description Subscribers (spec 2.2). No delete: deactivate instead. */
+        patch: operations["portal_subscribers_partial_update"];
+        trace?: never;
+    };
+    "/api/portal/subscribers/{id}/deactivate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Subscribers (spec 2.2). No delete: deactivate instead. */
+        post: operations["portal_subscribers_deactivate_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -743,6 +971,29 @@ export interface components {
             label: string;
             outcome: components["schemas"]["OutcomeEnum"];
             pick_next_delivery_days?: number;
+        };
+        Area: {
+            /** Format: uuid */
+            readonly id: string;
+            name: string;
+            code: string;
+            /** Format: uuid */
+            default_staff: string | null;
+            readonly default_staff_name: string;
+            is_active: boolean;
+            /** @default 0 */
+            readonly subscriber_count: number;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        AreaRequest: {
+            name: string;
+            code?: string;
+            /** Format: uuid */
+            default_staff?: string | null;
+            is_active?: boolean;
         };
         AuditEntry: {
             /** Format: uuid */
@@ -837,6 +1088,15 @@ export interface components {
          * @enum {string}
          */
         ChannelOrderEnum: "whatsapp" | "voice";
+        /**
+         * @description * `paper_form` - Paper form
+         *     * `verbal` - Verbal
+         *     * `whatsapp_opt_in` - WhatsApp opt-in
+         *     * `import` - Import
+         *     * `other` - Other
+         * @enum {string}
+         */
+        ConsentSourceEnum: "paper_form" | "verbal" | "whatsapp_opt_in" | "import" | "other";
         Dashboard: {
             clients_active: number;
             clients_suspended: number;
@@ -852,6 +1112,11 @@ export interface components {
             /** Format: date-time */
             generated_at: string;
         };
+        /**
+         * @description * `subscribers` - subscribers
+         * @enum {string}
+         */
+        EntityEnum: "subscribers";
         Event: {
             action: string;
             from_status: string;
@@ -901,6 +1166,47 @@ export interface components {
             status: string;
             database: string;
             redis: string;
+        };
+        ImportJob: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly entity: string;
+            readonly original_filename: string;
+            readonly status: components["schemas"]["ImportJobStatusEnum"];
+            readonly total_rows: number;
+            readonly valid_rows: number;
+            readonly error_rows: number;
+            readonly created_rows: number;
+            readonly updated_rows: number;
+            readonly errors: unknown;
+            readonly summary: unknown;
+            readonly has_error_file: boolean;
+            readonly failure_reason: string;
+            /** @default  */
+            readonly created_by_email: string;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly previewed_at: string | null;
+            /** Format: date-time */
+            readonly confirmed_at: string | null;
+            /** Format: date-time */
+            readonly finished_at: string | null;
+        };
+        /**
+         * @description * `uploaded` - Uploaded
+         *     * `previewing` - Checking rows
+         *     * `previewed` - Ready to confirm
+         *     * `confirming` - Importing
+         *     * `done` - Done
+         *     * `failed` - Failed
+         * @enum {string}
+         */
+        ImportJobStatusEnum: "uploaded" | "previewing" | "previewed" | "confirming" | "done" | "failed";
+        ImportUploadRequest: {
+            entity: components["schemas"]["EntityEnum"];
+            /** Format: binary */
+            file: string;
         };
         IndustryTemplate: {
             /** Format: uuid */
@@ -1041,6 +1347,51 @@ export interface components {
             previous: string | null;
             results: components["schemas"]["AuditLog"][];
         };
+        PaginatedImportJobList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous: string | null;
+            results: components["schemas"]["ImportJob"][];
+        };
+        PaginatedStaffMemberList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous: string | null;
+            results: components["schemas"]["StaffMember"][];
+        };
+        PaginatedSubscriberList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous: string | null;
+            results: components["schemas"]["Subscriber"][];
+        };
         PaginatedTemplateList: {
             /** @example 123 */
             count: number;
@@ -1071,6 +1422,34 @@ export interface components {
             previous: string | null;
             results: components["schemas"]["Tenant"][];
         };
+        PatchedAreaRequest: {
+            name?: string;
+            code?: string;
+            /** Format: uuid */
+            default_staff?: string | null;
+            is_active?: boolean;
+        };
+        PatchedStaffMemberRequest: {
+            name?: string;
+            phone?: string;
+            is_active?: boolean;
+        };
+        PatchedSubscriberRequest: {
+            customer_name?: string;
+            mobile_number?: string;
+            alternate_number?: string;
+            external_ref?: string;
+            preferred_language?: components["schemas"]["LanguageEnum"];
+            address?: string;
+            /** Format: uuid */
+            area?: string | null;
+            whatsapp_consent?: boolean;
+            /** Format: date */
+            consent_date?: string | null;
+            consent_source?: components["schemas"]["ConsentSourceEnum"] | components["schemas"]["BlankEnum"];
+            status?: components["schemas"]["SubscriberStatusEnum"];
+            custom_fields?: unknown;
+        };
         /** @description Client details and settings (spec 2.4 / 2.5). Validation matches the create form. */
         PatchedTenantRequest: {
             name?: string;
@@ -1099,6 +1478,17 @@ export interface components {
             sample_values?: {
                 [key: string]: string;
             };
+        };
+        PortalConfig: {
+            tenant_name: string;
+            default_language: string;
+            template: string;
+            subscriber_fields: {
+                [key: string]: unknown;
+            }[];
+            schedule_types: {
+                [key: string]: unknown;
+            }[];
         };
         /**
          * @description * `GREEN` - GREEN
@@ -1174,6 +1564,22 @@ export interface components {
             /** @default  */
             reason: string;
         };
+        StaffMember: {
+            /** Format: uuid */
+            readonly id: string;
+            name: string;
+            phone: string;
+            is_active: boolean;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        StaffMemberRequest: {
+            name: string;
+            phone?: string;
+            is_active?: boolean;
+        };
         /**
          * @description * `AN` - Andaman and Nicobar Islands
          *     * `AP` - Andhra Pradesh
@@ -1219,6 +1625,55 @@ export interface components {
             name: string;
             gst_code: string;
         };
+        Subscriber: {
+            /** Format: uuid */
+            readonly id: string;
+            customer_name: string;
+            mobile_number: string;
+            alternate_number: string;
+            external_ref: string;
+            preferred_language: components["schemas"]["LanguageEnum"];
+            address: string;
+            /** Format: uuid */
+            area: string | null;
+            readonly area_name: string;
+            whatsapp_consent: boolean;
+            /** Format: date */
+            consent_date: string | null;
+            consent_source: components["schemas"]["ConsentSourceEnum"] | components["schemas"]["BlankEnum"];
+            readonly opted_out: boolean;
+            /** Format: date-time */
+            readonly opted_out_at: string | null;
+            status: components["schemas"]["SubscriberStatusEnum"];
+            custom_fields: unknown;
+            readonly can_be_messaged: boolean;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        SubscriberRequest: {
+            customer_name: string;
+            mobile_number: string;
+            alternate_number?: string;
+            external_ref: string;
+            preferred_language?: components["schemas"]["LanguageEnum"];
+            address?: string;
+            /** Format: uuid */
+            area?: string | null;
+            whatsapp_consent: boolean;
+            /** Format: date */
+            consent_date?: string | null;
+            consent_source?: components["schemas"]["ConsentSourceEnum"] | components["schemas"]["BlankEnum"];
+            status?: components["schemas"]["SubscriberStatusEnum"];
+            custom_fields?: unknown;
+        };
+        /**
+         * @description * `active` - Active
+         *     * `inactive` - Inactive
+         * @enum {string}
+         */
+        SubscriberStatusEnum: "active" | "inactive";
         SupportSession: {
             /** Format: uuid */
             readonly id: string;
@@ -2604,6 +3059,475 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    portal_areas_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Area"][];
+                };
+            };
+        };
+    };
+    portal_areas_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AreaRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["AreaRequest"];
+                "multipart/form-data": components["schemas"]["AreaRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Area"];
+                };
+            };
+        };
+    };
+    portal_areas_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this area. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Area"];
+                };
+            };
+        };
+    };
+    portal_areas_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this area. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedAreaRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedAreaRequest"];
+                "multipart/form-data": components["schemas"]["PatchedAreaRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Area"];
+                };
+            };
+        };
+    };
+    portal_config_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortalConfig"];
+                };
+            };
+        };
+    };
+    portal_imports_list: {
+        parameters: {
+            query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedImportJobList"];
+                };
+            };
+        };
+    };
+    portal_imports_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["ImportUploadRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ImportUploadRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportJob"];
+                };
+            };
+        };
+    };
+    portal_imports_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this import job. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportJob"];
+                };
+            };
+        };
+    };
+    portal_imports_confirm_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this import job. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImportJob"];
+                };
+            };
+        };
+    };
+    portal_imports_error_file_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this import job. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
+                };
+            };
+        };
+    };
+    portal_imports_template_retrieve: {
+        parameters: {
+            query: {
+                entity: "subscribers";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/csv": string;
+                };
+            };
+        };
+    };
+    portal_staff_list: {
+        parameters: {
+            query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedStaffMemberList"];
+                };
+            };
+        };
+    };
+    portal_staff_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StaffMemberRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["StaffMemberRequest"];
+                "multipart/form-data": components["schemas"]["StaffMemberRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffMember"];
+                };
+            };
+        };
+    };
+    portal_staff_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this staff member. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffMember"];
+                };
+            };
+        };
+    };
+    portal_staff_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this staff member. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedStaffMemberRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedStaffMemberRequest"];
+                "multipart/form-data": components["schemas"]["PatchedStaffMemberRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffMember"];
+                };
+            };
+        };
+    };
+    portal_subscribers_list: {
+        parameters: {
+            query?: {
+                /** @description Area id, or 'none' */
+                area?: string;
+                consent?: boolean;
+                opted_out?: boolean;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Name, mobile or reference */
+                search?: string;
+                status?: "active" | "inactive";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedSubscriberList"];
+                };
+            };
+        };
+    };
+    portal_subscribers_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubscriberRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SubscriberRequest"];
+                "multipart/form-data": components["schemas"]["SubscriberRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscriber"];
+                };
+            };
+        };
+    };
+    portal_subscribers_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this subscriber. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscriber"];
+                };
+            };
+        };
+    };
+    portal_subscribers_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this subscriber. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedSubscriberRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedSubscriberRequest"];
+                "multipart/form-data": components["schemas"]["PatchedSubscriberRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscriber"];
+                };
+            };
+        };
+    };
+    portal_subscribers_deactivate_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this subscriber. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscriber"];
+                };
             };
         };
     };

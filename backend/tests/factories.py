@@ -46,3 +46,7 @@ def add_totp_device(user, confirmed=True):
 def totp_code(device):
     code = totp(device.bin_key, step=device.step, t0=device.t0, digits=device.digits, drift=0)
     return f"{code:0{device.digits}d}"
+
+
+def next_id() -> int:
+    return next(_seq)

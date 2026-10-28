@@ -378,7 +378,10 @@ Two repositories: **SAAS-Admin** (below: backend for both apps, admin console, i
 │  │  ├─ platform_admin/         tenants API, suspend, support sessions            (Step 5)
 │  │  ├─ industry/               industry templates                                (Step 6)
 │  │  ├─ messaging_templates/    WhatsApp templates + provider interface           (Step 7)
-│  │  ├─ subscribers/  schedules/  jobs/  content_view/  change_requests/
+│  │  ├─ subscribers/            areas, subscribers, CSV import engine, seed_demo  (Step 13)
+│  │  ├─ schedules/              bookings, timeline, attempts, responses (models)  (Step 13; API Step 14)
+│  │  ├─ jobs/                   staff members (Step 13); jobs, follow-up          (Step 14)
+│  │  ├─ content_view/  change_requests/
 │  │  ├─ billing/  integrations/                                                   (client portal steps)
 │  └─ tests/
 ├─ frontend/                     Turborepo + pnpm workspace

@@ -63,3 +63,29 @@ def sign_in(api, user, password=factories.PASSWORD, with_2fa=True):
         response = api.post("/api/auth/otp/verify", {"otp_code": factories.totp_code(device)})
         assert response.status_code == 200, response.json()
     return response
+
+
+# --- client portal --------------------------------------------------------------------------
+
+
+@pytest.fixture
+def client_tenant(tenant, gas_template):
+    """The default tenant as a gas agency client (industry template assigned)."""
+    from apps.industry.services import assign_template
+
+    assign_template(tenant, gas_template)
+    tenant.save()
+    return tenant
+
+
+@pytest.fixture
+def portal(api, client_tenant):
+    """Sign in to the portal as a given role of client_tenant: portal("manager") -> APIClient."""
+
+    def as_role(role="owner", tenant=None):
+        user = factories.make_user(f"{role}-{factories.next_id()}@agency.test")
+        factories.add_membership(user, tenant or client_tenant, role)
+        sign_in(api, user)
+        return api
+
+    return as_role

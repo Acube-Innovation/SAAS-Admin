@@ -56,6 +56,13 @@ Create the first super admin (they set up 2FA with an authenticator app at first
 docker compose exec api python manage.py createplatformuser --email you@example.com --role super_admin
 ```
 
+Demo data for the client portal: a gas agency with areas, staff, subscribers, bookings, WhatsApp messages, voice
+calls and outcomes (owner, manager and office staff users; the password is printed once):
+
+```bash
+docker compose exec api python manage.py seed_demo                  # --subscribers 2000, --name "Another Agency"
+```
+
 The API creates the S3 bucket on start-up (`manage.py ensure_storage_bucket`). WhatsApp templates use a stub provider
 (no calls to Meta) until Phase 2. In the admin console's template editor, super admins get a development-only
 **Simulate** panel to play Meta (approve / reject / pause) and the client (approve / send back); it only exists with
