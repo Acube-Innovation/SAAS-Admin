@@ -13,6 +13,8 @@ from . import services
 
 ALL_ROLES = tenant_roles("owner", "manager", "office_staff")
 OWNER = tenant_roles("owner")
+# The agency roles plus "support" (platform staff in a support session).
+PORTAL_ROLES = ("owner", "manager", "office_staff", "support")
 
 
 class PortalConfigSerializer(serializers.Serializer):
@@ -21,7 +23,7 @@ class PortalConfigSerializer(serializers.Serializer):
     tenant_status = serializers.ChoiceField(choices=Tenant.Status.choices)
     suspended_at = serializers.DateTimeField(allow_null=True)
     suspension_reason = serializers.CharField(allow_blank=True)
-    role = serializers.ChoiceField(choices=["owner", "manager", "office_staff", "support"])
+    role = serializers.ChoiceField(choices=PORTAL_ROLES)
     default_language = serializers.CharField()
     template = serializers.CharField()
     subscriber_fields = serializers.ListField(child=serializers.DictField())

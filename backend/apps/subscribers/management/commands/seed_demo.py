@@ -354,6 +354,11 @@ class Command(BaseCommand):
         sent_at = dt.datetime.combine(reminder_day, dt.time(10, 0), IST) + dt.timedelta(
             seconds=rng.randint(0, 900)
         )
+        now = timezone.now()
+        if sent_at > now - dt.timedelta(minutes=10):
+            return schedule, more  # today's reminder hasn't gone out yet
+        # Nothing in the demo data happens in the future (seeded during the day).
+        latest = now - dt.timedelta(minutes=1)
         message = Attempt(
             id=uuid.uuid4(),
             tenant=tenant,
@@ -365,7 +370,7 @@ class Command(BaseCommand):
             cost_paise=WHATSAPP_COST_PAISE,
         )
         attempts.append(message)  # the timeline shows attempts and replies from their own tables
-        replied_at = sent_at + dt.timedelta(minutes=rng.randint(2, 180))
+        replied_at = min(sent_at + dt.timedelta(minutes=rng.randint(2, 180)), latest)
 
         if outcome is None:
             schedule.status = Schedule.Status.AWAITING_REPLY
@@ -380,15 +385,17 @@ class Command(BaseCommand):
         elif outcome == Outcome.NO_RESPONSE:
             # No reply after the wait: some got a follow-up voice call that wasn't answered.
             if rng.random() < 0.5:
-                attempts.append(self.call(tenant, schedule, sent_at, rng, answered=False))
+                attempts.append(
+                    self.call(tenant, schedule, sent_at, rng, answered=False, latest=latest)
+                )
             # Decided when the wait (and any call) is over.
-            replied_at = sent_at + dt.timedelta(hours=4, minutes=45)
+            replied_at = min(sent_at + dt.timedelta(hours=4, minutes=45), latest)
         elif outcome in BUTTONS and rng.random() < 0.15:
             # Answered on a voice call after missing the WhatsApp message.
             message.delivery_status = Attempt.DeliveryStatus.DELIVERED
-            call = self.call(tenant, schedule, sent_at, rng, answered=True)
+            call = self.call(tenant, schedule, sent_at, rng, answered=True, latest=latest)
             attempts.append(call)
-            replied_at = call.sent_at + dt.timedelta(seconds=40)
+            replied_at = min(call.sent_at + dt.timedelta(seconds=40), latest)
             responses.append(
                 Response(
                     tenant=tenant,
@@ -527,13 +534,16 @@ class Command(BaseCommand):
         return len(jobs), len(items)
 
     @staticmethod
-    def call(tenant, schedule, after, rng, answered):
+    def call(tenant, schedule, after, rng, answered, latest):
         return Attempt(
             id=uuid.uuid4(),
             tenant=tenant,
             schedule=schedule,
             channel=Attempt.Channel.VOICE,
-            sent_at=after + dt.timedelta(hours=4, minutes=rng.randint(0, 30)),
+            sent_at=min(
+                after + dt.timedelta(hours=4, minutes=rng.randint(0, 30)),
+                latest - dt.timedelta(minutes=1),
+            ),
             provider_message_id=f"call.demo.{uuid.uuid4().hex}",
             delivery_status=Attempt.DeliveryStatus.ANSWERED
             if answered

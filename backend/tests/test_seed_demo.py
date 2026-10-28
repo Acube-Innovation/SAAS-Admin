@@ -5,6 +5,7 @@ import io
 import pytest
 from django.core.management import CommandError, call_command
 from django.db.models import Count
+from django.utils import timezone
 
 from apps.accounts.models import Membership
 from apps.core.models import Tenant
@@ -153,3 +154,12 @@ def test_outcomes_come_after_the_answers_they_are_based_on(demo):
             replies = [r.received_at for a in schedule.attempts.all() for r in a.responses.all()]
             sends = [a.sent_at for a in schedule.attempts.all() if a.sent_at]
             assert all(decided[-1] >= t for t in replies + sends), schedule.booking_reference
+
+
+def test_nothing_happens_in_the_future(demo):
+    tenant, _output = demo
+    now = timezone.now()
+    with tenant_context(tenant):
+        assert not Attempt.objects.filter(sent_at__gt=now).exists()
+        assert not Response.objects.filter(received_at__gt=now).exists()
+        assert not ScheduleEvent.objects.filter(occurred_at__gt=now).exists()

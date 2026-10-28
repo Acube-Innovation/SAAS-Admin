@@ -53,6 +53,10 @@ class AreaViewSet(AuditedModelMixin, PortalViewMixin, viewsets.ModelViewSet):
             queryset = queryset.filter(is_active=True)
         return queryset
 
+    @extend_schema(parameters=[OpenApiParameter("active", bool, description="Only active areas")])
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
     def perform_create(self, serializer):
         serializer.save(tenant_id=self.request.tenant_id)
         self.audit(

@@ -220,6 +220,7 @@ SPECTACULAR_SETTINGS = {
         "TemplateVersionStatusEnum": "apps.messaging_templates.models.VersionStatus",
         "BookingOutcomeEnum": "apps.schedules.models.Outcome",
         "AnswerOutcomeEnum": "apps.industry.serializers.OUTCOMES",
+        "PortalRoleEnum": "apps.portal.views.PORTAL_ROLES",
         "BookingStatusEnum": "apps.schedules.models.Schedule.Status",
         "SubscriberStatusEnum": "apps.subscribers.models.Subscriber.Status",
     },

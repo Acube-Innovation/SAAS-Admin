@@ -41,6 +41,10 @@ class StaffMemberViewSet(AuditedModelMixin, PortalViewMixin, viewsets.ModelViewS
     http_method_names = ["get", "post", "patch", "head", "options"]
     audit_status_fields = ("is_active",)
 
+    @extend_schema(parameters=[OpenApiParameter("active", bool, description="Only active staff")])
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
     def get_queryset(self):
         queryset = self.scoped(StaffMember.objects.all())
         if self.request.query_params.get("active") == "true":

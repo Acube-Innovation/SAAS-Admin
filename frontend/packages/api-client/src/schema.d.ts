@@ -721,6 +721,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/portal/agency": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The agency's details as the platform holds them (confirmed by the owner at first login). */
+        get: operations["portal_agency_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/portal/areas": {
         parameters: {
             query?: never;
@@ -1157,6 +1174,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/portal/reminder-settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The agency's reminder rule. Changes apply to reminders not yet sent (spec 2.10). */
+        get: operations["portal_reminder_settings_retrieve"];
+        /** @description The agency's reminder rule. Changes apply to reminders not yet sent (spec 2.10). */
+        put: operations["portal_reminder_settings_update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/portal/staff": {
         parameters: {
             query?: never;
@@ -1246,6 +1281,75 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/portal/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The agency's portal users: invite, change role, deactivate, resend invite (owner only). */
+        get: operations["portal_users_list"];
+        put?: never;
+        /** @description The agency's portal users: invite, change role, deactivate, resend invite (owner only). */
+        post: operations["portal_users_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/users/{id}/deactivate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description The agency's portal users: invite, change role, deactivate, resend invite (owner only). */
+        post: operations["portal_users_deactivate_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/users/{id}/resend-invite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description The agency's portal users: invite, change role, deactivate, resend invite (owner only). */
+        post: operations["portal_users_resend_invite_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/users/{id}/role": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description The agency's portal users: invite, change role, deactivate, resend invite (owner only). */
+        post: operations["portal_users_role_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1253,6 +1357,25 @@ export interface components {
         AcceptInviteRequest: {
             password: string;
             full_name?: string;
+        };
+        Agency: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly name: string;
+            readonly legal_name: string;
+            readonly gstin: string | null;
+            readonly address_line1: string;
+            readonly address_line2: string;
+            readonly city: string;
+            readonly state: components["schemas"]["StateEnum"];
+            readonly pin_code: string;
+            readonly contact_name: string;
+            readonly contact_phone: string;
+            /** Format: email */
+            readonly contact_email: string;
+            readonly default_language: components["schemas"]["LanguageEnum"];
+            readonly daily_send_cap: number;
+            readonly status: components["schemas"]["TenantStatusEnum"];
         };
         /**
          * @description * `confirmed` - confirmed
@@ -1456,6 +1579,9 @@ export interface components {
          * @enum {string}
          */
         CategoryEnum: "utility";
+        ChangeRoleRequest: {
+            role: components["schemas"]["TenantRoleEnum"];
+        };
         /**
          * @description * `whatsapp` - whatsapp
          *     * `voice` - voice
@@ -1764,6 +1890,12 @@ export interface components {
             needs_new_password: boolean;
             requires_2fa: boolean;
         };
+        InviteMemberRequest: {
+            /** Format: email */
+            email: string;
+            full_name: string;
+            role: components["schemas"]["TenantRoleEnum"];
+        };
         /**
          * @description * `agency_details` - agency_details
          *     * `auto_top_up` - auto_top_up
@@ -1810,6 +1942,22 @@ export interface components {
         LanguageOption: {
             code: string;
             name: string;
+        };
+        LinkedTemplate: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            language: string;
+            live_version: number | null;
+            latest_status: string;
+        };
+        LinkedTemplateRequest: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            language: string;
+            live_version: number | null;
+            latest_status: string;
         };
         LoginRequest: {
             /** Format: email */
@@ -2102,7 +2250,7 @@ export interface components {
             /** Format: date-time */
             suspended_at: string | null;
             suspension_reason: string;
-            role: components["schemas"]["PortalConfigRoleEnum"];
+            role: components["schemas"]["PortalRoleEnum"];
             default_language: string;
             template: string;
             subscriber_fields: {
@@ -2119,7 +2267,7 @@ export interface components {
          *     * `support` - support
          * @enum {string}
          */
-        PortalConfigRoleEnum: "owner" | "manager" | "office_staff" | "support";
+        PortalRoleEnum: "owner" | "manager" | "office_staff" | "support";
         /**
          * @description * `GREEN` - GREEN
          *     * `YELLOW` - YELLOW
@@ -2158,6 +2306,30 @@ export interface components {
             quiet_end: string;
             delivery_weekdays: number[];
             channel_order: components["schemas"]["ChannelOrderEnum"][];
+        };
+        ReminderSettings: {
+            readonly schedule_type: string;
+            send_time: string;
+            days_before: number;
+            wait_minutes: number;
+            quiet_start: string;
+            quiet_end: string;
+            default_language: components["schemas"]["LanguageEnum"];
+            delivery_weekdays: number[];
+            holiday_dates: string[];
+            readonly linked_templates: components["schemas"]["LinkedTemplate"][];
+            /** Format: date-time */
+            readonly saved_at: string | null;
+        };
+        ReminderSettingsRequest: {
+            send_time: string;
+            days_before: number;
+            wait_minutes: number;
+            quiet_start: string;
+            quiet_end: string;
+            default_language: components["schemas"]["LanguageEnum"];
+            delivery_weekdays: number[];
+            holiday_dates?: string[];
         };
         ScheduleType: {
             /** Format: uuid */
@@ -2353,6 +2525,22 @@ export interface components {
          * @enum {string}
          */
         SupportSessionEndReasonEnum: "manual" | "expired" | "replaced";
+        TeamMember: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: email */
+            readonly email: string;
+            readonly full_name: string;
+            readonly role: components["schemas"]["TenantRoleEnum"];
+            readonly status: components["schemas"]["MembershipStatusEnum"];
+            /** Format: date-time */
+            readonly last_login: string | null;
+            /** @default false */
+            readonly otp_enabled: boolean;
+            readonly is_you: boolean;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
         Template: {
             /** Format: uuid */
             readonly id: string;
@@ -3724,9 +3912,31 @@ export interface operations {
             };
         };
     };
-    portal_areas_list: {
+    portal_agency_retrieve: {
         parameters: {
             query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Agency"];
+                };
+            };
+        };
+    };
+    portal_areas_list: {
+        parameters: {
+            query?: {
+                /** @description Only active areas */
+                active?: boolean;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -4468,9 +4678,55 @@ export interface operations {
             };
         };
     };
+    portal_reminder_settings_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReminderSettings"];
+                };
+            };
+        };
+    };
+    portal_reminder_settings_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReminderSettingsRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ReminderSettingsRequest"];
+                "multipart/form-data": components["schemas"]["ReminderSettingsRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReminderSettings"];
+                };
+            };
+        };
+    };
     portal_staff_list: {
         parameters: {
             query?: {
+                /** @description Only active staff */
+                active?: boolean;
                 /** @description A page number within the paginated result set. */
                 page?: number;
             };
@@ -4687,6 +4943,122 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Subscriber"];
+                };
+            };
+        };
+    };
+    portal_users_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamMember"][];
+                };
+            };
+        };
+    };
+    portal_users_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InviteMemberRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["InviteMemberRequest"];
+                "multipart/form-data": components["schemas"]["InviteMemberRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamMember"];
+                };
+            };
+        };
+    };
+    portal_users_deactivate_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this membership. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamMember"];
+                };
+            };
+        };
+    };
+    portal_users_resend_invite_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this membership. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamMember"];
+                };
+            };
+        };
+    };
+    portal_users_role_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this membership. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangeRoleRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ChangeRoleRequest"];
+                "multipart/form-data": components["schemas"]["ChangeRoleRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamMember"];
                 };
             };
         };

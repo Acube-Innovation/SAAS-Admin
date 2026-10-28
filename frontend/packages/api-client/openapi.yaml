@@ -1375,11 +1375,33 @@ paths:
           description: ''
         '503':
           description: No response body
+  /api/portal/agency:
+    get:
+      operationId: portal_agency_retrieve
+      description: The agency's details as the platform holds them (confirmed by the
+        owner at first login).
+      tags:
+      - 'portal: users and settings'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Agency'
+          description: ''
   /api/portal/areas:
     get:
       operationId: portal_areas_list
       description: Areas / routes (spec 2.7). Everyone can list them (subscriber form);
         owner/manager edit.
+      parameters:
+      - in: query
+        name: active
+        schema:
+          type: boolean
+        description: Only active areas
       tags:
       - 'portal: areas and staff'
       security:
@@ -2266,12 +2288,60 @@ paths:
               schema:
                 $ref: '#/components/schemas/DeliveryJob'
           description: ''
+  /api/portal/reminder-settings:
+    get:
+      operationId: portal_reminder_settings_retrieve
+      description: The agency's reminder rule. Changes apply to reminders not yet
+        sent (spec 2.10).
+      tags:
+      - 'portal: users and settings'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReminderSettings'
+          description: ''
+    put:
+      operationId: portal_reminder_settings_update
+      description: The agency's reminder rule. Changes apply to reminders not yet
+        sent (spec 2.10).
+      tags:
+      - 'portal: users and settings'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReminderSettingsRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ReminderSettingsRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ReminderSettingsRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReminderSettings'
+          description: ''
   /api/portal/staff:
     get:
       operationId: portal_staff_list
       description: Delivery staff (portal spec 2.7). Owner and manager; no delete
         (deactivate instead).
       parameters:
+      - in: query
+        name: active
+        schema:
+          type: boolean
+        description: Only active staff
       - name: page
         required: false
         in: query
@@ -2526,6 +2596,135 @@ paths:
               schema:
                 $ref: '#/components/schemas/Subscriber'
           description: ''
+  /api/portal/users:
+    get:
+      operationId: portal_users_list
+      description: 'The agency''s portal users: invite, change role, deactivate, resend
+        invite (owner only).'
+      tags:
+      - 'portal: users and settings'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TeamMember'
+          description: ''
+    post:
+      operationId: portal_users_create
+      description: 'The agency''s portal users: invite, change role, deactivate, resend
+        invite (owner only).'
+      tags:
+      - 'portal: users and settings'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InviteMemberRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/InviteMemberRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/InviteMemberRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamMember'
+          description: ''
+  /api/portal/users/{id}/deactivate:
+    post:
+      operationId: portal_users_deactivate_create
+      description: 'The agency''s portal users: invite, change role, deactivate, resend
+        invite (owner only).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this membership.
+        required: true
+      tags:
+      - 'portal: users and settings'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamMember'
+          description: ''
+  /api/portal/users/{id}/resend-invite:
+    post:
+      operationId: portal_users_resend_invite_create
+      description: 'The agency''s portal users: invite, change role, deactivate, resend
+        invite (owner only).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this membership.
+        required: true
+      tags:
+      - 'portal: users and settings'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamMember'
+          description: ''
+  /api/portal/users/{id}/role:
+    post:
+      operationId: portal_users_role_create
+      description: 'The agency''s portal users: invite, change role, deactivate, resend
+        invite (owner only).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this membership.
+        required: true
+      tags:
+      - 'portal: users and settings'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeRoleRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ChangeRoleRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ChangeRoleRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamMember'
+          description: ''
 components:
   schemas:
     AcceptInviteRequest:
@@ -2539,6 +2738,76 @@ components:
           maxLength: 100
       required:
       - password
+    Agency:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        legal_name:
+          type: string
+          readOnly: true
+        gstin:
+          type: string
+          readOnly: true
+          nullable: true
+        address_line1:
+          type: string
+          readOnly: true
+        address_line2:
+          type: string
+          readOnly: true
+        city:
+          type: string
+          readOnly: true
+        state:
+          allOf:
+          - $ref: '#/components/schemas/StateEnum'
+          readOnly: true
+        pin_code:
+          type: string
+          readOnly: true
+        contact_name:
+          type: string
+          readOnly: true
+        contact_phone:
+          type: string
+          readOnly: true
+        contact_email:
+          type: string
+          format: email
+          readOnly: true
+        default_language:
+          allOf:
+          - $ref: '#/components/schemas/LanguageEnum'
+          readOnly: true
+        daily_send_cap:
+          type: integer
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/TenantStatusEnum'
+          readOnly: true
+      required:
+      - address_line1
+      - address_line2
+      - city
+      - contact_email
+      - contact_name
+      - contact_phone
+      - daily_send_cap
+      - default_language
+      - gstin
+      - id
+      - legal_name
+      - name
+      - pin_code
+      - state
+      - status
     AnswerOutcomeEnum:
       enum:
       - confirmed
@@ -3069,6 +3338,13 @@ components:
       - utility
       type: string
       description: '* `utility` - Utility'
+    ChangeRoleRequest:
+      type: object
+      properties:
+        role:
+          $ref: '#/components/schemas/TenantRoleEnum'
+      required:
+      - role
     ChannelOrderEnum:
       enum:
       - whatsapp
@@ -3832,6 +4108,24 @@ components:
       - requires_2fa
       - role
       - tenant_name
+    InviteMemberRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        full_name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        role:
+          $ref: '#/components/schemas/TenantRoleEnum'
+      required:
+      - email
+      - full_name
+      - role
     ItemEnum:
       enum:
       - agency_details
@@ -3916,6 +4210,51 @@ components:
           type: string
       required:
       - code
+      - name
+    LinkedTemplate:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        language:
+          type: string
+        live_version:
+          type: integer
+          nullable: true
+        latest_status:
+          type: string
+      required:
+      - id
+      - language
+      - latest_status
+      - live_version
+      - name
+    LinkedTemplateRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+        language:
+          type: string
+          minLength: 1
+        live_version:
+          type: integer
+          nullable: true
+        latest_status:
+          type: string
+          minLength: 1
+      required:
+      - id
+      - language
+      - latest_status
+      - live_version
       - name
     LoginRequest:
       type: object
@@ -4499,7 +4838,7 @@ components:
         suspension_reason:
           type: string
         role:
-          $ref: '#/components/schemas/PortalConfigRoleEnum'
+          $ref: '#/components/schemas/PortalRoleEnum'
         default_language:
           type: string
         template:
@@ -4525,7 +4864,7 @@ components:
       - tenant_id
       - tenant_name
       - tenant_status
-    PortalConfigRoleEnum:
+    PortalRoleEnum:
       enum:
       - owner
       - manager
@@ -4647,6 +4986,108 @@ components:
       required:
       - channel_order
       - days_before
+      - delivery_weekdays
+      - quiet_end
+      - quiet_start
+      - send_time
+      - wait_minutes
+    ReminderSettings:
+      type: object
+      properties:
+        schedule_type:
+          type: string
+          readOnly: true
+        send_time:
+          type: string
+        days_before:
+          type: integer
+          maximum: 7
+          minimum: 0
+        wait_minutes:
+          type: integer
+          maximum: 1440
+          minimum: 30
+        quiet_start:
+          type: string
+        quiet_end:
+          type: string
+        default_language:
+          $ref: '#/components/schemas/LanguageEnum'
+        delivery_weekdays:
+          type: array
+          items:
+            type: integer
+            maximum: 6
+            minimum: 0
+          maxItems: 7
+          minItems: 1
+        holiday_dates:
+          type: array
+          items:
+            type: string
+            format: date
+          maxItems: 60
+        linked_templates:
+          type: array
+          items:
+            $ref: '#/components/schemas/LinkedTemplate'
+          readOnly: true
+        saved_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - days_before
+      - default_language
+      - delivery_weekdays
+      - holiday_dates
+      - linked_templates
+      - quiet_end
+      - quiet_start
+      - saved_at
+      - schedule_type
+      - send_time
+      - wait_minutes
+    ReminderSettingsRequest:
+      type: object
+      properties:
+        send_time:
+          type: string
+          minLength: 1
+        days_before:
+          type: integer
+          maximum: 7
+          minimum: 0
+        wait_minutes:
+          type: integer
+          maximum: 1440
+          minimum: 30
+        quiet_start:
+          type: string
+          minLength: 1
+        quiet_end:
+          type: string
+          minLength: 1
+        default_language:
+          $ref: '#/components/schemas/LanguageEnum'
+        delivery_weekdays:
+          type: array
+          items:
+            type: integer
+            maximum: 6
+            minimum: 0
+          maxItems: 7
+          minItems: 1
+        holiday_dates:
+          type: array
+          items:
+            type: string
+            format: date
+          maxItems: 60
+      required:
+      - days_before
+      - default_language
       - delivery_weekdays
       - quiet_end
       - quiet_start
@@ -5109,6 +5550,54 @@ components:
         * `manual` - Ended by staff
         * `expired` - Expired
         * `replaced` - Replaced by a new session
+    TeamMember:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+        full_name:
+          type: string
+          readOnly: true
+        role:
+          allOf:
+          - $ref: '#/components/schemas/TenantRoleEnum'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/MembershipStatusEnum'
+          readOnly: true
+        last_login:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        otp_enabled:
+          type: boolean
+          readOnly: true
+          default: false
+        is_you:
+          type: boolean
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - email
+      - full_name
+      - id
+      - is_you
+      - last_login
+      - otp_enabled
+      - role
+      - status
     Template:
       type: object
       properties:

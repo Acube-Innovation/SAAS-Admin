@@ -280,6 +280,11 @@ Import details (subscribers):
    bookings → invite team → **set up auto top-up (skippable)**.
 3. Each item ticks when done. The checklist hides when everything is done or skipped.
 
+Implementation (Step 16): the guided set-up (`/setup`, owner) walks the seven items with the real forms (agency
+details, staff and areas, reminder settings, subscriber and booking imports, invite, auto top-up prompt that can be
+skipped). Saving reminder settings ticks that item; the owner confirms agency details. Validation in the portal (Zod)
+mirrors the API's rules, including quiet hours that wrap midnight (send time can't fall inside them).
+
 Implementation (Step 15): areas, subscribers, bookings and team tick themselves from the data (an active area, any
 subscriber, any booking, a second membership). Agency details and reminder settings are ticked by the owner until
 their screens exist (Step 16); auto top-up can only be skipped until billing (wallet and wallet-empty alerts arrive
@@ -329,6 +334,10 @@ systems under `/api/v1/` (API key auth, per-key rate limits): subscribers, sched
 | GET | `config` | The user's role here (`owner`, `manager`, `office_staff`, `support`), agency status (`tenant_status`, `suspended_at`, `suspension_reason`), default language, industry fields (labels, choices) and schedule types | all |
 | GET | `home` | Home (2.1): tomorrow's bookings by outcome, follow-up queue size and oldest age, bookings with no date, alerts (`tenant_suspended`, `template_paused`, `no_live_template`, `send_cap_reached`), sends today vs the daily cap, and the checklist (owner only) | all |
 | POST | `checklist` | Owner ticks `agency_details` / `reminder_settings` (`done`) or skips / unskips `auto_top_up` (Workflow 3.6) | owner |
+| GET | `agency` | The agency's details as the platform holds them (read-only; confirmed at first login) | all |
+| GET POST | `users` | Team list (role, status, last sign-in, 2FA); invite by email, name and role (72-hour link) | owner (support: view) |
+| POST | `users/{id}/role` · `users/{id}/deactivate` · `users/{id}/resend-invite` | Change role, deactivate, resend. The last active owner can't be demoted or deactivated (`409 last_owner`) | owner |
+| GET PUT | `reminder-settings` | The reminder rule (2.10) and linked templates (read-only). Saving ticks the checklist item | owner, manager (support: view) |
 | GET POST PATCH | `subscribers` · `subscribers/{id}` | List (search, `area` / `none`, `status`, `consent`, `opted_out`; 50 per page), add, edit | all |
 | POST | `subscribers/{id}/deactivate` | Set inactive (there is no delete) | all |
 | GET POST PATCH | `areas` · `areas/{id}` | List (`active=true`; with subscriber counts), add, edit / deactivate | read: all · write: owner, manager |
