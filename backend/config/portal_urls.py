@@ -3,6 +3,12 @@
 from django.urls import path
 from rest_framework.routers import SimpleRouter
 
+from apps.change_requests.views import PortalChangeRequestViewSet
+from apps.content_view.views import (
+    ContentTemplateViewSet,
+    ContentVoiceScriptViewSet,
+    QuestionFlowView,
+)
 from apps.jobs.views import (
     DeliveriesExportView,
     DeliveriesPrintedView,
@@ -29,6 +35,11 @@ router.register("bookings", BookingViewSet, basename="portal-booking")
 router.register("jobs", JobViewSet, basename="portal-job")
 router.register("follow-ups", FollowUpViewSet, basename="portal-follow-up")
 router.register("users", TeamViewSet, basename="portal-user")
+router.register("content/templates", ContentTemplateViewSet, basename="portal-content-template")
+router.register(
+    "content/voice-scripts", ContentVoiceScriptViewSet, basename="portal-content-voice-script"
+)
+router.register("change-requests", PortalChangeRequestViewSet, basename="portal-change-request")
 
 urlpatterns = [
     path("config", PortalConfigView.as_view(), name="portal-config"),
@@ -39,5 +50,6 @@ urlpatterns = [
     path("deliveries", DeliveriesView.as_view(), name="portal-deliveries"),
     path("deliveries/printed", DeliveriesPrintedView.as_view(), name="portal-deliveries-printed"),
     path("deliveries/export", DeliveriesExportView.as_view(), name="portal-deliveries-export"),
+    path("content/question-flows", QuestionFlowView.as_view(), name="portal-question-flows"),
     *router.urls,
 ]

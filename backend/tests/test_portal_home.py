@@ -109,7 +109,14 @@ def test_home_numbers_match_the_seeded_data(api, demo):
 def test_home_alerts(api, demo):
     api = as_role(api, demo, "manager")
     codes = {a["code"] for a in api.get("/api/portal/home").json()["alerts"]}
-    assert codes == {"no_live_template"}  # the demo agency has no live WhatsApp template yet
+    assert codes == set()  # the demo agency's reminder template is live
+
+    from apps.messaging_templates.models import WhatsAppTemplateVersion
+
+    with tenant_context(demo):
+        WhatsAppTemplateVersion.objects.filter(tenant=demo).update(is_live=False)
+    codes = {a["code"] for a in api.get("/api/portal/home").json()["alerts"]}
+    assert codes == {"no_live_template"}
 
     demo.daily_send_cap = 1
     demo.save()

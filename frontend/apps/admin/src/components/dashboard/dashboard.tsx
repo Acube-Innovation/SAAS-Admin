@@ -147,7 +147,12 @@ export function Dashboard() {
             href="/whatsapp-templates"
             attention={Boolean(data?.templates_awaiting_action)}
           />
-          <Tile label={t("dashboard.change_requests")} value={value(data?.open_change_requests)} />
+          <Tile
+            label={t("dashboard.change_requests")}
+            value={value(data?.open_change_requests)}
+            href="/change-requests"
+            attention={Boolean(data?.open_change_requests)}
+          />
           <Tile
             label={t("dashboard.support_sessions")}
             value={value(data?.active_support_sessions)}

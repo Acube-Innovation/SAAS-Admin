@@ -2,6 +2,7 @@ from django.urls import path
 from rest_framework.routers import SimpleRouter
 
 from apps.audit.api import AuditLogExportView, AuditLogFacetsView, AuditLogListView
+from apps.change_requests.views import AdminChangeRequestViewSet
 from apps.industry.views import IndustryTemplateViewSet
 from apps.messaging_templates.dev import SimulateView
 from apps.messaging_templates.views import WhatsAppTemplateViewSet
@@ -13,6 +14,7 @@ router = SimpleRouter(trailing_slash=False)
 router.register("tenants", TenantViewSet, basename="admin-tenant")
 router.register("industry-templates", IndustryTemplateViewSet, basename="admin-industry-template")
 router.register("whatsapp-templates", WhatsAppTemplateViewSet, basename="admin-whatsapp-template")
+router.register("change-requests", AdminChangeRequestViewSet, basename="admin-change-request")
 router.register("support-sessions", SupportSessionViewSet, basename="admin-support-session")
 
 urlpatterns = [

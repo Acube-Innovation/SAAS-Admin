@@ -18,6 +18,7 @@ export const keys = {
   dashboard: ["dashboard"] as const,
   auditLogs: ["audit-logs"] as const,
   auditFacets: ["audit-logs", "facets"] as const,
+  changeRequests: ["change-requests"] as const,
 };
 
 export function useTenants(params: { search?: string; status?: string; industry_template?: string; page?: string }) {
@@ -168,5 +169,38 @@ export function useAuditFacets() {
     queryKey: keys.auditFacets,
     queryFn: () => unwrap(api.GET("/api/admin/audit-logs/facets")),
     staleTime: 60_000,
+  });
+}
+
+/** Change requests queue (spec 2.9). */
+export function useChangeRequests(query: Record<string, string>) {
+  return useQuery({
+    queryKey: [...keys.changeRequests, query],
+    queryFn: () => unwrap(api.GET("/api/admin/change-requests", { params: { query } })),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useChangeRequest(id: string) {
+  return useQuery({
+    queryKey: [...keys.changeRequests, id],
+    queryFn: () => unwrap(api.GET("/api/admin/change-requests/{id}", { params: { path: { id } } })),
+    retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 1,
+  });
+}
+
+export function useAssignees() {
+  return useQuery({
+    queryKey: [...keys.changeRequests, "assignees"],
+    queryFn: () => unwrap(api.GET("/api/admin/change-requests/assignees")),
+    staleTime: 300_000,
+  });
+}
+
+export function useCandidateVersions(id: string, enabled: boolean) {
+  return useQuery({
+    queryKey: [...keys.changeRequests, id, "versions"],
+    queryFn: () => unwrap(api.GET("/api/admin/change-requests/{id}/versions", { params: { path: { id } } })),
+    enabled,
   });
 }

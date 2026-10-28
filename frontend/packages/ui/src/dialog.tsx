@@ -22,6 +22,12 @@ type DialogProps = {
 export function Dialog({ open, title, onClose, children, footer, size = "md" }: DialogProps) {
   const titleId = useId();
   const panel = useRef<HTMLDivElement>(null);
+  // Callers often pass a new onClose each render; keep the latest without re-running the focus
+  // effect (which would pull focus back to the first field while the user types).
+  const closeRef = useRef(onClose);
+  useEffect(() => {
+    closeRef.current = onClose;
+  });
 
   useEffect(() => {
     if (!open) return;
@@ -31,14 +37,14 @@ export function Dialog({ open, title, onClose, children, footer, size = "md" }: 
     );
     focusable?.focus();
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") closeRef.current();
     };
     document.addEventListener("keydown", onKey);
     return () => {
       document.removeEventListener("keydown", onKey);
       previous?.focus?.();
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open) return null;
   return (

@@ -204,6 +204,10 @@ Queue filters: status, tenant, assignee, type. Actions: assign, start work, repl
 
 ### 2.10 Voice script editor (Phase 3)
 
+The `VoiceScript` / `VoiceScriptVersion` models exist from Step 18 so the portal can show live scripts read-only
+(status `draft`, `sent_to_client`, `signed_off`, `sent_back`, `live`; one live version per script). The editor and
+its actions arrive with Step A3.
+
 Per language: `greeting`, `question`, answers mapped to outcomes, `voice`, `max_retries` (default 2),
 `retry_gap_minutes` (default 60). Audio preview through the voice provider interface. Lifecycle as in Workflow 3.7.
 Calls respect quiet hours, delivery days and opt-outs.
@@ -462,8 +466,9 @@ All under `/api/admin/`. They need an authenticated, OTP-verified user with `pla
 | GET/PATCH | `/api/admin/whatsapp-templates/{id}/versions/{vid}` | Detail / edit draft | staff |
 | POST | `…/versions/{vid}/send-to-client` · `/manual-signoff` (multipart) · `/submit` · `/make-live` · `/disable` · `/new-version` · `/sync-status` | 3.4 actions (manual sign-off, submit, make live, disable: super admin) | per 3.4 |
 | GET | `/api/admin/whatsapp-templates/variables?schedule_type=` · `…/versions/{vid}/evidence` | Variables picker · signed evidence link (5 min) | staff |
-| GET/PATCH | `/api/admin/change-requests[/{id}]` | Queue / detail / assign / status | staff |
-| POST | `/api/admin/change-requests/{id}/comments` · `/decline` · `/link-version` | | staff |
+| GET/PATCH | `/api/admin/change-requests[/{id}]` | Queue (filters: `status` incl. `active` = open + in progress, `tenant`, `assignee` = id / `me` / `none`, `request_type`, `search`; 50 per page) / detail with comments / PATCH `assignee` (platform staff or null) and `status: in_progress` (Start work, from open only; assigns the caller if unassigned) | staff |
+| POST | `/api/admin/change-requests/{id}/comments` · `/decline` (reason 5–500) · `/link-version` (a version of the same client still in progress: draft … submitted) | Closed requests answer `409 request_closed`. Platform staff are emailed when a client raises a request | staff |
+| GET | `/api/admin/change-requests/assignees` · `/change-requests/{id}/versions` | Platform staff to assign · the client's versions that can be linked | staff |
 | GET | `/api/admin/audit-logs` · `/audit-logs/facets` · `/audit-logs/export` | Audit list (filters: tenant, actor, action, object_type, date_from/date_to in IST; 50 per page, `page_size` ≤ 200) / filter values / CSV of every matching row, newest first (≤ 50,000 rows; formula cells neutralised; writes an `export` entry) | staff |
 | GET/POST/PATCH | `/api/admin/plans` · `/price-list` · `/tenants/{id}/subscription` · `/tenants/{id}/price-overrides` | Billing (2.11, 3.8) | SA |
 

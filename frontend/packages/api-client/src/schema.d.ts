@@ -54,6 +54,126 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/change-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The change requests queue (admin spec 2.9, Workflow 3.6). Both platform roles. */
+        get: operations["admin_change_requests_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/change-requests/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The change requests queue (admin spec 2.9, Workflow 3.6). Both platform roles. */
+        get: operations["admin_change_requests_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description The change requests queue (admin spec 2.9, Workflow 3.6). Both platform roles. */
+        patch: operations["admin_change_requests_partial_update"];
+        trace?: never;
+    };
+    "/api/admin/change-requests/{id}/comments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description The change requests queue (admin spec 2.9, Workflow 3.6). Both platform roles. */
+        post: operations["admin_change_requests_comments_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/change-requests/{id}/decline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description The change requests queue (admin spec 2.9, Workflow 3.6). Both platform roles. */
+        post: operations["admin_change_requests_decline_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/change-requests/{id}/link-version": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description The change requests queue (admin spec 2.9, Workflow 3.6). Both platform roles. */
+        post: operations["admin_change_requests_link_version_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/change-requests/{id}/versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Template versions of this client that are still in progress (can be linked). */
+        get: operations["admin_change_requests_versions_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/change-requests/assignees": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Platform staff a request can be assigned to. */
+        get: operations["admin_change_requests_assignees_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/dashboard": {
         parameters: {
             query?: never;
@@ -878,6 +998,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/portal/change-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The agency's change requests (portal spec 2.6, Workflow 3.3). No edit or delete. */
+        get: operations["portal_change_requests_list"];
+        put?: never;
+        /** @description The agency's change requests (portal spec 2.6, Workflow 3.3). No edit or delete. */
+        post: operations["portal_change_requests_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/change-requests/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The agency's change requests (portal spec 2.6, Workflow 3.3). No edit or delete. */
+        get: operations["portal_change_requests_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/change-requests/{id}/comments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description The agency's change requests (portal spec 2.6, Workflow 3.3). No edit or delete. */
+        post: operations["portal_change_requests_comments_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/portal/checklist": {
         parameters: {
             query?: never;
@@ -907,6 +1079,125 @@ export interface paths {
          *     (read-only banner) and the industry template's labels and choice lists.
          */
         get: operations["portal_config_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/content/question-flows": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The agency's question flows: each answer and the outcome it records. */
+        get: operations["portal_content_question_flows_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/content/templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description WhatsApp templates with the live version, the version awaiting review and the history. */
+        get: operations["portal_content_templates_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/content/templates/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description WhatsApp templates with the live version, the version awaiting review and the history. */
+        get: operations["portal_content_templates_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/content/templates/{id}/versions/{vid}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Workflow 3.3: the owner or manager approves a version sent to them (-> signed off). */
+        post: operations["portal_content_templates_versions_approve_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/content/templates/{id}/versions/{vid}/send-back": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Workflow 3.3: send the version back to platform staff with a comment. */
+        post: operations["portal_content_templates_versions_send_back_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/content/voice-scripts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description AI voice call scripts (live versions), read-only. */
+        get: operations["portal_content_voice_scripts_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/content/voice-scripts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description AI voice call scripts (live versions), read-only. */
+        get: operations["portal_content_voice_scripts_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1392,6 +1683,66 @@ export interface components {
             password: string;
             full_name?: string;
         };
+        /** @description The client's view (portal). */
+        AdminChangeRequest: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly request_type: components["schemas"]["ChangeRequestTypeEnum"];
+            readonly subject: string;
+            readonly description: string;
+            readonly status: components["schemas"]["ChangeRequestStatusEnum"];
+            readonly requested_by_name: string;
+            readonly linked_version: components["schemas"]["LinkedVersion"] | null;
+            readonly decline_reason: string;
+            readonly comment_count: number;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+            /** Format: date-time */
+            readonly started_at: string | null;
+            /** Format: date-time */
+            readonly closed_at: string | null;
+            /** Format: uuid */
+            tenant_id: string;
+            tenant_name: string;
+            /** Format: email */
+            requested_by_email: string;
+            readonly assignee: components["schemas"]["StaffUser"] | null;
+        };
+        /** @description The client's view (portal). */
+        AdminChangeRequestDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly request_type: components["schemas"]["ChangeRequestTypeEnum"];
+            readonly subject: string;
+            readonly description: string;
+            readonly status: components["schemas"]["ChangeRequestStatusEnum"];
+            readonly requested_by_name: string;
+            readonly linked_version: components["schemas"]["LinkedVersion"] | null;
+            readonly decline_reason: string;
+            readonly comment_count: number;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+            /** Format: date-time */
+            readonly started_at: string | null;
+            /** Format: date-time */
+            readonly closed_at: string | null;
+            /** Format: uuid */
+            tenant_id: string;
+            tenant_name: string;
+            /** Format: email */
+            requested_by_email: string;
+            readonly assignee: components["schemas"]["StaffUser"] | null;
+            readonly comments: components["schemas"]["StaffComment"][];
+        };
+        /**
+         * @description * `in_progress` - in_progress
+         * @enum {string}
+         */
+        AdminChangeRequestUpdateStatusEnum: "in_progress";
         Agency: {
             /** Format: uuid */
             readonly id: string;
@@ -1601,6 +1952,10 @@ export interface components {
             skipped_cancelled: string[];
             not_found: string[];
         };
+        Button: {
+            text: string;
+            outcome: components["schemas"]["AnswerOutcomeEnum"];
+        };
         ButtonRequest: {
             text: string;
             outcome: components["schemas"]["AnswerOutcomeEnum"];
@@ -1608,11 +1963,89 @@ export interface components {
         CancelReasonRequest: {
             reason: string;
         };
+        /** @description A template version of the request's client that can be linked. */
+        CandidateVersion: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            template_id: string;
+            template_name: string;
+            language: string;
+            version: number;
+            status: string;
+            is_live: boolean;
+        };
         /**
          * @description * `utility` - Utility
          * @enum {string}
          */
         CategoryEnum: "utility";
+        /** @description The client's view (portal). */
+        ChangeRequest: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly request_type: components["schemas"]["ChangeRequestTypeEnum"];
+            readonly subject: string;
+            readonly description: string;
+            readonly status: components["schemas"]["ChangeRequestStatusEnum"];
+            readonly requested_by_name: string;
+            readonly linked_version: components["schemas"]["LinkedVersion"] | null;
+            readonly decline_reason: string;
+            readonly comment_count: number;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+            /** Format: date-time */
+            readonly started_at: string | null;
+            /** Format: date-time */
+            readonly closed_at: string | null;
+        };
+        ChangeRequestCreateRequest: {
+            request_type: components["schemas"]["ChangeRequestTypeEnum"];
+            subject: string;
+            /** @default  */
+            description: string;
+        };
+        /** @description The client's view (portal). */
+        ChangeRequestDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly request_type: components["schemas"]["ChangeRequestTypeEnum"];
+            readonly subject: string;
+            readonly description: string;
+            readonly status: components["schemas"]["ChangeRequestStatusEnum"];
+            readonly requested_by_name: string;
+            readonly linked_version: components["schemas"]["LinkedVersion"] | null;
+            readonly decline_reason: string;
+            readonly comment_count: number;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+            /** Format: date-time */
+            readonly started_at: string | null;
+            /** Format: date-time */
+            readonly closed_at: string | null;
+            readonly comments: components["schemas"]["Comment"][];
+        };
+        /**
+         * @description * `open` - Open
+         *     * `in_progress` - In progress
+         *     * `done` - Done
+         *     * `declined` - Declined
+         * @enum {string}
+         */
+        ChangeRequestStatusEnum: "open" | "in_progress" | "done" | "declined";
+        /**
+         * @description * `new_template` - New template
+         *     * `edit_template` - Edit a template
+         *     * `new_language` - New language
+         *     * `voice_script` - Voice script
+         *     * `other` - Other
+         * @enum {string}
+         */
+        ChangeRequestTypeEnum: "new_template" | "edit_template" | "new_language" | "voice_script" | "other";
         ChangeRoleRequest: {
             role: components["schemas"]["TenantRoleEnum"];
         };
@@ -1645,6 +2078,54 @@ export interface components {
             /** @description Ticked by the owner (the others tick themselves) */
             manual: boolean;
         };
+        ClientEvent: {
+            readonly action: string;
+            version: number;
+            /** @description The client user; null for platform staff */
+            readonly by: string | null;
+            readonly note: string;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        ClientTemplate: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly name: string;
+            readonly language: components["schemas"]["LanguageEnum"];
+            schedule_type_name: string;
+            readonly live: components["schemas"]["ClientVersion"] | null;
+            readonly pending: components["schemas"]["ClientVersion"] | null;
+            readonly history: components["schemas"]["ClientEvent"][];
+        };
+        ClientVersion: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly version: number;
+            readonly status: components["schemas"]["TemplateVersionStatusEnum"];
+            readonly is_live: boolean;
+            readonly header_text: string;
+            readonly body: string;
+            readonly footer: string;
+            buttons: components["schemas"]["Button"][];
+            readonly sample_values: unknown;
+            /** @description Waiting for the client's Approve or Send back */
+            readonly can_review: boolean;
+            readonly signoff_method: components["schemas"]["SignoffMethodEnum"];
+            readonly signed_off_by_name: string | null;
+            /** Format: date-time */
+            readonly signed_off_at: string | null;
+            /** Format: date-time */
+            readonly approved_at: string | null;
+            readonly sent_back_comment: string | null;
+        };
+        ClientVoiceScript: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly name: string;
+            readonly language: components["schemas"]["LanguageEnum"];
+            schedule_type_name: string;
+            readonly live: components["schemas"]["VoiceLive"] | null;
+        };
         /**
          * @description * `tenant_suspended` - tenant_suspended
          *     * `template_paused` - template_paused
@@ -1653,6 +2134,18 @@ export interface components {
          * @enum {string}
          */
         CodeEnum: "tenant_suspended" | "template_paused" | "no_live_template" | "send_cap_reached";
+        Comment: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly author_name: string;
+            readonly from_staff: boolean;
+            readonly body: string;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        CommentCreateRequest: {
+            body: string;
+        };
         /**
          * @description * `paper_form` - Paper form
          *     * `verbal` - Verbal
@@ -1676,6 +2169,9 @@ export interface components {
             active_support_sessions: number;
             /** Format: date-time */
             generated_at: string;
+        };
+        DeclineRequest: {
+            reason: string;
         };
         Deliveries: {
             /** Format: date */
@@ -1767,6 +2263,12 @@ export interface components {
          * @enum {string}
          */
         FieldTypeEnum: "text" | "number" | "date" | "phone" | "choice" | "boolean";
+        FlowAnswer: {
+            key: string;
+            label: string;
+            outcome: string;
+            pick_next_delivery_days: number;
+        };
         FollowUp: {
             /** Format: uuid */
             id: string;
@@ -1984,6 +2486,10 @@ export interface components {
             code: string;
             name: string;
         };
+        LinkVersionRequest: {
+            /** Format: uuid */
+            version: string;
+        };
         LinkedTemplate: {
             /** Format: uuid */
             id: string;
@@ -1999,6 +2505,17 @@ export interface components {
             language: string;
             live_version: number | null;
             latest_status: string;
+        };
+        LinkedVersion: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            template_id: string;
+            template_name: string;
+            language: string;
+            version: number;
+            status: string;
+            is_live: boolean;
         };
         LoginRequest: {
             /** Format: email */
@@ -2062,6 +2579,21 @@ export interface components {
             /** @description Hex key, for manual entry. */
             secret: string;
         };
+        PaginatedAdminChangeRequestList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous: string | null;
+            results: components["schemas"]["AdminChangeRequest"][];
+        };
         PaginatedAuditEntryList: {
             /** @example 123 */
             count: number;
@@ -2106,6 +2638,21 @@ export interface components {
              */
             previous: string | null;
             results: components["schemas"]["Booking"][];
+        };
+        PaginatedChangeRequestList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous: string | null;
+            results: components["schemas"]["ChangeRequest"][];
         };
         PaginatedFollowUpList: {
             /** @example 123 */
@@ -2197,6 +2744,12 @@ export interface components {
             previous: string | null;
             results: components["schemas"]["Tenant"][];
         };
+        /** @description Assign (or unassign with null) and/or Start work (`status = in_progress`). */
+        PatchedAdminChangeRequestUpdateRequest: {
+            /** Format: uuid */
+            assignee?: string | null;
+            status?: components["schemas"]["AdminChangeRequestUpdateStatusEnum"];
+        };
         PatchedAreaRequest: {
             name?: string;
             code?: string;
@@ -2268,6 +2821,12 @@ export interface components {
                 [key: string]: string;
             };
         };
+        /**
+         * @description * `super_admin` - Super admin
+         *     * `support` - Support
+         * @enum {string}
+         */
+        PlatformRoleEnum: "super_admin" | "support";
         PortalConfig: {
             /** Format: uuid */
             tenant_id: string;
@@ -2313,6 +2872,11 @@ export interface components {
          * @enum {string}
          */
         QualityRatingEnum: "GREEN" | "YELLOW" | "RED" | "UNKNOWN";
+        QuestionFlow: {
+            schedule_type: string;
+            name: string;
+            answers: components["schemas"]["FlowAnswer"][];
+        };
         QuestionFlowRequest: {
             answers: components["schemas"]["AnswerRequest"][];
         };
@@ -2391,6 +2955,9 @@ export interface components {
             /** Format: uuid */
             tenant_id: string;
         };
+        SendBackRequest: {
+            comment: string;
+        };
         SendCapLimits: {
             default: number;
             min: number;
@@ -2426,6 +2993,17 @@ export interface components {
             /** @default  */
             reason: string;
         };
+        StaffComment: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly author_name: string;
+            readonly from_staff: boolean;
+            readonly body: string;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: email */
+            author_email: string;
+        };
         StaffMember: {
             /** Format: uuid */
             readonly id: string;
@@ -2441,6 +3019,14 @@ export interface components {
             name: string;
             phone?: string;
             is_active?: boolean;
+        };
+        StaffUser: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: email */
+            email: string;
+            full_name: string;
+            platform_role: components["schemas"]["PlatformRoleEnum"] | components["schemas"]["BlankEnum"];
         };
         /**
          * @description * `AN` - Andaman and Nicobar Islands
@@ -2783,6 +3369,19 @@ export interface components {
             readonly available_actions: string[];
             readonly events: components["schemas"]["Event"][];
         };
+        VoiceAnswer: {
+            text: string;
+            outcome: string;
+        };
+        VoiceLive: {
+            version: number;
+            greeting: string;
+            question: string;
+            answers: components["schemas"]["VoiceAnswer"][];
+            voice: string;
+            max_retries: number;
+            retry_gap_minutes: number;
+        };
     };
     responses: never;
     parameters: never;
@@ -2871,6 +3470,209 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AuditLogFacets"];
+                };
+            };
+        };
+    };
+    admin_change_requests_list: {
+        parameters: {
+            query?: {
+                /** @description A staff user id, `me` or `none` */
+                assignee?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                request_type?: "edit_template" | "new_language" | "new_template" | "other" | "voice_script";
+                search?: string;
+                status?: "active" | "declined" | "done" | "in_progress" | "open";
+                tenant?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedAdminChangeRequestList"];
+                };
+            };
+        };
+    };
+    admin_change_requests_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this change request. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminChangeRequestDetail"];
+                };
+            };
+        };
+    };
+    admin_change_requests_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this change request. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedAdminChangeRequestUpdateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedAdminChangeRequestUpdateRequest"];
+                "multipart/form-data": components["schemas"]["PatchedAdminChangeRequestUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminChangeRequestDetail"];
+                };
+            };
+        };
+    };
+    admin_change_requests_comments_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this change request. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CommentCreateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CommentCreateRequest"];
+                "multipart/form-data": components["schemas"]["CommentCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminChangeRequestDetail"];
+                };
+            };
+        };
+    };
+    admin_change_requests_decline_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this change request. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeclineRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["DeclineRequest"];
+                "multipart/form-data": components["schemas"]["DeclineRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminChangeRequestDetail"];
+                };
+            };
+        };
+    };
+    admin_change_requests_link_version_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this change request. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinkVersionRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["LinkVersionRequest"];
+                "multipart/form-data": components["schemas"]["LinkVersionRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminChangeRequestDetail"];
+                };
+            };
+        };
+    };
+    admin_change_requests_versions_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this change request. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CandidateVersion"][];
+                };
+            };
+        };
+    };
+    admin_change_requests_assignees_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StaffUser"][];
                 };
             };
         };
@@ -4278,6 +5080,104 @@ export interface operations {
             };
         };
     };
+    portal_change_requests_list: {
+        parameters: {
+            query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                status?: "declined" | "done" | "in_progress" | "open";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedChangeRequestList"];
+                };
+            };
+        };
+    };
+    portal_change_requests_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangeRequestCreateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ChangeRequestCreateRequest"];
+                "multipart/form-data": components["schemas"]["ChangeRequestCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeRequestDetail"];
+                };
+            };
+        };
+    };
+    portal_change_requests_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this change request. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeRequestDetail"];
+                };
+            };
+        };
+    };
+    portal_change_requests_comments_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this change request. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CommentCreateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CommentCreateRequest"];
+                "multipart/form-data": components["schemas"]["CommentCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeRequestDetail"];
+                };
+            };
+        };
+    };
     portal_checklist_create: {
         parameters: {
             query?: never;
@@ -4318,6 +5218,159 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PortalConfig"];
+                };
+            };
+        };
+    };
+    portal_content_question_flows_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionFlow"][];
+                };
+            };
+        };
+    };
+    portal_content_templates_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClientTemplate"][];
+                };
+            };
+        };
+    };
+    portal_content_templates_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this whats app template. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClientTemplate"];
+                };
+            };
+        };
+    };
+    portal_content_templates_versions_approve_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this whats app template. */
+                id: string;
+                vid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClientVersion"];
+                };
+            };
+        };
+    };
+    portal_content_templates_versions_send_back_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this whats app template. */
+                id: string;
+                vid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SendBackRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SendBackRequest"];
+                "multipart/form-data": components["schemas"]["SendBackRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClientVersion"];
+                };
+            };
+        };
+    };
+    portal_content_voice_scripts_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClientVoiceScript"][];
+                };
+            };
+        };
+    };
+    portal_content_voice_scripts_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this voice script. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClientVoiceScript"];
                 };
             };
         };

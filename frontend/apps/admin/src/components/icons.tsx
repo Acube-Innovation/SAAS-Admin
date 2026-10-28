@@ -39,6 +39,12 @@ export const icons = {
       <path d="M9 10h6M9 14h4" />
     </svg>
   ),
+  requests: (
+    <svg {...base}>
+      <path d="M4 5h16v11H8l-4 4V5Z" />
+      <path d="M12 8v3M12 13.5v.01" />
+    </svg>
+  ),
   audit: (
     <svg {...base}>
       <path d="M9 4h6l1 2h3v15H5V6h3l1-2Z" />

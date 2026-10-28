@@ -17,3 +17,6 @@ export type FieldDef = Schemas["Field"];
 export type ScheduleTypeDef = Schemas["ScheduleType"];
 export type AuditEntry = Schemas["AuditEntry"];
 export type Dashboard = Schemas["Dashboard"];
+export type AdminChangeRequest = Schemas["AdminChangeRequest"];
+export type AdminChangeRequestDetail = Schemas["AdminChangeRequestDetail"];
+export type StaffUser = Schemas["StaffUser"];

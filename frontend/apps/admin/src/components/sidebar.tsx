@@ -14,6 +14,7 @@ export const NAV_ITEMS = [
   { href: "/clients", label: "nav.clients", icon: icons.clients },
   { href: "/industry-templates", label: "nav.industry_templates", icon: icons.industry },
   { href: "/whatsapp-templates", label: "nav.whatsapp_templates", icon: icons.whatsapp },
+  { href: "/change-requests", label: "nav.change_requests", icon: icons.requests },
   { href: "/audit-log", label: "nav.audit_log", icon: icons.audit },
 ] as const;
 

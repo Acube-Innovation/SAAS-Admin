@@ -1,10 +1,11 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { Button } from "./button";
 import { DataTable } from "./data-table";
-import { ConfirmDialog, ReasonDialog } from "./dialog";
+import { ConfirmDialog, Dialog, ReasonDialog } from "./dialog";
 import { TextField } from "./fields";
 import { FileUpload } from "./file-upload";
 import { StatusBadge } from "./status-pill";
@@ -97,6 +98,25 @@ describe("ConfirmDialog", () => {
       <ConfirmDialog open={false} title="t" message="m" confirmLabel="ok" cancelLabel="no" onConfirm={vi.fn()} onClose={vi.fn()} />,
     );
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+});
+
+describe("Dialog", () => {
+  it("keeps focus in the field being typed in when the parent re-renders", async () => {
+    function Form() {
+      const [text, setText] = useState("");
+      return (
+        <Dialog open title="New request" onClose={() => setText("")}>
+          <select aria-label="Type"><option>A</option></select>
+          <input aria-label="Subject" value={text} onChange={(e) => setText(e.target.value)} />
+        </Dialog>
+      );
+    }
+    render(<Form />);
+    expect(screen.getByLabelText("Type")).toHaveFocus();
+    await userEvent.type(screen.getByLabelText("Subject"), "Add our phone number");
+    expect(screen.getByLabelText("Subject")).toHaveFocus();
+    expect(screen.getByLabelText("Subject")).toHaveValue("Add our phone number");
   });
 });
 

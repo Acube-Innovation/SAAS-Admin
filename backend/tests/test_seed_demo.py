@@ -163,3 +163,30 @@ def test_nothing_happens_in_the_future(demo):
         assert not Attempt.objects.filter(sent_at__gt=now).exists()
         assert not Response.objects.filter(received_at__gt=now).exists()
         assert not ScheduleEvent.objects.filter(occurred_at__gt=now).exists()
+
+
+def test_messages_and_voice_content(demo):
+    from apps.change_requests.models import ChangeRequest
+    from apps.messaging_templates.models import VoiceScriptVersion, WhatsAppTemplateVersion
+    from apps.messaging_templates.validation import validate_content
+
+    tenant, output = demo
+    assert "template versions: 3" in output
+    with tenant_context(tenant):
+        versions = list(WhatsAppTemplateVersion.objects.select_related("template__schedule_type"))
+        assert sorted((v.template.language, v.version, v.status, v.is_live) for v in versions) == [
+            ("en", 1, "approved", True),
+            ("en", 2, "sent_to_client", False),
+            ("ml", 1, "approved", True),
+        ]
+        for version in versions:  # the demo content passes the editor's rules (spec 2.7)
+            validate_content(
+                schedule_type=version.template.schedule_type,
+                header_text=version.header_text,
+                body=version.body,
+                footer=version.footer,
+                buttons=version.buttons,
+                sample_values=version.sample_values,
+            )
+        assert VoiceScriptVersion.objects.filter(status="live").count() == 1
+        assert ChangeRequest.objects.get().status == "open"

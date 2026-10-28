@@ -122,6 +122,271 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuditLogFacets'
           description: ''
+  /api/admin/change-requests:
+    get:
+      operationId: admin_change_requests_list
+      description: The change requests queue (admin spec 2.9, Workflow 3.6). Both
+        platform roles.
+      parameters:
+      - in: query
+        name: assignee
+        schema:
+          type: string
+        description: A staff user id, `me` or `none`
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: request_type
+        schema:
+          type: string
+          enum:
+          - edit_template
+          - new_language
+          - new_template
+          - other
+          - voice_script
+      - in: query
+        name: search
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - active
+          - declined
+          - done
+          - in_progress
+          - open
+      - in: query
+        name: tenant
+        schema:
+          type: string
+      tags:
+      - 'admin: change requests'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAdminChangeRequestList'
+          description: ''
+  /api/admin/change-requests/{id}:
+    get:
+      operationId: admin_change_requests_retrieve
+      description: The change requests queue (admin spec 2.9, Workflow 3.6). Both
+        platform roles.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this change request.
+        required: true
+      tags:
+      - 'admin: change requests'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminChangeRequestDetail'
+          description: ''
+    patch:
+      operationId: admin_change_requests_partial_update
+      description: The change requests queue (admin spec 2.9, Workflow 3.6). Both
+        platform roles.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this change request.
+        required: true
+      tags:
+      - 'admin: change requests'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminChangeRequestUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminChangeRequestUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminChangeRequestUpdateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminChangeRequestDetail'
+          description: ''
+  /api/admin/change-requests/{id}/comments:
+    post:
+      operationId: admin_change_requests_comments_create
+      description: The change requests queue (admin spec 2.9, Workflow 3.6). Both
+        platform roles.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this change request.
+        required: true
+      tags:
+      - 'admin: change requests'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CommentCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CommentCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminChangeRequestDetail'
+          description: ''
+  /api/admin/change-requests/{id}/decline:
+    post:
+      operationId: admin_change_requests_decline_create
+      description: The change requests queue (admin spec 2.9, Workflow 3.6). Both
+        platform roles.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this change request.
+        required: true
+      tags:
+      - 'admin: change requests'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeclineRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/DeclineRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/DeclineRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminChangeRequestDetail'
+          description: ''
+  /api/admin/change-requests/{id}/link-version:
+    post:
+      operationId: admin_change_requests_link_version_create
+      description: The change requests queue (admin spec 2.9, Workflow 3.6). Both
+        platform roles.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this change request.
+        required: true
+      tags:
+      - 'admin: change requests'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LinkVersionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LinkVersionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LinkVersionRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminChangeRequestDetail'
+          description: ''
+  /api/admin/change-requests/{id}/versions:
+    get:
+      operationId: admin_change_requests_versions_list
+      description: Template versions of this client that are still in progress (can
+        be linked).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this change request.
+        required: true
+      tags:
+      - 'admin: change requests'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CandidateVersion'
+          description: ''
+  /api/admin/change-requests/assignees:
+    get:
+      operationId: admin_change_requests_assignees_list
+      description: Platform staff a request can be assigned to.
+      tags:
+      - 'admin: change requests'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StaffUser'
+          description: ''
   /api/admin/dashboard:
     get:
       operationId: admin_dashboard_retrieve
@@ -1771,6 +2036,125 @@ paths:
               schema:
                 $ref: '#/components/schemas/BulkSetDateResult'
           description: ''
+  /api/portal/change-requests:
+    get:
+      operationId: portal_change_requests_list
+      description: The agency's change requests (portal spec 2.6, Workflow 3.3). No
+        edit or delete.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - declined
+          - done
+          - in_progress
+          - open
+      tags:
+      - 'portal: messages and voice'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedChangeRequestList'
+          description: ''
+    post:
+      operationId: portal_change_requests_create
+      description: The agency's change requests (portal spec 2.6, Workflow 3.3). No
+        edit or delete.
+      tags:
+      - 'portal: messages and voice'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeRequestCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ChangeRequestCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ChangeRequestCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeRequestDetail'
+          description: ''
+  /api/portal/change-requests/{id}:
+    get:
+      operationId: portal_change_requests_retrieve
+      description: The agency's change requests (portal spec 2.6, Workflow 3.3). No
+        edit or delete.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this change request.
+        required: true
+      tags:
+      - 'portal: messages and voice'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeRequestDetail'
+          description: ''
+  /api/portal/change-requests/{id}/comments:
+    post:
+      operationId: portal_change_requests_comments_create
+      description: The agency's change requests (portal spec 2.6, Workflow 3.3). No
+        edit or delete.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this change request.
+        required: true
+      tags:
+      - 'portal: messages and voice'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CommentCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CommentCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeRequestDetail'
+          description: ''
   /api/portal/checklist:
     post:
       operationId: portal_checklist_create
@@ -1815,6 +2199,176 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PortalConfig'
+          description: ''
+  /api/portal/content/question-flows:
+    get:
+      operationId: portal_content_question_flows_list
+      description: 'The agency''s question flows: each answer and the outcome it records.'
+      tags:
+      - 'portal: messages and voice'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuestionFlow'
+          description: ''
+  /api/portal/content/templates:
+    get:
+      operationId: portal_content_templates_list
+      description: WhatsApp templates with the live version, the version awaiting
+        review and the history.
+      tags:
+      - 'portal: messages and voice'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClientTemplate'
+          description: ''
+  /api/portal/content/templates/{id}:
+    get:
+      operationId: portal_content_templates_retrieve
+      description: WhatsApp templates with the live version, the version awaiting
+        review and the history.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this whats app template.
+        required: true
+      tags:
+      - 'portal: messages and voice'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientTemplate'
+          description: ''
+  /api/portal/content/templates/{id}/versions/{vid}/approve:
+    post:
+      operationId: portal_content_templates_versions_approve_create
+      description: 'Workflow 3.3: the owner or manager approves a version sent to
+        them (-> signed off).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this whats app template.
+        required: true
+      - in: path
+        name: vid
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]+$
+        required: true
+      tags:
+      - 'portal: messages and voice'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientVersion'
+          description: ''
+  /api/portal/content/templates/{id}/versions/{vid}/send-back:
+    post:
+      operationId: portal_content_templates_versions_send_back_create
+      description: 'Workflow 3.3: send the version back to platform staff with a comment.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this whats app template.
+        required: true
+      - in: path
+        name: vid
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]+$
+        required: true
+      tags:
+      - 'portal: messages and voice'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendBackRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SendBackRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SendBackRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientVersion'
+          description: ''
+  /api/portal/content/voice-scripts:
+    get:
+      operationId: portal_content_voice_scripts_list
+      description: AI voice call scripts (live versions), read-only.
+      tags:
+      - 'portal: messages and voice'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClientVoiceScript'
+          description: ''
+  /api/portal/content/voice-scripts/{id}:
+    get:
+      operationId: portal_content_voice_scripts_retrieve
+      description: AI voice call scripts (live versions), read-only.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this voice script.
+        required: true
+      tags:
+      - 'portal: messages and voice'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientVoiceScript'
           description: ''
   /api/portal/deliveries:
     get:
@@ -2784,6 +3338,187 @@ components:
           maxLength: 100
       required:
       - password
+    AdminChangeRequest:
+      type: object
+      description: The client's view (portal).
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        request_type:
+          allOf:
+          - $ref: '#/components/schemas/ChangeRequestTypeEnum'
+          readOnly: true
+        subject:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ChangeRequestStatusEnum'
+          readOnly: true
+        requested_by_name:
+          type: string
+          readOnly: true
+        linked_version:
+          allOf:
+          - $ref: '#/components/schemas/LinkedVersion'
+          readOnly: true
+          nullable: true
+        decline_reason:
+          type: string
+          readOnly: true
+        comment_count:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        started_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        closed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        tenant_id:
+          type: string
+          format: uuid
+        tenant_name:
+          type: string
+        requested_by_email:
+          type: string
+          format: email
+        assignee:
+          allOf:
+          - $ref: '#/components/schemas/StaffUser'
+          readOnly: true
+          nullable: true
+      required:
+      - assignee
+      - closed_at
+      - comment_count
+      - created_at
+      - decline_reason
+      - description
+      - id
+      - linked_version
+      - request_type
+      - requested_by_email
+      - requested_by_name
+      - started_at
+      - status
+      - subject
+      - tenant_id
+      - tenant_name
+      - updated_at
+    AdminChangeRequestDetail:
+      type: object
+      description: The client's view (portal).
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        request_type:
+          allOf:
+          - $ref: '#/components/schemas/ChangeRequestTypeEnum'
+          readOnly: true
+        subject:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ChangeRequestStatusEnum'
+          readOnly: true
+        requested_by_name:
+          type: string
+          readOnly: true
+        linked_version:
+          allOf:
+          - $ref: '#/components/schemas/LinkedVersion'
+          readOnly: true
+          nullable: true
+        decline_reason:
+          type: string
+          readOnly: true
+        comment_count:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        started_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        closed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        tenant_id:
+          type: string
+          format: uuid
+        tenant_name:
+          type: string
+        requested_by_email:
+          type: string
+          format: email
+        assignee:
+          allOf:
+          - $ref: '#/components/schemas/StaffUser'
+          readOnly: true
+          nullable: true
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/StaffComment'
+          readOnly: true
+      required:
+      - assignee
+      - closed_at
+      - comment_count
+      - comments
+      - created_at
+      - decline_reason
+      - description
+      - id
+      - linked_version
+      - request_type
+      - requested_by_email
+      - requested_by_name
+      - started_at
+      - status
+      - subject
+      - tenant_id
+      - tenant_name
+      - updated_at
+    AdminChangeRequestUpdateStatusEnum:
+      enum:
+      - in_progress
+      type: string
+      description: '* `in_progress` - in_progress'
     Agency:
       type: object
       properties:
@@ -3360,6 +4095,16 @@ components:
       - not_found
       - skipped_cancelled
       - updated
+    Button:
+      type: object
+      properties:
+        text:
+          type: string
+        outcome:
+          $ref: '#/components/schemas/AnswerOutcomeEnum'
+      required:
+      - outcome
+      - text
     ButtonRequest:
       type: object
       properties:
@@ -3379,11 +4124,223 @@ components:
           maxLength: 500
       required:
       - reason
+    CandidateVersion:
+      type: object
+      description: A template version of the request's client that can be linked.
+      properties:
+        id:
+          type: string
+          format: uuid
+        template_id:
+          type: string
+          format: uuid
+        template_name:
+          type: string
+        language:
+          type: string
+        version:
+          type: integer
+        status:
+          type: string
+        is_live:
+          type: boolean
+      required:
+      - id
+      - is_live
+      - language
+      - status
+      - template_id
+      - template_name
+      - version
     CategoryEnum:
       enum:
       - utility
       type: string
       description: '* `utility` - Utility'
+    ChangeRequest:
+      type: object
+      description: The client's view (portal).
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        request_type:
+          allOf:
+          - $ref: '#/components/schemas/ChangeRequestTypeEnum'
+          readOnly: true
+        subject:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ChangeRequestStatusEnum'
+          readOnly: true
+        requested_by_name:
+          type: string
+          readOnly: true
+        linked_version:
+          allOf:
+          - $ref: '#/components/schemas/LinkedVersion'
+          readOnly: true
+          nullable: true
+        decline_reason:
+          type: string
+          readOnly: true
+        comment_count:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        started_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        closed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - closed_at
+      - comment_count
+      - created_at
+      - decline_reason
+      - description
+      - id
+      - linked_version
+      - request_type
+      - requested_by_name
+      - started_at
+      - status
+      - subject
+      - updated_at
+    ChangeRequestCreateRequest:
+      type: object
+      properties:
+        request_type:
+          $ref: '#/components/schemas/ChangeRequestTypeEnum'
+        subject:
+          type: string
+          minLength: 1
+          maxLength: 150
+        description:
+          type: string
+          default: ''
+          maxLength: 2000
+      required:
+      - request_type
+      - subject
+    ChangeRequestDetail:
+      type: object
+      description: The client's view (portal).
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        request_type:
+          allOf:
+          - $ref: '#/components/schemas/ChangeRequestTypeEnum'
+          readOnly: true
+        subject:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ChangeRequestStatusEnum'
+          readOnly: true
+        requested_by_name:
+          type: string
+          readOnly: true
+        linked_version:
+          allOf:
+          - $ref: '#/components/schemas/LinkedVersion'
+          readOnly: true
+          nullable: true
+        decline_reason:
+          type: string
+          readOnly: true
+        comment_count:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        started_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        closed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Comment'
+          readOnly: true
+      required:
+      - closed_at
+      - comment_count
+      - comments
+      - created_at
+      - decline_reason
+      - description
+      - id
+      - linked_version
+      - request_type
+      - requested_by_name
+      - started_at
+      - status
+      - subject
+      - updated_at
+    ChangeRequestStatusEnum:
+      enum:
+      - open
+      - in_progress
+      - done
+      - declined
+      type: string
+      description: |-
+        * `open` - Open
+        * `in_progress` - In progress
+        * `done` - Done
+        * `declined` - Declined
+    ChangeRequestTypeEnum:
+      enum:
+      - new_template
+      - edit_template
+      - new_language
+      - voice_script
+      - other
+      type: string
+      description: |-
+        * `new_template` - New template
+        * `edit_template` - Edit a template
+        * `new_language` - New language
+        * `voice_script` - Voice script
+        * `other` - Other
     ChangeRoleRequest:
       type: object
       properties:
@@ -3451,6 +4408,172 @@ components:
       - key
       - manual
       - skipped
+    ClientEvent:
+      type: object
+      properties:
+        action:
+          type: string
+          readOnly: true
+        version:
+          type: integer
+        by:
+          type: string
+          nullable: true
+          readOnly: true
+          description: The client user; null for platform staff
+        note:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - action
+      - by
+      - created_at
+      - note
+      - version
+    ClientTemplate:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        language:
+          allOf:
+          - $ref: '#/components/schemas/LanguageEnum'
+          readOnly: true
+        schedule_type_name:
+          type: string
+        live:
+          allOf:
+          - $ref: '#/components/schemas/ClientVersion'
+          nullable: true
+          readOnly: true
+        pending:
+          allOf:
+          - $ref: '#/components/schemas/ClientVersion'
+          nullable: true
+          readOnly: true
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClientEvent'
+          readOnly: true
+      required:
+      - history
+      - id
+      - language
+      - live
+      - name
+      - pending
+      - schedule_type_name
+    ClientVersion:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        version:
+          type: integer
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/TemplateVersionStatusEnum'
+          readOnly: true
+        is_live:
+          type: boolean
+          readOnly: true
+        header_text:
+          type: string
+          readOnly: true
+        body:
+          type: string
+          readOnly: true
+        footer:
+          type: string
+          readOnly: true
+        buttons:
+          type: array
+          items:
+            $ref: '#/components/schemas/Button'
+        sample_values:
+          readOnly: true
+        can_review:
+          type: boolean
+          readOnly: true
+          description: Waiting for the client's Approve or Send back
+        signoff_method:
+          allOf:
+          - $ref: '#/components/schemas/SignoffMethodEnum'
+          readOnly: true
+        signed_off_by_name:
+          type: string
+          nullable: true
+          readOnly: true
+        signed_off_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        approved_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        sent_back_comment:
+          type: string
+          nullable: true
+          readOnly: true
+      required:
+      - approved_at
+      - body
+      - buttons
+      - can_review
+      - footer
+      - header_text
+      - id
+      - is_live
+      - sample_values
+      - sent_back_comment
+      - signed_off_at
+      - signed_off_by_name
+      - signoff_method
+      - status
+      - version
+    ClientVoiceScript:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        language:
+          allOf:
+          - $ref: '#/components/schemas/LanguageEnum'
+          readOnly: true
+        schedule_type_name:
+          type: string
+        live:
+          allOf:
+          - $ref: '#/components/schemas/VoiceLive'
+          nullable: true
+          readOnly: true
+      required:
+      - id
+      - language
+      - live
+      - name
+      - schedule_type_name
     CodeEnum:
       enum:
       - tenant_suspended
@@ -3463,6 +4586,41 @@ components:
         * `template_paused` - template_paused
         * `no_live_template` - no_live_template
         * `send_cap_reached` - send_cap_reached
+    Comment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        author_name:
+          type: string
+          readOnly: true
+        from_staff:
+          type: boolean
+          readOnly: true
+        body:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - author_name
+      - body
+      - created_at
+      - from_staff
+      - id
+    CommentCreateRequest:
+      type: object
+      properties:
+        body:
+          type: string
+          minLength: 1
+          maxLength: 2000
+      required:
+      - body
     ConsentSourceEnum:
       enum:
       - paper_form
@@ -3516,6 +4674,15 @@ components:
       - quality_alert
       - quality_rating
       - templates_awaiting_action
+    DeclineRequest:
+      type: object
+      properties:
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+      required:
+      - reason
     Deliveries:
       type: object
       properties:
@@ -3748,6 +4915,22 @@ components:
         * `phone` - Phone
         * `choice` - Choice
         * `boolean` - Yes / No
+    FlowAnswer:
+      type: object
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        outcome:
+          type: string
+        pick_next_delivery_days:
+          type: integer
+      required:
+      - key
+      - label
+      - outcome
+      - pick_next_delivery_days
     FollowUp:
       type: object
       properties:
@@ -4276,6 +5459,14 @@ components:
       required:
       - code
       - name
+    LinkVersionRequest:
+      type: object
+      properties:
+        version:
+          type: string
+          format: uuid
+      required:
+      - version
     LinkedTemplate:
       type: object
       properties:
@@ -4321,6 +5512,33 @@ components:
       - latest_status
       - live_version
       - name
+    LinkedVersion:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        template_id:
+          type: string
+          format: uuid
+        template_name:
+          type: string
+        language:
+          type: string
+        version:
+          type: integer
+        status:
+          type: string
+        is_live:
+          type: boolean
+      required:
+      - id
+      - is_live
+      - language
+      - status
+      - template_id
+      - template_name
+      - version
     LoginRequest:
       type: object
       properties:
@@ -4465,6 +5683,31 @@ components:
       required:
       - otpauth_url
       - secret
+    PaginatedAdminChangeRequestList:
+      type: object
+      required:
+      - count
+      - next
+      - previous
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminChangeRequest'
     PaginatedAuditEntryList:
       type: object
       required:
@@ -4540,6 +5783,31 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Booking'
+    PaginatedChangeRequestList:
+      type: object
+      required:
+      - count
+      - next
+      - previous
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChangeRequest'
     PaginatedFollowUpList:
       type: object
       required:
@@ -4690,6 +5958,16 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Tenant'
+    PatchedAdminChangeRequestUpdateRequest:
+      type: object
+      description: Assign (or unassign with null) and/or Start work (`status = in_progress`).
+      properties:
+        assignee:
+          type: string
+          format: uuid
+          nullable: true
+        status:
+          $ref: '#/components/schemas/AdminChangeRequestUpdateStatusEnum'
     PatchedAreaRequest:
       type: object
       properties:
@@ -4861,6 +6139,14 @@ components:
           type: object
           additionalProperties:
             type: string
+    PlatformRoleEnum:
+      enum:
+      - super_admin
+      - support
+      type: string
+      description: |-
+        * `super_admin` - Super admin
+        * `support` - Support
     PortalConfig:
       type: object
       properties:
@@ -4951,6 +6237,21 @@ components:
         * `YELLOW` - YELLOW
         * `RED` - RED
         * `UNKNOWN` - UNKNOWN
+    QuestionFlow:
+      type: object
+      properties:
+        schedule_type:
+          type: string
+        name:
+          type: string
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/FlowAnswer'
+      required:
+      - answers
+      - name
+      - schedule_type
     QuestionFlowRequest:
       type: object
       properties:
@@ -5222,6 +6523,15 @@ components:
           format: uuid
       required:
       - tenant_id
+    SendBackRequest:
+      type: object
+      properties:
+        comment:
+          type: string
+          minLength: 5
+          maxLength: 1000
+      required:
+      - comment
     SendCapLimits:
       type: object
       properties:
@@ -5284,6 +6594,36 @@ components:
           maxLength: 1000
       required:
       - action
+    StaffComment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        author_name:
+          type: string
+          readOnly: true
+        from_staff:
+          type: boolean
+          readOnly: true
+        body:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        author_email:
+          type: string
+          format: email
+      required:
+      - author_email
+      - author_name
+      - body
+      - created_at
+      - from_staff
+      - id
     StaffMember:
       type: object
       properties:
@@ -5328,6 +6668,29 @@ components:
           type: boolean
       required:
       - name
+    StaffUser:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        full_name:
+          type: string
+          maxLength: 100
+        platform_role:
+          oneOf:
+          - $ref: '#/components/schemas/PlatformRoleEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+      required:
+      - email
+      - full_name
+      - id
+      - platform_role
     StateEnum:
       enum:
       - AN
@@ -6209,6 +7572,43 @@ components:
       - status
       - submitted_at
       - version
+    VoiceAnswer:
+      type: object
+      properties:
+        text:
+          type: string
+        outcome:
+          type: string
+      required:
+      - outcome
+      - text
+    VoiceLive:
+      type: object
+      properties:
+        version:
+          type: integer
+        greeting:
+          type: string
+        question:
+          type: string
+        answers:
+          type: array
+          items:
+            $ref: '#/components/schemas/VoiceAnswer'
+        voice:
+          type: string
+        max_retries:
+          type: integer
+        retry_gap_minutes:
+          type: integer
+      required:
+      - answers
+      - greeting
+      - max_retries
+      - question
+      - retry_gap_minutes
+      - version
+      - voice
   securitySchemes:
     cookieAuth:
       type: apiKey

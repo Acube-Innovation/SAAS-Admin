@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     "apps.subscribers",
     "apps.schedules",
     "apps.portal",
+    "apps.content_view",
+    "apps.change_requests",
 ]
 
 AUTH_USER_MODEL = "accounts.User"
@@ -222,6 +224,8 @@ SPECTACULAR_SETTINGS = {
         "AnswerOutcomeEnum": "apps.industry.serializers.OUTCOMES",
         "PortalRoleEnum": "apps.portal.views.PORTAL_ROLES",
         "BookingStatusEnum": "apps.schedules.models.Schedule.Status",
+        "ChangeRequestStatusEnum": "apps.change_requests.models.ChangeRequest.Status",
+        "ChangeRequestTypeEnum": "apps.change_requests.models.ChangeRequest.RequestType",
         "SubscriberStatusEnum": "apps.subscribers.models.Subscriber.Status",
     },
 }

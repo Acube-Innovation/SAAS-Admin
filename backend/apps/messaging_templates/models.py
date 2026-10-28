@@ -110,3 +110,68 @@ class TemplateStatusEvent(TenantScopedModel):
 
     class Meta:
         ordering = ["created_at"]
+
+
+class VoiceStatus(models.TextChoices):
+    """Workflow 3.7 (Phase 3). The editor and its actions arrive with Step A3."""
+
+    DRAFT = "draft", _("Draft")
+    SENT_TO_CLIENT = "sent_to_client", _("Sent to client")
+    SIGNED_OFF = "signed_off", _("Signed off")
+    SENT_BACK = "sent_back", _("Sent back")
+    LIVE = "live", _("Live")
+
+
+class VoiceScript(TenantScopedModel):
+    """An AI voice call script per language (spec 2.10)."""
+
+    name = models.CharField(max_length=100)
+    language = models.CharField(max_length=2, choices=Language.choices)
+    schedule_type = models.ForeignKey(
+        "industry.ScheduleType", on_delete=models.PROTECT, related_name="+"
+    )
+
+    class Meta:
+        ordering = ["name", "language"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["tenant", "name", "language"], name="voice_script_name_language"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.name} ({self.language})"
+
+
+class VoiceScriptVersion(TenantScopedModel):
+    script = models.ForeignKey(VoiceScript, on_delete=models.CASCADE, related_name="versions")
+    version = models.PositiveIntegerField()
+    status = models.CharField(max_length=20, choices=VoiceStatus.choices, default=VoiceStatus.DRAFT)
+    greeting = models.TextField(max_length=500)
+    question = models.TextField(max_length=500)
+    answers = models.JSONField(
+        default=list, blank=True, help_text='[{"text": ..., "outcome": ...}]'
+    )
+    voice = models.CharField(max_length=50, blank=True)
+    max_retries = models.PositiveSmallIntegerField(default=2)
+    retry_gap_minutes = models.PositiveIntegerField(default=60)
+    signed_off_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.PROTECT, null=True, blank=True, related_name="+"
+    )
+    signed_off_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-version"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["tenant", "script", "version"], name="voice_version_unique"
+            ),
+            models.UniqueConstraint(
+                fields=["tenant", "script"],
+                condition=Q(status="live"),
+                name="voice_one_live_version",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.script} v{self.version} [{self.status}]"

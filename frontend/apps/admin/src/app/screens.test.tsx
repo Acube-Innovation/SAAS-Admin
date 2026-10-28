@@ -164,7 +164,7 @@ describe("Console layout", () => {
     expect(screen.queryByText("secret page")).not.toBeInTheDocument();
   });
 
-  it("shows the console with the five sections to verified platform staff", async () => {
+  it("shows the console with its sections to verified platform staff", async () => {
     mockApi([{ method: "GET", path: "/api/auth/me", body: authState() }]);
     renderWithQuery(<ConsoleShell>dashboard content</ConsoleShell>);
 
@@ -175,6 +175,7 @@ describe("Console layout", () => {
       "Clients",
       "Industry templates",
       "WhatsApp templates",
+      "Change requests",
       "Audit log",
     ]);
     expect(within(nav).getByRole("link", { name: "Dashboard" })).toHaveAttribute("aria-current", "page");

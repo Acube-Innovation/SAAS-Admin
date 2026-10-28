@@ -14,6 +14,7 @@ from apps.core.tenancy import db_context, tenant_context
 
 from . import providers
 from .models import TemplateStatusEvent, VersionStatus, WhatsAppTemplate, WhatsAppTemplateVersion
+from .signals import version_went_live
 from .validation import validate_content, validate_evidence
 
 S = VersionStatus
@@ -269,7 +270,9 @@ def make_live(version, actor):
         WhatsAppTemplateVersion.objects.filter(template=locked.template, is_live=True).update(
             is_live=False
         )
-        return _transition(locked, "make_live", actor, is_live=True)
+        live = _transition(locked, "make_live", actor, is_live=True)
+        version_went_live.send(sender=WhatsAppTemplateVersion, version=live, actor=actor)
+        return live
 
 
 def disable(version, actor, reason=""):

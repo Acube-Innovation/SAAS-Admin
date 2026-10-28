@@ -356,6 +356,12 @@ systems under `/api/v1/` (API key auth, per-key rate limits): subscribers, sched
 | POST | `jobs/{id}/reassign` | Change the staff member of a pending delivery | owner, manager |
 | GET | `follow-ups` · `follow-ups/{id}` | Open and contacted items (`status`, `outcome`, `area`, `age` = `normal` / `amber` / `red`), oldest first, with the last reply and failure reason | all |
 | POST | `follow-ups/{id}/set-date` · `contacted` · `note` · `cancel-booking` · `resolve` | Workflow 3.2 actions | all |
+| GET | `content/templates` · `content/templates/{id}` | WhatsApp templates that have reached the client: the `live` version, the `pending` one (newer than live, from `sent_to_client` on; drafts stay with staff) with `can_review` and `sent_back_comment`, and the client-facing `history` | all |
+| POST | `content/templates/{id}/versions/{vid}/approve` · `…/send-back` | Workflow 3.3: Approve (`signed_off`, method `client`) or Send back with `comment` (5–1,000 characters). Only from `sent_to_client` (`409 invalid_transition`) | owner, manager |
+| GET | `content/voice-scripts` · `content/voice-scripts/{id}` | Voice scripts with a live version (greeting, question, answers → outcome, voice, retries, gap) | all |
+| GET | `content/question-flows` | Each schedule type's answers and the outcome each records | all |
+| GET POST | `change-requests` · `change-requests/{id}` | List (`status`; 50 per page), raise (`request_type`, `subject` 5–150, `description` ≤ 2,000); detail with comments (staff shown by name only) and the linked version. No edit or delete (`405`) | read: all · raise: owner, manager |
+| POST | `change-requests/{id}/comments` | Comment (1–2,000 characters); closed requests answer `409 request_closed` | owner, manager |
 
 Platform staff in a support session can read everything above and change nothing. A suspended tenant reads only.
 
@@ -363,5 +369,7 @@ Platform staff in a support session can read everything above and change nothing
 
 - Message content (templates, voice scripts, question flows) is **view-only** for clients. There are no create or
   edit routes; the only content actions are approve / send back on drafts and change requests.
+  `tests/test_content_change_requests.py` walks every portal route under `content/` to prove it, and checks that
+  write attempts answer `403` / `405`.
 - Every write is audited (before/after JSON).
 - All labels come from the translation layer and the industry template.

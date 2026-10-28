@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.accounts.permissions import IsPlatformStaff
+from apps.change_requests.models import ChangeRequest
 from apps.core.models import Tenant
 from apps.messaging_templates.models import VersionStatus, WhatsAppTemplateVersion
 from apps.messaging_templates.providers import get_provider
@@ -64,8 +65,9 @@ class DashboardView(APIView):
             "templates_awaiting_action": WhatsAppTemplateVersion.objects.filter(
                 status__in=AWAITING_ACTION
             ).count(),
-            # Change requests arrive with Step A1.
-            "open_change_requests": 0,
+            "open_change_requests": ChangeRequest.objects.filter(
+                status__in=[ChangeRequest.Status.OPEN, ChangeRequest.Status.IN_PROGRESS]
+            ).count(),
             "active_support_sessions": SupportSession.objects.filter(
                 ended_at=None, expires_at__gt=now
             ).count(),

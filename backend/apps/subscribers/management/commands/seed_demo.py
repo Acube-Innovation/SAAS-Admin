@@ -22,17 +22,63 @@ from django.utils import timezone
 from apps.accounts.models import Membership, TenantRole, User
 from apps.audit.models import Action
 from apps.audit.services import write_audit
+from apps.change_requests.models import ChangeRequest
 from apps.core.models import Tenant
 from apps.core.tenancy import tenant_context
 from apps.industry.models import IndustryTemplate
 from apps.industry.seed import seed_gas_agency
 from apps.industry.services import assign_template
 from apps.jobs.models import FollowUpItem, Job, StaffMember
+from apps.messaging_templates.models import (
+    TemplateStatusEvent,
+    VoiceScript,
+    VoiceScriptVersion,
+    WhatsAppTemplate,
+    WhatsAppTemplateVersion,
+)
 from apps.schedules.models import Attempt, Outcome, Response, Schedule, ScheduleEvent
 from apps.schedules.services import FOLLOW_UP_OUTCOMES, plan_job
 from apps.subscribers.models import Area, Subscriber
 
 IST = zoneinfo.ZoneInfo("Asia/Kolkata")
+
+BUTTONS_EN = [
+    {"text": "Yes, available", "outcome": "confirmed"},
+    {"text": "Not available", "outcome": "not_available"},
+    {"text": "Change date", "outcome": "reschedule"},
+]
+CONTENT = {
+    "ml": {
+        "body": (
+            "നമസ്കാരം {{customer_name}}, {{agency_name}} ൽ നിന്നാണ്. നിങ്ങളുടെ {{cylinder_type}} "
+            "സിലിണ്ടർ (ബുക്കിംഗ് {{booking_reference}}) {{scheduled_date}} ന് എത്തിക്കും. "
+            "സ്വീകരിക്കാൻ ആരെങ്കിലും ഉണ്ടാകുമോ?"
+        ),
+        "footer": "നിർത്താൻ STOP എന്ന് മറുപടി നൽകുക",
+        "buttons": [
+            {"text": "ഉണ്ട്", "outcome": "confirmed"},
+            {"text": "ഇല്ല", "outcome": "not_available"},
+            {"text": "തീയതി മാറ്റണം", "outcome": "reschedule"},
+        ],
+        "versions": [("approved", {"is_live": True})],
+    },
+    "en": {
+        "body": (
+            "Hello {{customer_name}}, this is {{agency_name}}. Your {{cylinder_type}} cylinder "
+            "(booking {{booking_reference}}) will be delivered on {{scheduled_date}}. "
+            "Will someone be available to receive it?"
+        ),
+        "footer": "Reply STOP to stop these messages.",
+        "buttons": BUTTONS_EN,
+        "versions": [
+            ("approved", {"is_live": True}),
+            (
+                "sent_to_client",
+                {"footer": "Questions? Call 0484 2345678. Reply STOP to stop."},
+            ),
+        ],
+    },
+}
 
 AREAS = [
     ("Edappally", "EDP"),
@@ -176,6 +222,7 @@ class Command(BaseCommand):
             users = self.create_users(tenant, opts["email_domain"], password)
             with tenant_context(tenant):
                 counts = self.create_data(tenant, template, rng, opts["subscribers"])
+                counts.update(self.create_content(tenant, template, users[0]))
             write_audit(
                 Action.CREATE,
                 tenant,
@@ -300,6 +347,93 @@ class Command(BaseCommand):
             "delivery jobs": jobs,
             "follow-up items": follow_ups,
         }
+
+    def create_content(self, tenant, template, owner):
+        """
+        Messages and voice: the reminder template live in Malayalam and English, a new English
+        version waiting for the owner's approval, a live voice script and an open change request.
+        """
+        schedule_type = template.schedule_types.get(key="cylinder_delivery")
+        samples = {
+            "customer_name": "Asha Menon",
+            "agency_name": tenant.name,
+            "cylinder_type": "14.2 kg domestic",
+            "booking_reference": "BK26000042",
+            "scheduled_date": "29 Oct 2026",
+        }
+        versions = 0
+        for language, content in CONTENT.items():
+            wa_template = WhatsAppTemplate.objects.create(
+                tenant=tenant,
+                name="cylinder_delivery_reminder",
+                language=language,
+                schedule_type=schedule_type,
+            )
+            for number, (status, overrides) in enumerate(content["versions"], start=1):
+                version = WhatsAppTemplateVersion.objects.create(
+                    tenant=tenant,
+                    template=wa_template,
+                    version=number,
+                    status=status,
+                    is_live=overrides.get("is_live", False),
+                    header_text="",
+                    body=overrides.get("body", content["body"]),
+                    footer=overrides.get("footer", content["footer"]),
+                    buttons=content["buttons"],
+                    sample_values=samples,
+                    provider_template_id=f"stub-demo-{language}-{number}" if number == 1 else "",
+                    signoff_method="manual" if number == 1 else "",
+                    signed_off_at=timezone.now() - dt.timedelta(days=30) if number == 1 else None,
+                    approved_at=timezone.now() - dt.timedelta(days=29) if number == 1 else None,
+                )
+                trail = (
+                    ["send_to_client", "manual_signoff", "submit", "make_live"]
+                    if number == 1
+                    else ["send_to_client"]
+                )
+                previous = "draft"
+                for action in trail:
+                    target = {
+                        "send_to_client": "sent_to_client",
+                        "manual_signoff": "signed_off",
+                        "submit": "submitted",
+                        "make_live": "approved",
+                    }[action]
+                    TemplateStatusEvent.objects.create(
+                        tenant=tenant,
+                        version=version,
+                        action=action,
+                        from_status=previous,
+                        to_status=target,
+                    )
+                    previous = target
+                versions += 1
+
+        script = VoiceScript.objects.create(
+            tenant=tenant, name="cylinder_delivery_call", language="ml", schedule_type=schedule_type
+        )
+        VoiceScriptVersion.objects.create(
+            tenant=tenant,
+            script=script,
+            version=1,
+            status="live",
+            greeting=f"നമസ്കാരം, {tenant.name} ൽ നിന്നാണ് വിളിക്കുന്നത്.",
+            question="നാളെ നിങ്ങളുടെ ഗ്യാസ് സിലിണ്ടർ എത്തിക്കുമ്പോൾ വീട്ടിൽ ആരെങ്കിലും ഉണ്ടാകുമോ?",
+            answers=[
+                {"text": "ഉണ്ട് / Yes", "outcome": "confirmed"},
+                {"text": "ഇല്ല / No", "outcome": "not_available"},
+                {"text": "മറ്റൊരു ദിവസം / Another day", "outcome": "reschedule"},
+            ],
+            voice="ml-IN-female-1",
+        )
+        ChangeRequest.objects.create(
+            tenant=tenant,
+            requested_by=owner,
+            request_type=ChangeRequest.RequestType.EDIT_TEMPLATE,
+            subject="Add our office phone number to the reminder",
+            description="Customers keep asking where to call. Please add 0484 2345678.",
+        )
+        return {"template versions": versions, "voice scripts": 1, "change requests": 1}
 
     @staticmethod
     def mobile(rng):
