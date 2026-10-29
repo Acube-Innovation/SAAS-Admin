@@ -38,3 +38,26 @@ def notify_low_balance(tenant_id):
         from_email=None,
         recipient_list=owners,
     )
+
+
+@shared_task(base=TenantTask)
+def auto_top_up(tenant_id):
+    """Start an auto top-up debit if the wallet is low and a mandate is active."""
+    from .payment_services import trigger_auto_top_up
+
+    return trigger_auto_top_up(Tenant.objects.get(pk=tenant_id))
+
+
+@shared_task
+def check_auto_top_ups():
+    """Celery Beat, every 15 minutes: catch low wallets whose earlier debit failed or timed out."""
+    from apps.core.tenancy import tenant_context
+
+    from .payment_services import trigger_auto_top_up
+
+    started = 0
+    for tenant in Tenant.objects.filter(status=Tenant.Status.ACTIVE):
+        with tenant_context(tenant):
+            if trigger_auto_top_up(tenant) == "charge_started":
+                started += 1
+    return started

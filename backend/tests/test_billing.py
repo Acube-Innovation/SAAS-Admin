@@ -195,7 +195,9 @@ def test_falling_below_the_level_alerts_once(
     client_tenant, owner, django_capture_on_commit_callbacks
 ):
     received = []
-    billing.wallet_low_balance.connect(lambda **kw: received.append(kw["level_paise"]), weak=False)
+    billing.wallet_low_balance.connect(
+        lambda **kw: received.append(kw["level_paise"]), weak=False, dispatch_uid="test-low"
+    )
     billing.credit(client_tenant, 100_100, reason="adjustment")
     with django_capture_on_commit_callbacks(execute=True):
         billing.debit(client_tenant, 85)  # 100,015 paise: still above ₹1,000
@@ -207,7 +209,7 @@ def test_falling_below_the_level_alerts_once(
     billing.credit(client_tenant, 50_000, reason="adjustment")
     with tenant_context(client_tenant):
         assert Wallet.objects.get(tenant=client_tenant).low_balance_since is None
-    billing.wallet_low_balance.receivers.clear()
+    billing.wallet_low_balance.disconnect(dispatch_uid="test-low")  # keep the app's receivers
 
 
 def test_home_shows_wallet_alerts(portal, client_tenant):

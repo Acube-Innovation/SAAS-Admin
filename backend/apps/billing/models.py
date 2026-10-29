@@ -148,3 +148,155 @@ class Invoice(TenantScopedModel):
 
     def __str__(self):
         return self.number
+
+
+# --- plans (Step 21 portal view; admin management in Step A2) ---------------------------------
+
+
+class Plan(BaseModel):
+    """A subscription plan (admin spec 2.11). Not tenant-scoped."""
+
+    code = models.SlugField(max_length=30, unique=True)
+    name = models.CharField(max_length=100)
+    monthly_fee_paise = models.PositiveIntegerField()
+    max_active_subscribers = models.PositiveIntegerField()
+    features = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text='{"voice_ai": bool, "public_api": bool, "staff_app": bool}',
+    )
+    is_active = models.BooleanField(default=True)
+    is_placeholder = models.BooleanField(
+        default=False, help_text="Seeded until the approved plan list replaces it"
+    )
+
+    class Meta:
+        ordering = ["monthly_fee_paise"]
+
+    def __str__(self):
+        return self.name
+
+
+class Subscription(TenantScopedModel):
+    class Status(models.TextChoices):
+        ACTIVE = "active", _("Active")
+        CANCELLED = "cancelled", _("Cancelled")
+
+    plan = models.ForeignKey(Plan, on_delete=models.PROTECT, related_name="+")
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.ACTIVE)
+    current_period_start = models.DateField()
+    next_billing_date = models.DateField()
+    pending_plan = models.ForeignKey(
+        Plan, on_delete=models.PROTECT, null=True, blank=True, related_name="+"
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["tenant"], name="one_subscription_per_tenant")
+        ]
+
+
+# --- payments (portal spec 2.9) ---------------------------------------------------------------
+
+
+class Provider(models.TextChoices):
+    RAZORPAY = "razorpay", _("Razorpay")
+    CASHFREE = "cashfree", _("Cashfree")
+    STUB = "stub", _("Sandbox simulator")
+
+
+class PaymentOrder(TenantScopedModel):
+    """A manual top-up checkout. The wallet is credited only from the provider's signed webhook."""
+
+    class Status(models.TextChoices):
+        CREATED = "created", _("Waiting for payment")
+        PAID = "paid", _("Paid")
+        FAILED = "failed", _("Failed")
+        AMOUNT_MISMATCH = "amount_mismatch", _("Paid amount didn't match")
+
+    provider = models.CharField(max_length=10, choices=Provider.choices)
+    credit_paise = models.PositiveBigIntegerField(help_text="Wallet credit (taxable value)")
+    gst_paise = models.PositiveBigIntegerField()
+    total_paise = models.PositiveBigIntegerField(help_text="What the client pays")
+    provider_order_id = models.CharField(max_length=100, blank=True)
+    provider_payment_id = models.CharField(max_length=100, blank=True)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.CREATED)
+    failure_reason = models.CharField(max_length=255, blank=True)
+    paid_at = models.DateTimeField(null=True, blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+"
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["provider", "provider_order_id"],
+                condition=~Q(provider_order_id=""),
+                name="payment_order_provider_id",
+            )
+        ]
+
+
+class PaymentMandate(TenantScopedModel):
+    """UPI AutoPay or card mandate for auto top-up (one live mandate per tenant)."""
+
+    class Method(models.TextChoices):
+        UPI = "upi", _("UPI AutoPay")
+        CARD = "card", _("Card")
+
+    class Status(models.TextChoices):
+        PENDING = "pending", _("Waiting for authorisation")
+        ACTIVE = "active", _("Active")
+        PAUSED = "paused", _("Paused")
+        CANCELLED = "cancelled", _("Cancelled")
+        FAILED = "failed", _("Failed")
+
+    provider = models.CharField(max_length=10, choices=Provider.choices)
+    method = models.CharField(max_length=10, choices=Method.choices)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.PENDING)
+    credit_paise = models.PositiveBigIntegerField(
+        help_text="Credit per auto top-up (₹1,000–₹15,000)"
+    )
+    provider_mandate_id = models.CharField(max_length=100, blank=True)
+    provider_customer_id = models.CharField(max_length=100, blank=True)
+    charge_in_flight = models.CharField(
+        max_length=100, blank=True, help_text="Provider reference of a debit awaiting its webhook"
+    )
+    charge_credit_paise = models.PositiveBigIntegerField(
+        null=True, blank=True, help_text="Credit the in-flight debit pays for"
+    )
+    charge_started_at = models.DateTimeField(null=True, blank=True)
+    last_charged_at = models.DateTimeField(null=True, blank=True)
+    last_failure = models.CharField(max_length=255, blank=True)
+    activated_at = models.DateTimeField(null=True, blank=True)
+    cancelled_at = models.DateTimeField(null=True, blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+"
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["tenant"],
+                condition=Q(status__in=["pending", "active", "paused"]),
+                name="one_live_mandate_per_tenant",
+            )
+        ]
+
+
+class PaymentEvent(TenantScopedModel):
+    """Every verified webhook, once (provider + event id). Replays are recorded as duplicates."""
+
+    provider = models.CharField(max_length=10, choices=Provider.choices)
+    event_id = models.CharField(max_length=150)
+    event_type = models.CharField(max_length=60)
+    payload = models.JSONField()
+    outcome = models.CharField(max_length=60, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            models.UniqueConstraint(fields=["provider", "event_id"], name="payment_event_once")
+        ]

@@ -208,6 +208,32 @@ play is audited. Recordings expire after 90 days (S3 lifecycle rule).
   `tenants/<tenant>/invoices/<FY>/` and downloaded through a 5-minute link. Seller details come from `SELLER_*`
   settings; the SAC code (`INVOICE_SAC_CODE`, default 998319) should be confirmed by the accountant.
 
+**Payments (Step 21, `apps/billing/payments.py`, `payment_services.py`).**
+- **Providers:** Razorpay (primary) and Cashfree (fallback), called over plain HTTPS (standard library, no SDKs).
+  A provider without credentials is skipped; one that is down (network error or 5xx) falls through to the next
+  (`PAYMENT_PROVIDERS`). A local **sandbox simulator** (`stub`) is used when `DEBUG` is on and no provider is
+  configured: it sends the same signed webhooks and can send one twice. It can never run with `DEBUG` off. The
+  Razorpay and Cashfree request and payload shapes follow their public docs and are verified with mocked HTTP; a
+  live sandbox run is pending test credentials (`RAZORPAY_*`, `CASHFREE_*` in `.env` / Secrets Manager).
+- **Top-up:** the owner picks a credit of ₹1,000–₹5,00,000 in whole rupees; GST is added on top and the order is
+  created at the provider with our references (tenant, order) in its notes / tags. The browser opens the
+  provider's checkout and then polls the order; **only the signed webhook credits the wallet**
+  (`POST /api/payments/webhooks/{razorpay|cashfree|stub}`, public, signature checked: Razorpay
+  `X-Razorpay-Signature` = hex HMAC-SHA256 of the body; Cashfree `x-webhook-signature` = base64 HMAC-SHA256 of
+  timestamp + body). Every verified event is stored once (`PaymentEvent`, unique provider + event id); the wallet
+  credit is idempotent on `payment:<provider>:<payment id>`, so a webhook sent twice, or resent with a new event
+  id, credits once. A paid amount that differs from the order is not credited (`amount_mismatch`).
+- **Auto top-up:** the owner sets up a UPI AutoPay or card mandate for a credit of ₹1,000–₹15,000 per debit
+  (authorised up to ₹17,700 incl. GST) and can change the amount, pause, resume and cancel (cancel stops debits at
+  once and cancels at the provider). When a debit takes the wallet below the low-balance level, or a mandate
+  becomes active on a low wallet, one mandate debit starts (`charge_in_flight`; a debit unanswered for 6 hours is
+  treated as lost). Celery Beat re-checks every 15 minutes. The debit's webhook credits the wallet once with
+  reason `auto_top_up` and a GST invoice; a failed debit is shown as the last problem.
+- **Plan:** view-only (current plan, fee, active subscribers against the limit, next billing date, other plans).
+  **Request a plan change** raises a change request of type `plan_change`. Until the approved plan list arrives,
+  three **placeholder** plans are seeded (Starter, Growth, Pro; `is_placeholder`). A tenant without a subscription
+  starts on the cheapest active plan. Plan changes, price overrides and billing runs are admin Step A2.
+
 ### 2.10 Users, Reminder settings, Integrations
 
 **Users** (owner only): invite (email, name, role `manager` / `office_staff` / `owner`), change role, deactivate,
@@ -364,7 +390,7 @@ All are tenant-scoped (`tenant_id` + RLS) with UUID keys.
 | Job | jobs | `schedule`, `scheduled_date`, `assigned_staff`, `status` (`pending`, `done`, `cancelled`), `cancelled_reason` |
 | FollowUpItem | jobs | `schedule`, `outcome`, `status` (`open`, `contacted`, `resolved`), `notes` (list of `at`, `by`, `text`), `opened_at`, `contacted_at`, `resolved_at`, `resolution` |
 | ChangeRequest / ChangeRequestComment | change_requests | admin spec 2.9 |
-| Wallet / WalletTransaction / Invoice / PaymentMandate | billing | Wallet: `balance_paise` (≥ 0, DB check), `low_balance_since`, `paused_at`. WalletTransaction: `kind` (`credit`, `debit`), `reason` (`top_up`, `auto_top_up`, `send`, `adjustment`), `amount_paise`, `balance_after_paise`, `channel`, `reference`, `idempotency_key` (unique per tenant when set), `invoice`. Invoice: `number`, `financial_year`, `sequence`, `kind`, `issued_at`, `seller`, `buyer`, `place_of_supply`, `lines`, `taxable_paise`, `cgst_paise`, `sgst_paise`, `igst_paise`, `total_paise`, `payment_reference`, `pdf`. PaymentMandate: Step 21 |
+| Wallet / WalletTransaction / Invoice / PaymentMandate | billing | Wallet: `balance_paise` (≥ 0, DB check), `low_balance_since`, `paused_at`. WalletTransaction: `kind` (`credit`, `debit`), `reason` (`top_up`, `auto_top_up`, `send`, `adjustment`), `amount_paise`, `balance_after_paise`, `channel`, `reference`, `idempotency_key` (unique per tenant when set), `invoice`. Invoice: `number`, `financial_year`, `sequence`, `kind`, `issued_at`, `seller`, `buyer`, `place_of_supply`, `lines`, `taxable_paise`, `cgst_paise`, `sgst_paise`, `igst_paise`, `total_paise`, `payment_reference`, `pdf`. Plan: `code`, `name`, `monthly_fee_paise`, `max_active_subscribers`, `features`, `is_active`, `is_placeholder` (platform). Subscription: `plan`, `status`, `current_period_start`, `next_billing_date`, `pending_plan`. PaymentOrder: `provider`, `credit_paise`, `gst_paise`, `total_paise`, `provider_order_id`, `provider_payment_id`, `status` (`created`, `paid`, `failed`, `amount_mismatch`). PaymentMandate: `provider`, `method` (`upi`, `card`), `status` (`pending`, `active`, `paused`, `cancelled`, `failed`; one live per tenant), `credit_paise`, provider ids, `charge_in_flight`, `charge_credit_paise`, `last_charged_at`, `last_failure`. PaymentEvent: `provider`, `event_id` (unique together), `event_type`, `payload`, `outcome` |
 | ApiKey / WebhookEndpoint / WebhookDelivery | integrations | `key_hash`, `prefix`, `revoked_at`; `url`, `secret`; `attempts`, `status` |
 
 ## 7. Portal API
@@ -408,6 +434,13 @@ systems under `/api/v1/` (API key auth, per-key rate limits): subscribers, sched
 | GET | `wallet` | Balance, low-balance level, `is_low`, `can_send`, `paused_at`, held reminders, current prices | owner, manager (support: view) |
 | GET | `wallet/transactions` | Ledger, newest first (`kind`; 50 per page) | owner, manager (support: view) |
 | GET | `invoices` · `invoices/{id}` · `invoices/{id}/pdf` | GST invoices; the PDF through a 5-minute link | owner, manager (support: view) |
+| POST | `top-ups` | Start a top-up (`credit_paise`): order + checkout data for the provider | owner |
+| GET | `top-ups/{id}` | The order's status (the screen polls it after checkout) | owner, manager (support: view) |
+| GET POST | `auto-top-up` | The live mandate and limits · set up a mandate (`credit_paise`, `method`) | read: owner, manager · set up: owner |
+| POST | `auto-top-up/amount` · `pause` · `resume` · `cancel` | Change the mandate | owner |
+| GET | `plan` | Plan, subscription, active subscribers, plans | owner, manager (support: view) |
+| POST | `plan/request-change` | `plan_code`, optional `note`: raises a `plan_change` change request | owner |
+| POST | `dev/payments/simulate` | Sandbox only (`DEBUG`): deliver a signed webhook for an order, a mandate or its debit, 1–3 times. 404 elsewhere | owner |
 | GET | `communication-log` · `communication-log/{id}` | Every attempt with its replies, newest first (`date_from`/`date_to`, `channel`, `delivery_status`, `outcome`, `booking`, `subscriber`, `has_recording`, `search`; 50 per page) | all |
 | GET | `communication-log/{id}/recording` | `{url, expires_in: 300, expires_at}`: a presigned link to the call recording. Audited (`recording_played`). `404 no_recording`, `410 recording_expired` after 90 days | owner, manager (support: view) |
 | GET | `reports/reminder-results` · `reports/follow-up-ageing` · `reports/subscriber-health` | Reports (2.5) with their filters | owner, manager (support: view) |

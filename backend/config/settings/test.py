@@ -7,6 +7,7 @@ DATABASES["default"]["USER"], DATABASES["default"]["PASSWORD"] = DATABASE_ROLES[
 INSTALLED_APPS = [*INSTALLED_APPS, "tests.tenancy_app"]
 
 DEBUG = False
+TESTING = True
 ALLOWED_HOSTS = ["testserver", "localhost"]
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 CELERY_TASK_ALWAYS_EAGER = True

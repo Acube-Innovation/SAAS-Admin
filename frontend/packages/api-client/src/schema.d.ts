@@ -841,6 +841,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/payments/webhooks/{provider}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Signed provider webhooks: the only way money reaches a wallet. Public; signature-checked. */
+        post: operations["payments_webhooks_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/portal/agency": {
         parameters: {
             query?: never;
@@ -892,6 +909,41 @@ export interface paths {
         head?: never;
         /** @description Areas / routes (spec 2.7). Everyone can list them (subscriber form); owner/manager edit. */
         patch: operations["portal_areas_partial_update"];
+        trace?: never;
+    };
+    "/api/portal/auto-top-up": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Auto top-up: view (owner, manager), set up (owner). */
+        get: operations["portal_auto_top_up_retrieve"];
+        put?: never;
+        /** @description Auto top-up: view (owner, manager), set up (owner). */
+        post: operations["portal_auto_top_up_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/auto-top-up/{action}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Change the amount, pause, resume or cancel auto top-up (owner). */
+        post: operations["portal_auto_top_up_action"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/portal/bookings": {
@@ -1308,6 +1360,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/portal/dev/payments/simulate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Local development only (DEBUG + the stub provider): deliver the signed webhook a provider would
+         *     send, optionally more than once. Answers 404 everywhere else.
+         */
+        post: operations["portal_dev_payments_simulate_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/portal/follow-ups": {
         parameters: {
             query?: never;
@@ -1607,6 +1679,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/portal/plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The agency's plan, view-only (spec 2.9), with the plans it could move to. */
+        get: operations["portal_plan_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/plan/request-change": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Request a plan change (owner): raises a change request for the platform team. */
+        post: operations["portal_plan_request_change_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/portal/reminder-settings": {
         parameters: {
             query?: never;
@@ -1776,6 +1882,40 @@ export interface paths {
         put?: never;
         /** @description Subscribers (spec 2.2). No delete: deactivate instead. */
         post: operations["portal_subscribers_deactivate_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/top-ups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Start a manual top-up (owner). The wallet is credited only by the provider's webhook. */
+        post: operations["portal_top_ups_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/top-ups/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Follow a top-up after checkout (the screen polls until the webhook marks it paid). */
+        get: operations["portal_top_ups_retrieve"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2096,6 +2236,12 @@ export interface components {
             active_tenant_id: string | null;
             memberships: components["schemas"]["Membership"][];
         };
+        AutoTopUp: {
+            mandate: components["schemas"]["Mandate"] | null;
+            min_credit_paise: number;
+            max_credit_paise: number;
+            low_balance_level_paise: number;
+        };
         /**
          * @description * `whatsapp_utility` - WhatsApp utility message
          *     * `whatsapp_service` - WhatsApp service message
@@ -2279,10 +2425,11 @@ export interface components {
          *     * `edit_template` - Edit a template
          *     * `new_language` - New language
          *     * `voice_script` - Voice script
+         *     * `plan_change` - Plan change
          *     * `other` - Other
          * @enum {string}
          */
-        ChangeRequestTypeEnum: "new_template" | "edit_template" | "new_language" | "voice_script" | "other";
+        ChangeRequestTypeEnum: "new_template" | "edit_template" | "new_language" | "voice_script" | "plan_change" | "other";
         ChangeRoleRequest: {
             role: components["schemas"]["TenantRoleEnum"];
         };
@@ -2314,6 +2461,13 @@ export interface components {
             can_skip: boolean;
             /** @description Ticked by the owner (the others tick themselves) */
             manual: boolean;
+        };
+        Checkout: {
+            provider: components["schemas"]["PaymentProviderEnum"];
+            /** @description What the provider's browser checkout needs */
+            data: {
+                [key: string]: unknown;
+            };
         };
         ClientEvent: {
             readonly action: string;
@@ -2848,6 +3002,56 @@ export interface components {
             email: string;
             password: string;
         };
+        Mandate: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly provider: components["schemas"]["PaymentProviderEnum"];
+            readonly method: components["schemas"]["MandateMethodEnum"];
+            readonly status: components["schemas"]["MandateStatusEnum"];
+            /** @description Credit per auto top-up (₹1,000–₹15,000) */
+            readonly credit_paise: number;
+            readonly gst_paise: number;
+            readonly charge_in_progress: boolean;
+            /** Format: date-time */
+            readonly last_charged_at: string | null;
+            readonly last_failure: string;
+            /** Format: date-time */
+            readonly activated_at: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        MandateAmountRequest: {
+            credit_paise: number;
+        };
+        /**
+         * @description * `upi` - upi
+         *     * `card` - card
+         * @enum {string}
+         */
+        MandateCreateMethodEnum: "upi" | "card";
+        MandateCreateRequest: {
+            credit_paise: number;
+            method: components["schemas"]["MandateCreateMethodEnum"];
+        };
+        /**
+         * @description * `upi` - UPI AutoPay
+         *     * `card` - Card
+         * @enum {string}
+         */
+        MandateMethodEnum: "upi" | "card";
+        MandateStarted: {
+            mandate: components["schemas"]["Mandate"];
+            checkout: components["schemas"]["Checkout"];
+        };
+        /**
+         * @description * `pending` - Waiting for authorisation
+         *     * `active` - Active
+         *     * `paused` - Paused
+         *     * `cancelled` - Cancelled
+         *     * `failed` - Failed
+         * @enum {string}
+         */
+        MandateStatusEnum: "pending" | "active" | "paused" | "cancelled" | "failed";
         ManualSignoffRequest: {
             /** Format: binary */
             evidence: string;
@@ -3201,6 +3405,84 @@ export interface components {
             sample_values?: {
                 [key: string]: string;
             };
+        };
+        PaymentOrder: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly provider: components["schemas"]["PaymentProviderEnum"];
+            /** @description Wallet credit (taxable value) */
+            readonly credit_paise: number;
+            readonly gst_paise: number;
+            /** @description What the client pays */
+            readonly total_paise: number;
+            readonly status: components["schemas"]["PaymentOrderStatusEnum"];
+            readonly failure_reason: string;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly paid_at: string | null;
+        };
+        /**
+         * @description * `created` - Waiting for payment
+         *     * `paid` - Paid
+         *     * `failed` - Failed
+         *     * `amount_mismatch` - Paid amount didn't match
+         * @enum {string}
+         */
+        PaymentOrderStatusEnum: "created" | "paid" | "failed" | "amount_mismatch";
+        /**
+         * @description * `razorpay` - Razorpay
+         *     * `cashfree` - Cashfree
+         *     * `stub` - Sandbox simulator
+         * @enum {string}
+         */
+        PaymentProviderEnum: "razorpay" | "cashfree" | "stub";
+        /**
+         * @description * `success` - success
+         *     * `failure` - failure
+         * @enum {string}
+         */
+        PaymentSimulateOutcomeEnum: "success" | "failure";
+        PaymentSimulateRequest: {
+            target: components["schemas"]["TargetEnum"];
+            /**
+             * Format: uuid
+             * @description PaymentOrder or PaymentMandate id
+             */
+            id: string;
+            /** @default success */
+            outcome: components["schemas"]["PaymentSimulateOutcomeEnum"];
+            /**
+             * @description Deliver N times
+             * @default 1
+             */
+            times: number;
+        };
+        Plan: {
+            code: string;
+            name: string;
+            monthly_fee_paise: number;
+            max_active_subscribers: number;
+            features: {
+                [key: string]: boolean;
+            };
+            is_placeholder: boolean;
+        };
+        PlanChangeRequestRequest: {
+            plan_code: string;
+            /** @default  */
+            note: string;
+        };
+        PlanView: {
+            plan: components["schemas"]["Plan"] | null;
+            pending_plan: components["schemas"]["Plan"] | null;
+            status: string | null;
+            /** Format: date */
+            current_period_start: string | null;
+            /** Format: date */
+            next_billing_date: string | null;
+            active_subscribers: number;
+            plans: components["schemas"]["Plan"][];
         };
         /**
          * @description * `super_admin` - Super admin
@@ -3575,6 +3857,13 @@ export interface components {
          * @enum {string}
          */
         SupportSessionEndReasonEnum: "manual" | "expired" | "replaced";
+        /**
+         * @description * `order` - order
+         *     * `mandate` - mandate
+         *     * `charge` - charge
+         * @enum {string}
+         */
+        TargetEnum: "order" | "mandate" | "charge";
         TeamMember: {
             /** Format: uuid */
             readonly id: string;
@@ -3766,6 +4055,14 @@ export interface components {
             };
             actor_email: string;
         };
+        TopUpCreateRequest: {
+            /** @description Wallet credit; GST is added on top */
+            credit_paise: number;
+        };
+        TopUpStarted: {
+            order: components["schemas"]["PaymentOrder"];
+            checkout: components["schemas"]["Checkout"];
+        };
         Version: {
             /** Format: uuid */
             readonly id: string;
@@ -3941,7 +4238,7 @@ export interface operations {
                 assignee?: string;
                 /** @description A page number within the paginated result set. */
                 page?: number;
-                request_type?: "edit_template" | "new_language" | "new_template" | "other" | "voice_script";
+                request_type?: "edit_template" | "new_language" | "new_template" | "other" | "plan_change" | "voice_script";
                 search?: string;
                 status?: "active" | "declined" | "done" | "in_progress" | "open";
                 tenant?: string;
@@ -5211,6 +5508,26 @@ export interface operations {
             };
         };
     };
+    payments_webhooks_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                provider: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     portal_agency_retrieve: {
         parameters: {
             query?: never;
@@ -5323,6 +5640,77 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Area"];
+                };
+            };
+        };
+    };
+    portal_auto_top_up_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AutoTopUp"];
+                };
+            };
+        };
+    };
+    portal_auto_top_up_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MandateCreateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["MandateCreateRequest"];
+                "multipart/form-data": components["schemas"]["MandateCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MandateStarted"];
+                };
+            };
+        };
+    };
+    portal_auto_top_up_action: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                action: "amount" | "cancel" | "pause" | "resume";
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MandateAmountRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["MandateAmountRequest"];
+                "multipart/form-data": components["schemas"]["MandateAmountRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Mandate"];
                 };
             };
         };
@@ -5982,6 +6370,30 @@ export interface operations {
             };
         };
     };
+    portal_dev_payments_simulate_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PaymentSimulateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PaymentSimulateRequest"];
+                "multipart/form-data": components["schemas"]["PaymentSimulateRequest"];
+            };
+        };
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     portal_follow_ups_list: {
         parameters: {
             query?: {
@@ -6416,6 +6828,50 @@ export interface operations {
             };
         };
     };
+    portal_plan_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanView"];
+                };
+            };
+        };
+    };
+    portal_plan_request_change_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlanChangeRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PlanChangeRequestRequest"];
+                "multipart/form-data": components["schemas"]["PlanChangeRequestRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeRequestDetail"];
+                };
+            };
+        };
+    };
     portal_reminder_settings_retrieve: {
         parameters: {
             query?: never;
@@ -6790,6 +7246,52 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Subscriber"];
+                };
+            };
+        };
+    };
+    portal_top_ups_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TopUpCreateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["TopUpCreateRequest"];
+                "multipart/form-data": components["schemas"]["TopUpCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopUpStarted"];
+                };
+            };
+        };
+    };
+    portal_top_ups_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaymentOrder"];
                 };
             };
         };

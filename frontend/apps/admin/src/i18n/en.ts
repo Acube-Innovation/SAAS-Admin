@@ -485,6 +485,7 @@ export const en: Messages = {
   "cr.type.edit_template": "Edit a template",
   "cr.type.new_language": "New language",
   "cr.type.voice_script": "Voice script",
+  "cr.type.plan_change": "Plan change",
   "cr.type.other": "Other",
   "cr.meta": "{type} · {client} · raised by {email} on {date}",
   "cr.no_description": "No details given.",

@@ -230,6 +230,7 @@ SPECTACULAR_SETTINGS = {
         "ChangeRequestTypeEnum": "apps.change_requests.models.ChangeRequest.RequestType",
         "AttemptChannelEnum": "apps.schedules.models.Attempt.Channel",
         "BillingChannelEnum": "apps.billing.models.Channel",
+        "PaymentProviderEnum": "apps.billing.models.Provider",
         "SubscriberStatusEnum": "apps.subscribers.models.Subscriber.Status",
     },
 }
@@ -273,6 +274,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.subscribers.tasks.fail_stale_imports",
         "schedule": 300.0,
     },
+    "check-auto-top-ups": {
+        "task": "apps.billing.tasks.check_auto_top_ups",
+        "schedule": 900.0,
+    },
 }
 
 LOGGING = {
@@ -299,3 +304,23 @@ INVOICE_SAC_CODE = env("INVOICE_SAC_CODE", "998319")  # confirm with the account
 GST_RATE_PERCENT = int(env("GST_RATE_PERCENT", "18"))
 INVOICE_FONT_PATH = env("INVOICE_FONT_PATH", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")
 LOW_BALANCE_DEFAULT_PAISE = 100_000  # ₹1,000 until there are 14 days of usage
+
+# --- Payments (portal spec 2.9, Step 21) ----------------------------------------------------
+# Providers in order of preference; a provider without credentials is skipped.
+PAYMENT_PROVIDERS = env_list("PAYMENT_PROVIDERS", "razorpay,cashfree")
+RAZORPAY_KEY_ID = env("RAZORPAY_KEY_ID", "")
+RAZORPAY_KEY_SECRET = env("RAZORPAY_KEY_SECRET", "")
+RAZORPAY_WEBHOOK_SECRET = env("RAZORPAY_WEBHOOK_SECRET", "")
+RAZORPAY_API_BASE = env("RAZORPAY_API_BASE", "https://api.razorpay.com/v1")
+CASHFREE_APP_ID = env("CASHFREE_APP_ID", "")
+CASHFREE_SECRET_KEY = env("CASHFREE_SECRET_KEY", "")
+CASHFREE_API_BASE = env("CASHFREE_API_BASE", "https://sandbox.cashfree.com/pg")
+CASHFREE_API_VERSION = env("CASHFREE_API_VERSION", "2023-08-01")
+CASHFREE_MODE = env("CASHFREE_MODE", "sandbox")  # sandbox | production (the browser SDK's mode)
+# The local payment simulator; only ever used when DEBUG is on.
+PAYMENT_STUB_ENABLED = env_bool("PAYMENT_STUB_ENABLED", True)
+TOP_UP_MIN_PAISE = 100_000  # ₹1,000
+TOP_UP_MAX_PAISE = 50_000_000  # ₹5,00,000 per payment
+AUTO_TOP_UP_MIN_PAISE = 100_000  # ₹1,000
+AUTO_TOP_UP_MAX_PAISE = 1_500_000  # ₹15,000
+TESTING = False

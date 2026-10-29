@@ -191,7 +191,7 @@ Requests raised by clients from the portal about message content (template wordi
 | Field | Rules |
 | --- | --- |
 | `tenant`, `requested_by` | From the portal |
-| `request_type` | `new_template`, `edit_template`, `new_language`, `voice_script`, `other` |
+| `request_type` | `new_template`, `edit_template`, `new_language`, `voice_script`, `plan_change` (raised from the portal's Plan view), `other` |
 | `subject` | 5–150 characters |
 | `description` | Up to 2,000 characters |
 | `status` | `open` → `in_progress` → `done` / `declined` |

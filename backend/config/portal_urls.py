@@ -3,7 +3,18 @@
 from django.urls import path
 from rest_framework.routers import SimpleRouter
 
-from apps.billing.views import InvoiceViewSet, WalletTransactionViewSet, WalletView
+from apps.billing.views import (
+    AutoTopUpActionView,
+    AutoTopUpView,
+    InvoiceViewSet,
+    PlanChangeRequestView,
+    PlanView,
+    SimulatePaymentView,
+    TopUpDetailView,
+    TopUpView,
+    WalletTransactionViewSet,
+    WalletView,
+)
 from apps.change_requests.views import PortalChangeRequestViewSet
 from apps.content_view.views import (
     ContentTemplateViewSet,
@@ -59,6 +70,15 @@ urlpatterns = [
     path("agency", AgencyView.as_view(), name="portal-agency"),
     path("reminder-settings", ReminderSettingsView.as_view(), name="portal-reminder-settings"),
     path("wallet", WalletView.as_view(), name="portal-wallet"),
+    path("top-ups", TopUpView.as_view(), name="portal-top-ups"),
+    path("top-ups/<uuid:pk>", TopUpDetailView.as_view(), name="portal-top-up"),
+    path("auto-top-up", AutoTopUpView.as_view(), name="portal-auto-top-up"),
+    path(
+        "auto-top-up/<slug:action>", AutoTopUpActionView.as_view(), name="portal-auto-top-up-action"
+    ),
+    path("plan", PlanView.as_view(), name="portal-plan"),
+    path("plan/request-change", PlanChangeRequestView.as_view(), name="portal-plan-change"),
+    path("dev/payments/simulate", SimulatePaymentView.as_view(), name="portal-dev-payments"),
     path("deliveries", DeliveriesView.as_view(), name="portal-deliveries"),
     path("deliveries/printed", DeliveriesPrintedView.as_view(), name="portal-deliveries-printed"),
     path("deliveries/export", DeliveriesExportView.as_view(), name="portal-deliveries-export"),

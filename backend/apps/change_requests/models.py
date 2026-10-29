@@ -13,6 +13,7 @@ class ChangeRequest(TenantScopedModel):
         EDIT_TEMPLATE = "edit_template", _("Edit a template")
         NEW_LANGUAGE = "new_language", _("New language")
         VOICE_SCRIPT = "voice_script", _("Voice script")
+        PLAN_CHANGE = "plan_change", _("Plan change")
         OTHER = "other", _("Other")
 
     class Status(models.TextChoices):

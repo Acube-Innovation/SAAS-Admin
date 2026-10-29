@@ -148,6 +148,7 @@ paths:
           - new_language
           - new_template
           - other
+          - plan_change
           - voice_script
       - in: query
         name: search
@@ -1640,6 +1641,24 @@ paths:
           description: ''
         '503':
           description: No response body
+  /api/payments/webhooks/{provider}:
+    post:
+      operationId: payments_webhooks_create
+      description: 'Signed provider webhooks: the only way money reaches a wallet.
+        Public; signature-checked.'
+      parameters:
+      - in: path
+        name: provider
+        schema:
+          type: string
+        required: true
+      tags:
+      - 'payments: webhooks'
+      security:
+      - {}
+      responses:
+        '200':
+          description: No response body
   /api/portal/agency:
     get:
       operationId: portal_agency_retrieve
@@ -1764,6 +1783,85 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Area'
+          description: ''
+  /api/portal/auto-top-up:
+    get:
+      operationId: portal_auto_top_up_retrieve
+      description: 'Auto top-up: view (owner, manager), set up (owner).'
+      tags:
+      - 'portal: wallet and billing'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AutoTopUp'
+          description: ''
+    post:
+      operationId: portal_auto_top_up_create
+      description: 'Auto top-up: view (owner, manager), set up (owner).'
+      tags:
+      - 'portal: wallet and billing'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MandateCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MandateCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MandateCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MandateStarted'
+          description: ''
+  /api/portal/auto-top-up/{action}:
+    post:
+      operationId: portal_auto_top_up_action
+      description: Change the amount, pause, resume or cancel auto top-up (owner).
+      parameters:
+      - in: path
+        name: action
+        schema:
+          type: string
+          enum:
+          - amount
+          - cancel
+          - pause
+          - resume
+        required: true
+      tags:
+      - 'portal: wallet and billing'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MandateAmountRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MandateAmountRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MandateAmountRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mandate'
           description: ''
   /api/portal/bookings:
     get:
@@ -2564,6 +2662,31 @@ paths:
               schema:
                 $ref: '#/components/schemas/PrintedResult'
           description: ''
+  /api/portal/dev/payments/simulate:
+    post:
+      operationId: portal_dev_payments_simulate_create
+      description: |-
+        Local development only (DEBUG + the stub provider): deliver the signed webhook a provider would
+        send, optionally more than once. Answers 404 everywhere else.
+      tags:
+      - 'portal: wallet and billing'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentSimulateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PaymentSimulateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PaymentSimulateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
   /api/portal/follow-ups:
     get:
       operationId: portal_follow_ups_list
@@ -3082,6 +3205,50 @@ paths:
               schema:
                 $ref: '#/components/schemas/DeliveryJob'
           description: ''
+  /api/portal/plan:
+    get:
+      operationId: portal_plan_retrieve
+      description: The agency's plan, view-only (spec 2.9), with the plans it could
+        move to.
+      tags:
+      - 'portal: wallet and billing'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanView'
+          description: ''
+  /api/portal/plan/request-change:
+    post:
+      operationId: portal_plan_request_change_create
+      description: 'Request a plan change (owner): raises a change request for the
+        platform team.'
+      tags:
+      - 'portal: wallet and billing'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanChangeRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PlanChangeRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PlanChangeRequestRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangeRequestDetail'
+          description: ''
   /api/portal/reminder-settings:
     get:
       operationId: portal_reminder_settings_retrieve
@@ -3555,6 +3722,57 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Subscriber'
+          description: ''
+  /api/portal/top-ups:
+    post:
+      operationId: portal_top_ups_create
+      description: Start a manual top-up (owner). The wallet is credited only by the
+        provider's webhook.
+      tags:
+      - 'portal: wallet and billing'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TopUpCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TopUpCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TopUpCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopUpStarted'
+          description: ''
+  /api/portal/top-ups/{id}:
+    get:
+      operationId: portal_top_ups_retrieve
+      description: Follow a top-up after checkout (the screen polls until the webhook
+        marks it paid).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - 'portal: wallet and billing'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentOrder'
           description: ''
   /api/portal/users:
     get:
@@ -4312,6 +4530,24 @@ components:
       - otp_verified
       - platform_role
       - requires_2fa
+    AutoTopUp:
+      type: object
+      properties:
+        mandate:
+          allOf:
+          - $ref: '#/components/schemas/Mandate'
+          nullable: true
+        min_credit_paise:
+          type: integer
+        max_credit_paise:
+          type: integer
+        low_balance_level_paise:
+          type: integer
+      required:
+      - low_balance_level_paise
+      - mandate
+      - max_credit_paise
+      - min_credit_paise
     BillingChannelEnum:
       enum:
       - whatsapp_utility
@@ -4778,6 +5014,7 @@ components:
       - edit_template
       - new_language
       - voice_script
+      - plan_change
       - other
       type: string
       description: |-
@@ -4785,6 +5022,7 @@ components:
         * `edit_template` - Edit a template
         * `new_language` - New language
         * `voice_script` - Voice script
+        * `plan_change` - Plan change
         * `other` - Other
     ChangeRoleRequest:
       type: object
@@ -4853,6 +5091,18 @@ components:
       - key
       - manual
       - skipped
+    Checkout:
+      type: object
+      properties:
+        provider:
+          $ref: '#/components/schemas/PaymentProviderEnum'
+        data:
+          type: object
+          additionalProperties: {}
+          description: What the provider's browser checkout needs
+      required:
+      - data
+      - provider
     ClientEvent:
       type: object
       properties:
@@ -6236,6 +6486,121 @@ components:
       required:
       - email
       - password
+    Mandate:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        provider:
+          allOf:
+          - $ref: '#/components/schemas/PaymentProviderEnum'
+          readOnly: true
+        method:
+          allOf:
+          - $ref: '#/components/schemas/MandateMethodEnum'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/MandateStatusEnum'
+          readOnly: true
+        credit_paise:
+          type: integer
+          readOnly: true
+          description: Credit per auto top-up (₹1,000–₹15,000)
+        gst_paise:
+          type: integer
+          readOnly: true
+        charge_in_progress:
+          type: boolean
+          readOnly: true
+        last_charged_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        last_failure:
+          type: string
+          readOnly: true
+        activated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - activated_at
+      - charge_in_progress
+      - created_at
+      - credit_paise
+      - gst_paise
+      - id
+      - last_charged_at
+      - last_failure
+      - method
+      - provider
+      - status
+    MandateAmountRequest:
+      type: object
+      properties:
+        credit_paise:
+          type: integer
+      required:
+      - credit_paise
+    MandateCreateMethodEnum:
+      enum:
+      - upi
+      - card
+      type: string
+      description: |-
+        * `upi` - upi
+        * `card` - card
+    MandateCreateRequest:
+      type: object
+      properties:
+        credit_paise:
+          type: integer
+        method:
+          $ref: '#/components/schemas/MandateCreateMethodEnum'
+      required:
+      - credit_paise
+      - method
+    MandateMethodEnum:
+      enum:
+      - upi
+      - card
+      type: string
+      description: |-
+        * `upi` - UPI AutoPay
+        * `card` - Card
+    MandateStarted:
+      type: object
+      properties:
+        mandate:
+          $ref: '#/components/schemas/Mandate'
+        checkout:
+          $ref: '#/components/schemas/Checkout'
+      required:
+      - checkout
+      - mandate
+    MandateStatusEnum:
+      enum:
+      - pending
+      - active
+      - paused
+      - cancelled
+      - failed
+      type: string
+      description: |-
+        * `pending` - Waiting for authorisation
+        * `active` - Active
+        * `paused` - Paused
+        * `cancelled` - Cancelled
+        * `failed` - Failed
     ManualSignoffRequest:
       type: object
       properties:
@@ -6914,6 +7279,179 @@ components:
           type: object
           additionalProperties:
             type: string
+    PaymentOrder:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        provider:
+          allOf:
+          - $ref: '#/components/schemas/PaymentProviderEnum'
+          readOnly: true
+        credit_paise:
+          type: integer
+          readOnly: true
+          description: Wallet credit (taxable value)
+        gst_paise:
+          type: integer
+          readOnly: true
+        total_paise:
+          type: integer
+          readOnly: true
+          description: What the client pays
+        status:
+          allOf:
+          - $ref: '#/components/schemas/PaymentOrderStatusEnum'
+          readOnly: true
+        failure_reason:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        paid_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - created_at
+      - credit_paise
+      - failure_reason
+      - gst_paise
+      - id
+      - paid_at
+      - provider
+      - status
+      - total_paise
+    PaymentOrderStatusEnum:
+      enum:
+      - created
+      - paid
+      - failed
+      - amount_mismatch
+      type: string
+      description: |-
+        * `created` - Waiting for payment
+        * `paid` - Paid
+        * `failed` - Failed
+        * `amount_mismatch` - Paid amount didn't match
+    PaymentProviderEnum:
+      enum:
+      - razorpay
+      - cashfree
+      - stub
+      type: string
+      description: |-
+        * `razorpay` - Razorpay
+        * `cashfree` - Cashfree
+        * `stub` - Sandbox simulator
+    PaymentSimulateOutcomeEnum:
+      enum:
+      - success
+      - failure
+      type: string
+      description: |-
+        * `success` - success
+        * `failure` - failure
+    PaymentSimulateRequest:
+      type: object
+      properties:
+        target:
+          $ref: '#/components/schemas/TargetEnum'
+        id:
+          type: string
+          format: uuid
+          description: PaymentOrder or PaymentMandate id
+        outcome:
+          allOf:
+          - $ref: '#/components/schemas/PaymentSimulateOutcomeEnum'
+          default: success
+        times:
+          type: integer
+          maximum: 3
+          minimum: 1
+          default: 1
+          description: Deliver N times
+      required:
+      - id
+      - target
+    Plan:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+        monthly_fee_paise:
+          type: integer
+        max_active_subscribers:
+          type: integer
+        features:
+          type: object
+          additionalProperties:
+            type: boolean
+        is_placeholder:
+          type: boolean
+      required:
+      - code
+      - features
+      - is_placeholder
+      - max_active_subscribers
+      - monthly_fee_paise
+      - name
+    PlanChangeRequestRequest:
+      type: object
+      properties:
+        plan_code:
+          type: string
+          minLength: 1
+          pattern: ^[-a-zA-Z0-9_]+$
+        note:
+          type: string
+          default: ''
+          maxLength: 1000
+      required:
+      - plan_code
+    PlanView:
+      type: object
+      properties:
+        plan:
+          allOf:
+          - $ref: '#/components/schemas/Plan'
+          nullable: true
+        pending_plan:
+          allOf:
+          - $ref: '#/components/schemas/Plan'
+          nullable: true
+        status:
+          type: string
+          nullable: true
+        current_period_start:
+          type: string
+          format: date
+          nullable: true
+        next_billing_date:
+          type: string
+          format: date
+          nullable: true
+        active_subscribers:
+          type: integer
+        plans:
+          type: array
+          items:
+            $ref: '#/components/schemas/Plan'
+      required:
+      - active_subscribers
+      - current_period_start
+      - next_billing_date
+      - pending_plan
+      - plan
+      - plans
+      - status
     PlatformRoleEnum:
       enum:
       - super_admin
@@ -7855,6 +8393,16 @@ components:
         * `manual` - Ended by staff
         * `expired` - Expired
         * `replaced` - Replaced by a new session
+    TargetEnum:
+      enum:
+      - order
+      - mandate
+      - charge
+      type: string
+      description: |-
+        * `order` - order
+        * `mandate` - mandate
+        * `charge` - charge
     TeamMember:
       type: object
       properties:
@@ -8359,6 +8907,24 @@ components:
       - at
       - data
       - kind
+    TopUpCreateRequest:
+      type: object
+      properties:
+        credit_paise:
+          type: integer
+          description: Wallet credit; GST is added on top
+      required:
+      - credit_paise
+    TopUpStarted:
+      type: object
+      properties:
+        order:
+          $ref: '#/components/schemas/PaymentOrder'
+        checkout:
+          $ref: '#/components/schemas/Checkout'
+      required:
+      - checkout
+      - order
     Version:
       type: object
       properties:
