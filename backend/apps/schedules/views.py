@@ -59,6 +59,12 @@ class BookingViewSet(
     pagination_class = BookingPagination
     http_method_names = ["get", "post", "patch", "head", "options"]
 
+    @property
+    def actor(self):
+        """The signed-in user, or None for the public API (API keys act for the agency)."""
+        user = self.request.user
+        return user if user.is_authenticated else None
+
     def get_queryset(self):
         queryset = self.scoped(
             Schedule.objects.select_related("subscriber__area", "schedule_type").prefetch_related(
@@ -103,7 +109,7 @@ class BookingViewSet(
 
     def perform_create(self, serializer):
         serializer.instance = services.create_booking(
-            serializer.context["tenant"], serializer.validated_data, self.request.user
+            serializer.context["tenant"], serializer.validated_data, self.actor
         )
 
     def perform_update(self, serializer):
@@ -119,7 +125,7 @@ class BookingViewSet(
                 services.event(
                     serializer.instance,
                     "updated",
-                    self.request.user,
+                    self.actor,
                     fields=sorted(k for k in after if after[k] != before.get(k)),
                 )
         if new_date != serializer.instance.scheduled_date:
@@ -127,20 +133,18 @@ class BookingViewSet(
                 from apps.core.exceptions import ApiError
 
                 raise ApiError("invalid_date", "A delivery date can be changed, not removed.", 400)
-            serializer.instance = services.set_date(
-                serializer.instance, new_date, self.request.user
-            )
+            serializer.instance = services.set_date(serializer.instance, new_date, self.actor)
 
     def _fresh(self, schedule):
         return self.get_serializer(self.get_queryset().get(pk=schedule.pk)).data
 
     @extend_schema(request=SetDateSerializer, responses=BookingSerializer)
     @action(detail=True, methods=["post"], url_path="set-date")
-    def set_date(self, request, pk=None):
+    def set_date(self, request, **kwargs):
         data = SetDateSerializer(data=request.data)
         data.is_valid(raise_exception=True)
         schedule = services.set_date(
-            self.get_object(), data.validated_data["scheduled_date"], request.user
+            self.get_object(), data.validated_data["scheduled_date"], self.actor
         )
         return Response(self._fresh(schedule))
 
@@ -153,23 +157,23 @@ class BookingViewSet(
             request.tenant_id,
             data.validated_data["ids"],
             data.validated_data["scheduled_date"],
-            request.user,
+            self.actor,
         )
         return Response(result)
 
     @extend_schema(request=CancelReasonSerializer, responses=BookingSerializer)
     @action(detail=True, methods=["post"])
-    def cancel(self, request, pk=None):
+    def cancel(self, request, **kwargs):
         data = CancelReasonSerializer(data=request.data)
         data.is_valid(raise_exception=True)
         schedule = services.cancel_booking(
-            self.get_object(), data.validated_data["reason"], request.user
+            self.get_object(), data.validated_data["reason"], self.actor
         )
         return Response(self._fresh(schedule))
 
     @extend_schema(responses=TimelineEntrySerializer(many=True))
     @action(detail=True, methods=["get"], pagination_class=None)
-    def timeline(self, request, pk=None):
+    def timeline(self, request, **kwargs):
         """Every status change, reminder attempt, reply and note, oldest first (spec 2.3)."""
         schedule = self.get_object()
         entries = [

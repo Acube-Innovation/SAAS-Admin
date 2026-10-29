@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "apps.change_requests",
     "apps.reports",
     "apps.billing",
+    "apps.integrations",
 ]
 
 AUTH_USER_MODEL = "accounts.User"
@@ -68,6 +69,8 @@ MIDDLEWARE = [
     "django_otp.middleware.OTPMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Public API keys (/api/v1/) are checked before the tenant is resolved.
+    "apps.integrations.middleware.ApiKeyMiddleware",
     "apps.core.middleware.TenantMiddleware",
     "apps.platform_admin.middleware.TenantWriteGuardMiddleware",
     # After TenantMiddleware, so audit entries see request.support_session_id.
@@ -277,6 +280,10 @@ CELERY_BEAT_SCHEDULE = {
     "check-auto-top-ups": {
         "task": "apps.billing.tasks.check_auto_top_ups",
         "schedule": 900.0,
+    },
+    "deliver-due-webhooks": {
+        "task": "apps.integrations.tasks.deliver_due",
+        "schedule": 60.0,
     },
     "apply-billing-dates": {
         "task": "apps.billing.tasks.apply_billing_dates",

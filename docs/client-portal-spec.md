@@ -257,6 +257,23 @@ Changes apply to reminders not yet sent.
 **Integrations** (owner): API keys (shown **once**, stored hashed, revocable at once), webhook endpoint URL (HTTPS)
 with a **test event**, HMAC-SHA256 signing secret, delivery log (retries for 24 h).
 
+As built (Step 22, `apps/integrations`):
+- **API keys** look like `sck_<agency id>_<secret>`; only the SHA-256 hash is stored and the key is shown once.
+  Every request re-checks the key, so a revoked key fails on its next call (`401 invalid_api_key`). Each key has a
+  rate limit (120 requests a minute, `429 rate_limited` with `Retry-After`). Keys act for the agency (no user):
+  audit entries have no actor; a suspended agency's keys can only read.
+- **Webhooks:** up to 5 endpoints, each with the events it wants: `booking.created`, `booking.date_set`,
+  `booking.cancelled`, `outcome.recorded` (plus `test` from the screen). Each message is JSON
+  `{id, type, created_at, tenant_id, data}` with headers `X-SC-Event`, `X-SC-Delivery` (the event id, the same on
+  every retry) and `X-SC-Signature: t=<unix seconds>,v1=<hex HMAC-SHA256 of "<t>.<raw body>" with the endpoint
+  secret>`; receivers should reject signatures older than 5 minutes. A 2xx answer within 10 s is delivered;
+  otherwise it is retried after 1, 5, 15 and 30 minutes, then 1, 2, 4, 8 and 12 hours, until 24 hours after the
+  event, then marked failed (Retry now starts a fresh window). Celery Beat picks up due retries every minute.
+- **URL safety:** outside local development, endpoints must be HTTPS and resolve to public addresses (no private,
+  loopback, link-local or reserved ranges), checked when saved and before every delivery.
+- The screen shows how to call the API and verification code for Node.js and Python. Owner only; platform
+  support sessions can't open it.
+
 ---
 
 ## 3. Workflows
@@ -398,6 +415,11 @@ All are tenant-scoped (`tenant_id` + RLS) with UUID keys.
 Under `/api/portal/`, scoped to the current tenant (from membership or a support session). Public API for clients'
 systems under `/api/v1/` (API key auth, per-key rate limits): subscribers, schedules, outcomes.
 
+**Public API (`/api/v1/`, `Authorization: Bearer <key>`):** `subscribers` (GET list / POST, GET / PATCH
+`subscribers/{external_ref}`, POST `subscribers/{external_ref}/deactivate`), `schedules` (GET list / POST with
+`subscriber_ref`, GET / PATCH `schedules/{booking_reference}`, POST `…/set-date`, `…/cancel`, GET `…/timeline`) and
+`outcomes?since=<ISO 8601>` (answers recorded after a time, oldest first). Same fields and rules as the portal.
+
 | Method | Path | Purpose | Roles (writes) |
 | --- | --- | --- | --- |
 | GET | `config` | The user's role here (`owner`, `manager`, `office_staff`, `support`), agency status (`tenant_status`, `suspended_at`, `suspension_reason`), default language, industry fields (labels, choices) and schedule types | all |
@@ -440,6 +462,9 @@ systems under `/api/v1/` (API key auth, per-key rate limits): subscribers, sched
 | POST | `auto-top-up/amount` · `pause` · `resume` · `cancel` | Change the mandate | owner |
 | GET | `plan` | Plan, subscription, active subscribers, plans | owner, manager (support: view) |
 | POST | `plan/request-change` | `plan_code`, optional `note`: raises a `plan_change` change request | owner |
+| GET POST | `integrations/api-keys` · POST `integrations/api-keys/{id}/revoke` | Keys (the full key only in the create response) · revoke | owner (not support) |
+| GET POST PATCH | `integrations/webhooks[/{id}]` · POST `…/{id}/test` · `…/{id}/rotate-secret` | Endpoints (with the signing secret) · test event · new secret | owner (not support) |
+| GET | `integrations/deliveries[/{id}]` · POST `…/{id}/retry` · GET `integrations/event-types` | Delivery log (`endpoint`, `status`, `event_id`) · retry now · event list | owner (not support) |
 | POST | `dev/payments/simulate` | Sandbox only (`DEBUG`): deliver a signed webhook for an order, a mandate or its debit, 1–3 times. 404 elsewhere | owner |
 | GET | `communication-log` · `communication-log/{id}` | Every attempt with its replies, newest first (`date_from`/`date_to`, `channel`, `delivery_status`, `outcome`, `booking`, `subscriber`, `has_recording`, `search`; 50 per page) | all |
 | GET | `communication-log/{id}/recording` | `{url, expires_in: 300, expires_at}`: a presigned link to the call recording. Audited (`recording_played`). `404 no_recording`, `410 recording_expired` after 90 days | owner, manager (support: view) |

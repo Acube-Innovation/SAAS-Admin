@@ -21,7 +21,7 @@ from apps.audit.services import snapshot, write_audit
 from apps.core.exceptions import ApiError
 from apps.jobs.models import FollowUpItem, Job
 
-from .hooks import on_schedule_date_changed
+from .hooks import booking_cancelled, booking_created, on_schedule_date_changed, outcome_recorded
 from .models import Outcome, Schedule, ScheduleEvent
 
 FOLLOW_UP_OUTCOMES = {
@@ -123,6 +123,7 @@ def _note(text, actor):
 def create_booking(tenant, data, actor=None) -> Schedule:
     schedule = Schedule.objects.create(tenant=tenant, **data)
     event(schedule, "created", actor, source="portal" if actor else "system")
+    booking_created.send(sender=Schedule, schedule=schedule)
     write_audit(Action.CREATE, schedule, after=snapshot(schedule))
     if schedule.scheduled_date:
         on_schedule_date_changed(schedule, previous_date=None)
@@ -188,6 +189,7 @@ def cancel_booking(schedule, reason, actor=None) -> Schedule:
     _cancel_job(schedule, "booking_cancelled", actor)
     _resolve_follow_up(schedule, "cancelled", actor)
     event(schedule, "cancelled", actor, reason=reason)
+    booking_cancelled.send(sender=Schedule, schedule=schedule)
     _audit(Action.STATUS_CHANGE, schedule, before, actor)
     return schedule
 
@@ -219,6 +221,7 @@ def record_outcome(schedule, outcome, *, new_date=None, response=None, actor=Non
         response=str(response.pk) if response else None,
     )
     _audit(Action.UPDATE, schedule, before, actor)
+    outcome_recorded.send(sender=Schedule, schedule=schedule, outcome=outcome)
 
     if outcome == Outcome.OPTED_OUT:
         subscriber = schedule.subscriber

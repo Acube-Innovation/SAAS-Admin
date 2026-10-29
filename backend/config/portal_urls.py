@@ -21,6 +21,12 @@ from apps.content_view.views import (
     ContentVoiceScriptViewSet,
     QuestionFlowView,
 )
+from apps.integrations.views import (
+    ApiKeyViewSet,
+    DeliveryViewSet,
+    EventTypesView,
+    WebhookEndpointViewSet,
+)
 from apps.jobs.views import (
     DeliveriesExportView,
     DeliveriesPrintedView,
@@ -61,6 +67,9 @@ router.register(
 router.register("communication-log", CommunicationLogViewSet, basename="portal-communication-log")
 router.register("wallet/transactions", WalletTransactionViewSet, basename="portal-wallet-txn")
 router.register("invoices", InvoiceViewSet, basename="portal-invoice")
+router.register("integrations/api-keys", ApiKeyViewSet, basename="portal-api-key")
+router.register("integrations/webhooks", WebhookEndpointViewSet, basename="portal-webhook")
+router.register("integrations/deliveries", DeliveryViewSet, basename="portal-delivery")
 router.register("change-requests", PortalChangeRequestViewSet, basename="portal-change-request")
 
 urlpatterns = [
@@ -77,6 +86,7 @@ urlpatterns = [
         "auto-top-up/<slug:action>", AutoTopUpActionView.as_view(), name="portal-auto-top-up-action"
     ),
     path("plan", PlanView.as_view(), name="portal-plan"),
+    path("integrations/event-types", EventTypesView.as_view(), name="portal-event-types"),
     path("plan/request-change", PlanChangeRequestView.as_view(), name="portal-plan-change"),
     path("dev/payments/simulate", SimulatePaymentView.as_view(), name="portal-dev-payments"),
     path("deliveries", DeliveriesView.as_view(), name="portal-deliveries"),

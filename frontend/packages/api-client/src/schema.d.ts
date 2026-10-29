@@ -1738,6 +1738,198 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/portal/integrations/api-keys": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `scoped(queryset)` filters to the request's tenant (RLS does too; this keeps queries explicit)
+         *     and adds `tenant` to the serializer context.
+         */
+        get: operations["portal_integrations_api_keys_list"];
+        put?: never;
+        /**
+         * @description `scoped(queryset)` filters to the request's tenant (RLS does too; this keeps queries explicit)
+         *     and adds `tenant` to the serializer context.
+         */
+        post: operations["portal_integrations_api_keys_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/integrations/api-keys/{id}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description `scoped(queryset)` filters to the request's tenant (RLS does too; this keeps queries explicit)
+         *     and adds `tenant` to the serializer context.
+         */
+        post: operations["portal_integrations_api_keys_revoke_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/integrations/deliveries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The delivery log, newest first. */
+        get: operations["portal_integrations_deliveries_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/integrations/deliveries/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The delivery log, newest first. */
+        get: operations["portal_integrations_deliveries_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/integrations/deliveries/{id}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description The delivery log, newest first. */
+        post: operations["portal_integrations_deliveries_retry_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/integrations/event-types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["portal_integrations_event_types_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/integrations/webhooks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `scoped(queryset)` filters to the request's tenant (RLS does too; this keeps queries explicit)
+         *     and adds `tenant` to the serializer context.
+         */
+        get: operations["portal_integrations_webhooks_list"];
+        put?: never;
+        /**
+         * @description `scoped(queryset)` filters to the request's tenant (RLS does too; this keeps queries explicit)
+         *     and adds `tenant` to the serializer context.
+         */
+        post: operations["portal_integrations_webhooks_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/integrations/webhooks/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * @description `scoped(queryset)` filters to the request's tenant (RLS does too; this keeps queries explicit)
+         *     and adds `tenant` to the serializer context.
+         */
+        patch: operations["portal_integrations_webhooks_partial_update"];
+        trace?: never;
+    };
+    "/api/portal/integrations/webhooks/{id}/rotate-secret": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description `scoped(queryset)` filters to the request's tenant (RLS does too; this keeps queries explicit)
+         *     and adds `tenant` to the serializer context.
+         */
+        post: operations["portal_integrations_webhooks_rotate_secret_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/integrations/webhooks/{id}/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Send a `test` event to this endpoint now. */
+        post: operations["portal_integrations_webhooks_test_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/portal/invoices": {
         parameters: {
             query?: never;
@@ -2163,6 +2355,180 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/outcomes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Answers recorded since a time, oldest first: poll with `since` (or use webhooks). */
+        get: operations["v1_outcomes_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schedules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Bookings (spec 2.3). Date changes, cancel and outcomes go through apps.schedules.services. */
+        get: operations["v1_schedules_list"];
+        put?: never;
+        /** @description Bookings (spec 2.3). Date changes, cancel and outcomes go through apps.schedules.services. */
+        post: operations["v1_schedules_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schedules/{booking_reference}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Bookings (spec 2.3). Date changes, cancel and outcomes go through apps.schedules.services. */
+        get: operations["v1_schedules_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description Bookings (spec 2.3). Date changes, cancel and outcomes go through apps.schedules.services. */
+        patch: operations["v1_schedules_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/schedules/{booking_reference}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Bookings (spec 2.3). Date changes, cancel and outcomes go through apps.schedules.services. */
+        post: operations["v1_schedules_cancel_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schedules/{booking_reference}/set-date": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Bookings (spec 2.3). Date changes, cancel and outcomes go through apps.schedules.services. */
+        post: operations["v1_schedules_set_date_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schedules/{booking_reference}/timeline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Every status change, reminder attempt, reply and note, oldest first (spec 2.3). */
+        get: operations["v1_schedules_timeline_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/schedules/bulk-set-date": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Bookings (spec 2.3). Date changes, cancel and outcomes go through apps.schedules.services. */
+        post: operations["v1_schedules_bulk_set_date_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/subscribers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Subscribers (spec 2.2). No delete: deactivate instead. */
+        get: operations["v1_subscribers_list"];
+        put?: never;
+        /** @description Subscribers (spec 2.2). No delete: deactivate instead. */
+        post: operations["v1_subscribers_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/subscribers/{external_ref}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Subscribers (spec 2.2). No delete: deactivate instead. */
+        get: operations["v1_subscribers_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description Subscribers (spec 2.2). No delete: deactivate instead. */
+        patch: operations["v1_subscribers_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/subscribers/{external_ref}/deactivate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Subscribers (spec 2.2). No delete: deactivate instead. */
+        post: operations["v1_subscribers_deactivate_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2266,6 +2632,30 @@ export interface components {
             label: string;
             outcome: components["schemas"]["AnswerOutcomeEnum"];
             pick_next_delivery_days?: number;
+        };
+        ApiKey: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly name: string;
+            /** @description Shown in lists to tell keys apart */
+            readonly prefix: string;
+            readonly rate_limit_per_minute: number;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: email */
+            created_by_email: string | null;
+            /** Format: date-time */
+            readonly last_used_at: string | null;
+            /** Format: date-time */
+            readonly revoked_at: string | null;
+        };
+        ApiKeyCreateRequest: {
+            name: string;
+        };
+        ApiKeyCreated: {
+            key: components["schemas"]["ApiKey"];
+            /** @description The full API key. Shown only in this response. */
+            secret: string;
         };
         Area: {
             /** Format: uuid */
@@ -2722,6 +3112,29 @@ export interface components {
             /** Format: date-time */
             printed_at: string | null;
         };
+        Delivery: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly event_id: string;
+            readonly event_type: string;
+            /** Format: uuid */
+            readonly endpoint_id: string;
+            endpoint_url: string;
+            readonly status: components["schemas"]["DeliveryStatusEnum"];
+            readonly attempts: number;
+            readonly last_status_code: number | null;
+            readonly last_error: string;
+            /** Format: date-time */
+            readonly last_attempt_at: string | null;
+            /** Format: date-time */
+            readonly next_attempt_at: string | null;
+            /** Format: date-time */
+            readonly delivered_at: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+            readonly payload: unknown;
+        };
         DeliveryArea: {
             /** Format: uuid */
             area_id: string | null;
@@ -2749,19 +3162,33 @@ export interface components {
             readonly quantity: number;
         };
         /**
-         * @description * `queued` - Queued
-         *     * `sent` - Sent
-         *     * `delivered` - Delivered
-         *     * `read` - Read
-         *     * `answered` - Answered
+         * @description * `pending` - Pending
+         *     * `succeeded` - Delivered
          *     * `failed` - Failed
          * @enum {string}
          */
-        DeliveryStatusEnum: "queued" | "sent" | "delivered" | "read" | "answered" | "failed";
+        DeliveryStatusEnum: "pending" | "succeeded" | "failed";
         EffectivePrice: {
             channel: components["schemas"]["BillingChannelEnum"];
             price_paise: number;
             source: components["schemas"]["SourceEnum"];
+        };
+        Endpoint: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uri */
+            readonly url: string;
+            readonly events: string[];
+            /** @description HMAC-SHA256 signing secret */
+            readonly secret: string;
+            readonly is_active: boolean;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        EndpointCreateRequest: {
+            /** Format: uri */
+            url: string;
+            events: components["schemas"]["EventsEnum"][];
         };
         /**
          * @description * `subscribers` - subscribers
@@ -2779,6 +3206,18 @@ export interface components {
             /** Format: date-time */
             readonly created_at: string;
         };
+        EventType: {
+            code: string;
+            label: string;
+        };
+        /**
+         * @description * `booking.created` - Booking created
+         *     * `booking.date_set` - Delivery date set or changed
+         *     * `booking.cancelled` - Booking cancelled
+         *     * `outcome.recorded` - Customer answer recorded
+         * @enum {string}
+         */
+        EventsEnum: "booking.created" | "booking.date_set" | "booking.cancelled" | "outcome.recorded";
         EvidenceLink: {
             /** Format: uri */
             url: string;
@@ -3273,6 +3712,16 @@ export interface components {
             /** @description Hex key, for manual entry. */
             secret: string;
         };
+        /** @description One recorded answer (a ScheduleEvent of kind outcome_set). */
+        OutcomeEvent: {
+            booking_reference: string;
+            subscriber_ref: string;
+            readonly outcome: string;
+            /** Format: date */
+            new_date_requested: string | null;
+            /** Format: date-time */
+            recorded_at: string;
+        };
         OutcomeShare: {
             /** @description An outcome, or `awaiting` for no outcome yet */
             outcome: string;
@@ -3380,6 +3829,21 @@ export interface components {
             previous: string | null;
             results: components["schemas"]["ChangeRequest"][];
         };
+        PaginatedDeliveryList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous: string | null;
+            results: components["schemas"]["Delivery"][];
+        };
         PaginatedFollowUpList: {
             /** @example 123 */
             count: number;
@@ -3439,6 +3903,21 @@ export interface components {
              */
             previous: string | null;
             results: components["schemas"]["LogEntry"][];
+        };
+        PaginatedOutcomeEventList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous: string | null;
+            results: components["schemas"]["OutcomeEvent"][];
         };
         PaginatedStaffMemberList: {
             /** @example 123 */
@@ -3541,6 +4020,12 @@ export interface components {
             scheduled_date?: string | null;
             remarks?: string;
             custom_fields?: unknown;
+        };
+        PatchedEndpointUpdateRequest: {
+            /** Format: uri */
+            url?: string;
+            events?: components["schemas"]["EventsEnum"][];
+            is_active?: boolean;
         };
         PatchedOverrideEndRequest: {
             /** Format: date */
@@ -7323,6 +7808,276 @@ export interface operations {
             };
         };
     };
+    portal_integrations_api_keys_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiKey"][];
+                };
+            };
+        };
+    };
+    portal_integrations_api_keys_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApiKeyCreateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ApiKeyCreateRequest"];
+                "multipart/form-data": components["schemas"]["ApiKeyCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiKeyCreated"];
+                };
+            };
+        };
+    };
+    portal_integrations_api_keys_revoke_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this api key. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApiKey"];
+                };
+            };
+        };
+    };
+    portal_integrations_deliveries_list: {
+        parameters: {
+            query?: {
+                endpoint?: string;
+                event_id?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                status?: "failed" | "pending" | "succeeded";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedDeliveryList"];
+                };
+            };
+        };
+    };
+    portal_integrations_deliveries_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this webhook delivery. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Delivery"];
+                };
+            };
+        };
+    };
+    portal_integrations_deliveries_retry_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this webhook delivery. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Delivery"];
+                };
+            };
+        };
+    };
+    portal_integrations_event_types_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventType"][];
+                };
+            };
+        };
+    };
+    portal_integrations_webhooks_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Endpoint"][];
+                };
+            };
+        };
+    };
+    portal_integrations_webhooks_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EndpointCreateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["EndpointCreateRequest"];
+                "multipart/form-data": components["schemas"]["EndpointCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Endpoint"];
+                };
+            };
+        };
+    };
+    portal_integrations_webhooks_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this webhook endpoint. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedEndpointUpdateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedEndpointUpdateRequest"];
+                "multipart/form-data": components["schemas"]["PatchedEndpointUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Endpoint"];
+                };
+            };
+        };
+    };
+    portal_integrations_webhooks_rotate_secret_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this webhook endpoint. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Endpoint"];
+                };
+            };
+        };
+    };
+    portal_integrations_webhooks_test_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this webhook endpoint. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Delivery"];
+                };
+            };
+        };
+    };
     portal_invoices_list: {
         parameters: {
             query?: {
@@ -8039,6 +8794,361 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedWalletTransactionList"];
+                };
+            };
+        };
+    };
+    v1_outcomes_list: {
+        parameters: {
+            query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description ISO 8601 date-time */
+                since?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedOutcomeEventList"];
+                };
+            };
+        };
+    };
+    v1_schedules_list: {
+        parameters: {
+            query?: {
+                /** @description Area id, or 'none' */
+                area?: string;
+                /** @description Delivery date (scheduled_date), YYYY-MM-DD */
+                date?: string;
+                date_from?: string;
+                date_to?: string;
+                /** @description Only bookings with no delivery date yet */
+                no_date?: boolean;
+                /** @description An outcome, or 'none' */
+                outcome?: string;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Booking reference, customer name or mobile */
+                search?: string;
+                status?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedBookingList"];
+                };
+            };
+        };
+    };
+    v1_schedules_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BookingRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["BookingRequest"];
+                "multipart/form-data": components["schemas"]["BookingRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Booking"];
+                };
+            };
+        };
+    };
+    v1_schedules_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                booking_reference: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Booking"];
+                };
+            };
+        };
+    };
+    v1_schedules_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                booking_reference: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedBookingRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedBookingRequest"];
+                "multipart/form-data": components["schemas"]["PatchedBookingRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Booking"];
+                };
+            };
+        };
+    };
+    v1_schedules_cancel_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                booking_reference: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CancelReasonRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CancelReasonRequest"];
+                "multipart/form-data": components["schemas"]["CancelReasonRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Booking"];
+                };
+            };
+        };
+    };
+    v1_schedules_set_date_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                booking_reference: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetDateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SetDateRequest"];
+                "multipart/form-data": components["schemas"]["SetDateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Booking"];
+                };
+            };
+        };
+    };
+    v1_schedules_timeline_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                booking_reference: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TimelineEntry"][];
+                };
+            };
+        };
+    };
+    v1_schedules_bulk_set_date_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BulkSetDateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["BulkSetDateRequest"];
+                "multipart/form-data": components["schemas"]["BulkSetDateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BulkSetDateResult"];
+                };
+            };
+        };
+    };
+    v1_subscribers_list: {
+        parameters: {
+            query?: {
+                /** @description Area id, or 'none' */
+                area?: string;
+                consent?: boolean;
+                opted_out?: boolean;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Name, mobile or reference */
+                search?: string;
+                status?: "active" | "inactive";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedSubscriberList"];
+                };
+            };
+        };
+    };
+    v1_subscribers_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubscriberRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SubscriberRequest"];
+                "multipart/form-data": components["schemas"]["SubscriberRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscriber"];
+                };
+            };
+        };
+    };
+    v1_subscribers_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                external_ref: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscriber"];
+                };
+            };
+        };
+    };
+    v1_subscribers_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                external_ref: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedSubscriberRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedSubscriberRequest"];
+                "multipart/form-data": components["schemas"]["PatchedSubscriberRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscriber"];
+                };
+            };
+        };
+    };
+    v1_subscribers_deactivate_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                external_ref: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Subscriber"];
                 };
             };
         };

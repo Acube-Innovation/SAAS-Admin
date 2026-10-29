@@ -18,6 +18,9 @@ def resolve_request_tenant(request):
     Platform staff act in a tenant only through an active support session (Workflow 3.3);
     everyone else through their memberships. Sets request.support_session_id in support mode.
     """
+    api_key = getattr(request, "api_key", None)
+    if api_key is not None:  # the public API: the key's agency (apps.integrations)
+        return api_key.tenant_id
     user = getattr(request, "user", None)
     if user is None or not user.is_authenticated or not user.is_platform_staff:
         return resolve_tenant_from_membership(request)

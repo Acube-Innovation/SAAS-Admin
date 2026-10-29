@@ -118,7 +118,7 @@ class SubscriberViewSet(AuditedModelMixin, PortalViewMixin, viewsets.ModelViewSe
 
     @extend_schema(request=None, responses=SubscriberSerializer)
     @action(detail=True, methods=["post"])
-    def deactivate(self, request, pk=None):
+    def deactivate(self, request, **kwargs):  # pk, or external_ref in /api/v1
         subscriber = self.get_object()
         if subscriber.status != Subscriber.Status.INACTIVE:
             before = self.audit_snapshot(subscriber)

@@ -13,6 +13,9 @@ x-backend: &backend
     AWS_S3_ENDPOINT_URL: http://storage:8333
   volumes:
     - ./backend:/app
+  # Lets local webhook deliveries reach a receiver on the host (e.g. the Playwright tests).
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
   depends_on:
     db:
       condition: service_healthy

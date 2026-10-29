@@ -18,3 +18,10 @@ def on_schedule_date_changed(schedule, previous_date=None):
     schedule_date_changed.send(
         sender=type(schedule), schedule=schedule, previous_date=previous_date
     )
+
+
+# Sent after a booking is created, cancelled, or gets an outcome (integrations send webhooks).
+# Receivers get `schedule` (and `outcome` for outcome_recorded).
+booking_created = Signal()
+booking_cancelled = Signal()
+outcome_recorded = Signal()

@@ -9,6 +9,7 @@ urlpatterns = [
     path("api/auth/", include("apps.accounts.urls")),
     path("api/admin/", include("apps.platform_admin.urls")),
     path("api/portal/", include("config.portal_urls")),
+    path("api/v1/", include("apps.integrations.urls")),
     path(
         "api/payments/webhooks/<slug:provider>",
         PaymentWebhookView.as_view(),

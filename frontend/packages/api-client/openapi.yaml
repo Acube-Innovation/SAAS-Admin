@@ -3427,6 +3427,309 @@ paths:
               schema:
                 type: string
           description: ''
+  /api/portal/integrations/api-keys:
+    get:
+      operationId: portal_integrations_api_keys_list
+      description: |-
+        `scoped(queryset)` filters to the request's tenant (RLS does too; this keeps queries explicit)
+        and adds `tenant` to the serializer context.
+      tags:
+      - 'portal: integrations'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ApiKey'
+          description: ''
+    post:
+      operationId: portal_integrations_api_keys_create
+      description: |-
+        `scoped(queryset)` filters to the request's tenant (RLS does too; this keeps queries explicit)
+        and adds `tenant` to the serializer context.
+      tags:
+      - 'portal: integrations'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiKeyCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ApiKeyCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ApiKeyCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeyCreated'
+          description: ''
+  /api/portal/integrations/api-keys/{id}/revoke:
+    post:
+      operationId: portal_integrations_api_keys_revoke_create
+      description: |-
+        `scoped(queryset)` filters to the request's tenant (RLS does too; this keeps queries explicit)
+        and adds `tenant` to the serializer context.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this api key.
+        required: true
+      tags:
+      - 'portal: integrations'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKey'
+          description: ''
+  /api/portal/integrations/deliveries:
+    get:
+      operationId: portal_integrations_deliveries_list
+      description: The delivery log, newest first.
+      parameters:
+      - in: query
+        name: endpoint
+        schema:
+          type: string
+      - in: query
+        name: event_id
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - failed
+          - pending
+          - succeeded
+      tags:
+      - 'portal: integrations'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDeliveryList'
+          description: ''
+  /api/portal/integrations/deliveries/{id}:
+    get:
+      operationId: portal_integrations_deliveries_retrieve
+      description: The delivery log, newest first.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this webhook delivery.
+        required: true
+      tags:
+      - 'portal: integrations'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Delivery'
+          description: ''
+  /api/portal/integrations/deliveries/{id}/retry:
+    post:
+      operationId: portal_integrations_deliveries_retry_create
+      description: The delivery log, newest first.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this webhook delivery.
+        required: true
+      tags:
+      - 'portal: integrations'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Delivery'
+          description: ''
+  /api/portal/integrations/event-types:
+    get:
+      operationId: portal_integrations_event_types_list
+      tags:
+      - 'portal: integrations'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventType'
+          description: ''
+  /api/portal/integrations/webhooks:
+    get:
+      operationId: portal_integrations_webhooks_list
+      description: |-
+        `scoped(queryset)` filters to the request's tenant (RLS does too; this keeps queries explicit)
+        and adds `tenant` to the serializer context.
+      tags:
+      - 'portal: integrations'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Endpoint'
+          description: ''
+    post:
+      operationId: portal_integrations_webhooks_create
+      description: |-
+        `scoped(queryset)` filters to the request's tenant (RLS does too; this keeps queries explicit)
+        and adds `tenant` to the serializer context.
+      tags:
+      - 'portal: integrations'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EndpointCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EndpointCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EndpointCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Endpoint'
+          description: ''
+  /api/portal/integrations/webhooks/{id}:
+    patch:
+      operationId: portal_integrations_webhooks_partial_update
+      description: |-
+        `scoped(queryset)` filters to the request's tenant (RLS does too; this keeps queries explicit)
+        and adds `tenant` to the serializer context.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this webhook endpoint.
+        required: true
+      tags:
+      - 'portal: integrations'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedEndpointUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedEndpointUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedEndpointUpdateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Endpoint'
+          description: ''
+  /api/portal/integrations/webhooks/{id}/rotate-secret:
+    post:
+      operationId: portal_integrations_webhooks_rotate_secret_create
+      description: |-
+        `scoped(queryset)` filters to the request's tenant (RLS does too; this keeps queries explicit)
+        and adds `tenant` to the serializer context.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this webhook endpoint.
+        required: true
+      tags:
+      - 'portal: integrations'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Endpoint'
+          description: ''
+  /api/portal/integrations/webhooks/{id}/test:
+    post:
+      operationId: portal_integrations_webhooks_test_create
+      description: Send a `test` event to this endpoint now.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this webhook endpoint.
+        required: true
+      tags:
+      - 'portal: integrations'
+      security:
+      - cookieAuth: []
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Delivery'
+          description: ''
   /api/portal/invoices:
     get:
       operationId: portal_invoices_list
@@ -4279,6 +4582,421 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedWalletTransactionList'
           description: ''
+  /api/v1/outcomes:
+    get:
+      operationId: v1_outcomes_list
+      description: 'Answers recorded since a time, oldest first: poll with `since`
+        (or use webhooks).'
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: since
+        schema:
+          type: string
+        description: ISO 8601 date-time
+      tags:
+      - public api v1
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOutcomeEventList'
+          description: ''
+  /api/v1/schedules:
+    get:
+      operationId: v1_schedules_list
+      description: Bookings (spec 2.3). Date changes, cancel and outcomes go through
+        apps.schedules.services.
+      parameters:
+      - in: query
+        name: area
+        schema:
+          type: string
+        description: Area id, or 'none'
+      - in: query
+        name: date
+        schema:
+          type: string
+        description: Delivery date (scheduled_date), YYYY-MM-DD
+      - in: query
+        name: date_from
+        schema:
+          type: string
+      - in: query
+        name: date_to
+        schema:
+          type: string
+      - in: query
+        name: no_date
+        schema:
+          type: boolean
+        description: Only bookings with no delivery date yet
+      - in: query
+        name: outcome
+        schema:
+          type: string
+        description: An outcome, or 'none'
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Booking reference, customer name or mobile
+      - in: query
+        name: status
+        schema:
+          type: string
+      tags:
+      - public api v1
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBookingList'
+          description: ''
+    post:
+      operationId: v1_schedules_create
+      description: Bookings (spec 2.3). Date changes, cancel and outcomes go through
+        apps.schedules.services.
+      tags:
+      - public api v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BookingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BookingRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+  /api/v1/schedules/{booking_reference}:
+    get:
+      operationId: v1_schedules_retrieve
+      description: Bookings (spec 2.3). Date changes, cancel and outcomes go through
+        apps.schedules.services.
+      parameters:
+      - in: path
+        name: booking_reference
+        schema:
+          type: string
+          pattern: ^[^/]+$
+        required: true
+      tags:
+      - public api v1
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+    patch:
+      operationId: v1_schedules_partial_update
+      description: Bookings (spec 2.3). Date changes, cancel and outcomes go through
+        apps.schedules.services.
+      parameters:
+      - in: path
+        name: booking_reference
+        schema:
+          type: string
+          pattern: ^[^/]+$
+        required: true
+      tags:
+      - public api v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedBookingRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedBookingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedBookingRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+  /api/v1/schedules/{booking_reference}/cancel:
+    post:
+      operationId: v1_schedules_cancel_create
+      description: Bookings (spec 2.3). Date changes, cancel and outcomes go through
+        apps.schedules.services.
+      parameters:
+      - in: path
+        name: booking_reference
+        schema:
+          type: string
+          pattern: ^[^/]+$
+        required: true
+      tags:
+      - public api v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelReasonRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CancelReasonRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CancelReasonRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+  /api/v1/schedules/{booking_reference}/set-date:
+    post:
+      operationId: v1_schedules_set_date_create
+      description: Bookings (spec 2.3). Date changes, cancel and outcomes go through
+        apps.schedules.services.
+      parameters:
+      - in: path
+        name: booking_reference
+        schema:
+          type: string
+          pattern: ^[^/]+$
+        required: true
+      tags:
+      - public api v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetDateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SetDateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SetDateRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: ''
+  /api/v1/schedules/{booking_reference}/timeline:
+    get:
+      operationId: v1_schedules_timeline_list
+      description: Every status change, reminder attempt, reply and note, oldest first
+        (spec 2.3).
+      parameters:
+      - in: path
+        name: booking_reference
+        schema:
+          type: string
+          pattern: ^[^/]+$
+        required: true
+      tags:
+      - public api v1
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TimelineEntry'
+          description: ''
+  /api/v1/schedules/bulk-set-date:
+    post:
+      operationId: v1_schedules_bulk_set_date_create
+      description: Bookings (spec 2.3). Date changes, cancel and outcomes go through
+        apps.schedules.services.
+      tags:
+      - public api v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkSetDateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BulkSetDateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BulkSetDateRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkSetDateResult'
+          description: ''
+  /api/v1/subscribers:
+    get:
+      operationId: v1_subscribers_list
+      description: 'Subscribers (spec 2.2). No delete: deactivate instead.'
+      parameters:
+      - in: query
+        name: area
+        schema:
+          type: string
+        description: Area id, or 'none'
+      - in: query
+        name: consent
+        schema:
+          type: boolean
+      - in: query
+        name: opted_out
+        schema:
+          type: boolean
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Name, mobile or reference
+      - in: query
+        name: status
+        schema:
+          type: string
+          enum:
+          - active
+          - inactive
+      tags:
+      - public api v1
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSubscriberList'
+          description: ''
+    post:
+      operationId: v1_subscribers_create
+      description: 'Subscribers (spec 2.2). No delete: deactivate instead.'
+      tags:
+      - public api v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriberRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SubscriberRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SubscriberRequest'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscriber'
+          description: ''
+  /api/v1/subscribers/{external_ref}:
+    get:
+      operationId: v1_subscribers_retrieve
+      description: 'Subscribers (spec 2.2). No delete: deactivate instead.'
+      parameters:
+      - in: path
+        name: external_ref
+        schema:
+          type: string
+          pattern: ^[^/]+$
+        required: true
+      tags:
+      - public api v1
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscriber'
+          description: ''
+    patch:
+      operationId: v1_subscribers_partial_update
+      description: 'Subscribers (spec 2.2). No delete: deactivate instead.'
+      parameters:
+      - in: path
+        name: external_ref
+        schema:
+          type: string
+          pattern: ^[^/]+$
+        required: true
+      tags:
+      - public api v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSubscriberRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSubscriberRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSubscriberRequest'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscriber'
+          description: ''
+  /api/v1/subscribers/{external_ref}/deactivate:
+    post:
+      operationId: v1_subscribers_deactivate_create
+      description: 'Subscribers (spec 2.2). No delete: deactivate instead.'
+      parameters:
+      - in: path
+        name: external_ref
+        schema:
+          type: string
+          pattern: ^[^/]+$
+        required: true
+      tags:
+      - public api v1
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscriber'
+          description: ''
 components:
   schemas:
     AcceptInviteRequest:
@@ -4584,6 +5302,70 @@ components:
       - key
       - label
       - outcome
+    ApiKey:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        prefix:
+          type: string
+          readOnly: true
+          description: Shown in lists to tell keys apart
+        rate_limit_per_minute:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        created_by_email:
+          type: string
+          format: email
+          nullable: true
+        last_used_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        revoked_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - created_at
+      - created_by_email
+      - id
+      - last_used_at
+      - name
+      - prefix
+      - rate_limit_per_minute
+      - revoked_at
+    ApiKeyCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+      required:
+      - name
+    ApiKeyCreated:
+      type: object
+      properties:
+        key:
+          $ref: '#/components/schemas/ApiKey'
+        secret:
+          type: string
+          description: The full API key. Shown only in this response.
+      required:
+      - key
+      - secret
     Area:
       type: object
       properties:
@@ -5764,6 +6546,76 @@ components:
       - date
       - not_confirmed
       - printed_at
+    Delivery:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        event_id:
+          type: string
+          format: uuid
+          readOnly: true
+        event_type:
+          type: string
+          readOnly: true
+        endpoint_id:
+          type: string
+          format: uuid
+          readOnly: true
+        endpoint_url:
+          type: string
+        status:
+          allOf:
+          - $ref: '#/components/schemas/DeliveryStatusEnum'
+          readOnly: true
+        attempts:
+          type: integer
+          readOnly: true
+        last_status_code:
+          type: integer
+          readOnly: true
+          nullable: true
+        last_error:
+          type: string
+          readOnly: true
+        last_attempt_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        next_attempt_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        delivered_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        payload:
+          readOnly: true
+      required:
+      - attempts
+      - created_at
+      - delivered_at
+      - endpoint_id
+      - endpoint_url
+      - event_id
+      - event_type
+      - id
+      - last_attempt_at
+      - last_error
+      - last_status_code
+      - next_attempt_at
+      - payload
+      - status
     DeliveryArea:
       type: object
       properties:
@@ -5839,19 +6691,13 @@ components:
       - status
     DeliveryStatusEnum:
       enum:
-      - queued
-      - sent
-      - delivered
-      - read
-      - answered
+      - pending
+      - succeeded
       - failed
       type: string
       description: |-
-        * `queued` - Queued
-        * `sent` - Sent
-        * `delivered` - Delivered
-        * `read` - Read
-        * `answered` - Answered
+        * `pending` - Pending
+        * `succeeded` - Delivered
         * `failed` - Failed
     EffectivePrice:
       type: object
@@ -5866,6 +6712,56 @@ components:
       - channel
       - price_paise
       - source
+    Endpoint:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        url:
+          type: string
+          format: uri
+          readOnly: true
+        events:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        secret:
+          type: string
+          readOnly: true
+          description: HMAC-SHA256 signing secret
+        is_active:
+          type: boolean
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - events
+      - id
+      - is_active
+      - secret
+      - url
+    EndpointCreateRequest:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          minLength: 1
+          maxLength: 500
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventsEnum'
+          minItems: 1
+      required:
+      - events
+      - url
     EntityEnum:
       enum:
       - subscribers
@@ -5903,6 +6799,28 @@ components:
       - from_status
       - note
       - to_status
+    EventType:
+      type: object
+      properties:
+        code:
+          type: string
+        label:
+          type: string
+      required:
+      - code
+      - label
+    EventsEnum:
+      enum:
+      - booking.created
+      - booking.date_set
+      - booking.cancelled
+      - outcome.recorded
+      type: string
+      description: |-
+        * `booking.created` - Booking created
+        * `booking.date_set` - Delivery date set or changed
+        * `booking.cancelled` - Booking cancelled
+        * `outcome.recorded` - Customer answer recorded
     EvidenceLink:
       type: object
       properties:
@@ -7123,6 +8041,30 @@ components:
       required:
       - otpauth_url
       - secret
+    OutcomeEvent:
+      type: object
+      description: One recorded answer (a ScheduleEvent of kind outcome_set).
+      properties:
+        booking_reference:
+          type: string
+        subscriber_ref:
+          type: string
+        outcome:
+          type: string
+          readOnly: true
+        new_date_requested:
+          type: string
+          format: date
+          nullable: true
+        recorded_at:
+          type: string
+          format: date-time
+      required:
+      - booking_reference
+      - new_date_requested
+      - outcome
+      - recorded_at
+      - subscriber_ref
     OutcomeShare:
       type: object
       properties:
@@ -7323,6 +8265,31 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ChangeRequest'
+    PaginatedDeliveryList:
+      type: object
+      required:
+      - count
+      - next
+      - previous
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Delivery'
     PaginatedFollowUpList:
       type: object
       required:
@@ -7423,6 +8390,31 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/LogEntry'
+    PaginatedOutcomeEventList:
+      type: object
+      required:
+      - count
+      - next
+      - previous
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/OutcomeEvent'
     PaginatedStaffMemberList:
       type: object
       required:
@@ -7603,6 +8595,21 @@ components:
           type: string
           maxLength: 500
         custom_fields: {}
+    PatchedEndpointUpdateRequest:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+          minLength: 1
+          maxLength: 500
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventsEnum'
+          minItems: 1
+        is_active:
+          type: boolean
     PatchedOverrideEndRequest:
       type: object
       properties:
