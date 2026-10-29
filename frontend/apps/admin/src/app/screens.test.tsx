@@ -176,6 +176,7 @@ describe("Console layout", () => {
       "Industry templates",
       "WhatsApp templates",
       "Change requests",
+      "Plans and prices",
       "Audit log",
     ]);
     expect(within(nav).getByRole("link", { name: "Dashboard" })).toHaveAttribute("aria-current", "page");

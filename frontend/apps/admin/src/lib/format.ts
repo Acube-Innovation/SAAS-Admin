@@ -21,3 +21,13 @@ export function formatCountdown(seconds: number): string {
   const safe = Math.max(0, Math.floor(seconds));
   return `${Math.floor(safe / 60)}:${String(safe % 60).padStart(2, "0")}`;
 }
+
+/** Paise as rupees, e.g. 199900 -> "₹1,999.00". */
+export function formatRupees(paise: number): string {
+  return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", minimumFractionDigits: 2 }).format(paise / 100);
+}
+
+/** Today in India as YYYY-MM-DD. */
+export function istToday(): string {
+  return new Date().toLocaleDateString("en-CA", { timeZone: TIME_ZONE });
+}

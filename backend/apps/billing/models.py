@@ -300,3 +300,25 @@ class PaymentEvent(TenantScopedModel):
         constraints = [
             models.UniqueConstraint(fields=["provider", "event_id"], name="payment_event_once")
         ]
+
+
+class PriceOverride(TenantScopedModel):
+    """A client's own price for a channel over a date range (admin spec 2.11). No backdating or
+    overlaps for the same channel; `ends_on` empty means open-ended."""
+
+    channel = models.CharField(max_length=20, choices=Channel.choices)
+    price_paise = models.PositiveIntegerField()
+    starts_on = models.DateField()
+    ends_on = models.DateField(null=True, blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="+"
+    )
+
+    class Meta:
+        ordering = ["channel", "starts_on"]
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(ends_on__isnull=True) | Q(ends_on__gte=models.F("starts_on")),
+                name="price_override_dates",
+            )
+        ]

@@ -260,6 +260,75 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/plans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Plans (spec 2.11): list, add, edit. Codes never change; plans are retired, not deleted. */
+        get: operations["admin_plans_list"];
+        put?: never;
+        /** @description Plans (spec 2.11): list, add, edit. Codes never change; plans are retired, not deleted. */
+        post: operations["admin_plans_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/plans/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description Plans (spec 2.11): list, add, edit. Codes never change; plans are retired, not deleted. */
+        patch: operations["admin_plans_partial_update"];
+        trace?: never;
+    };
+    "/api/admin/price-list": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The platform price list: current prices and every entry; add a price from a date. */
+        get: operations["admin_price_list_retrieve"];
+        put?: never;
+        /** @description The platform price list: current prices and every entry; add a price from a date. */
+        post: operations["admin_price_list_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/price-list/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["admin_price_list_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/admin/reference-data": {
         parameters: {
             query?: never;
@@ -376,6 +445,73 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/tenants/{id}/price-overrides": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["admin_tenants_price_overrides_list"];
+        put?: never;
+        post: operations["admin_tenants_price_overrides_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/tenants/{id}/price-overrides/{override_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["admin_tenants_price_overrides_destroy"];
+        options?: never;
+        head?: never;
+        patch: operations["admin_tenants_price_overrides_partial_update"];
+        trace?: never;
+    };
+    "/api/admin/tenants/{id}/subscription": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Client detail Billing tab: plan and pending change, prices, read-only wallet. */
+        get: operations["admin_tenants_subscription_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/tenants/{id}/subscription/plan-change": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Schedule a plan change for the next billing date, or cancel the pending one. */
+        post: operations["admin_tenants_subscription_plan_change_create"];
+        /** @description Schedule a plan change for the next billing date, or cancel the pending one. */
+        delete: operations["admin_tenants_subscription_plan_change_destroy"];
         options?: never;
         head?: never;
         patch?: never;
@@ -2363,6 +2499,9 @@ export interface components {
          * @enum {string}
          */
         CategoryEnum: "utility";
+        ChangePlanRequest: {
+            plan_code: string;
+        };
         /** @description The client's view (portal). */
         ChangeRequest: {
             /** Format: uuid */
@@ -2439,6 +2578,10 @@ export interface components {
          * @enum {string}
          */
         ChannelOrderEnum: "whatsapp" | "voice";
+        ChannelPrice: {
+            channel: components["schemas"]["BillingChannelEnum"];
+            price_paise: number;
+        };
         Checklist: {
             items: components["schemas"]["ChecklistItem"][];
             complete: boolean;
@@ -2615,6 +2758,11 @@ export interface components {
          * @enum {string}
          */
         DeliveryStatusEnum: "queued" | "sent" | "delivered" | "read" | "answered" | "failed";
+        EffectivePrice: {
+            channel: components["schemas"]["BillingChannelEnum"];
+            price_paise: number;
+            source: components["schemas"]["SourceEnum"];
+        };
         /**
          * @description * `subscribers` - subscribers
          *     * `bookings` - bookings
@@ -2634,6 +2782,22 @@ export interface components {
         EvidenceLink: {
             /** Format: uri */
             url: string;
+        };
+        Features: {
+            /** @default false */
+            voice_ai: boolean;
+            /** @default false */
+            public_api: boolean;
+            /** @default false */
+            staff_app: boolean;
+        };
+        FeaturesRequest: {
+            /** @default false */
+            voice_ai: boolean;
+            /** @default false */
+            public_api: boolean;
+            /** @default false */
+            staff_app: boolean;
         };
         Field: {
             key: string;
@@ -3119,6 +3283,28 @@ export interface components {
              */
             share: number;
         };
+        Override: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly channel: components["schemas"]["BillingChannelEnum"];
+            readonly price_paise: number;
+            /** Format: date */
+            readonly starts_on: string;
+            /** Format: date */
+            readonly ends_on: string | null;
+            /** @description scheduled, active or ended (today, IST) */
+            readonly state: string;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        OverrideCreateRequest: {
+            channel: components["schemas"]["BillingChannelEnum"];
+            price_paise: number;
+            /** Format: date */
+            starts_on: string;
+            /** Format: date */
+            ends_on?: string | null;
+        };
         PaginatedAdminChangeRequestList: {
             /** @example 123 */
             count: number;
@@ -3356,6 +3542,17 @@ export interface components {
             remarks?: string;
             custom_fields?: unknown;
         };
+        PatchedOverrideEndRequest: {
+            /** Format: date */
+            ends_on?: string | null;
+        };
+        PatchedPlanUpdateRequest: {
+            name?: string;
+            monthly_fee_paise?: number;
+            max_active_subscribers?: number;
+            features?: components["schemas"]["FeaturesRequest"];
+            is_active?: boolean;
+        };
         PatchedStaffMemberRequest: {
             name?: string;
             phone?: string;
@@ -3468,10 +3665,46 @@ export interface components {
             };
             is_placeholder: boolean;
         };
+        PlanAdmin: {
+            /** Format: uuid */
+            readonly id: string;
+            code: string;
+            name: string;
+            monthly_fee_paise: number;
+            max_active_subscribers: number;
+            features: components["schemas"]["Features"];
+            is_active: boolean;
+            /** @description Seeded until the approved plan list replaces it */
+            readonly is_placeholder: boolean;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        PlanAdminRequest: {
+            code: string;
+            name: string;
+            monthly_fee_paise: number;
+            max_active_subscribers: number;
+            features: components["schemas"]["FeaturesRequest"];
+            is_active?: boolean;
+        };
         PlanChangeRequestRequest: {
             plan_code: string;
             /** @default  */
             note: string;
+        };
+        PlanUpdate: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly code: string;
+            name: string;
+            monthly_fee_paise: number;
+            max_active_subscribers: number;
+            features: components["schemas"]["Features"];
+            is_active: boolean;
+            /** @description Seeded until the approved plan list replaces it */
+            readonly is_placeholder: boolean;
+            /** Format: date-time */
+            readonly updated_at: string;
         };
         PlanView: {
             plan: components["schemas"]["Plan"] | null;
@@ -3519,6 +3752,26 @@ export interface components {
         Price: {
             channel: components["schemas"]["BillingChannelEnum"];
             price_paise: number;
+        };
+        PriceCreateRequest: {
+            channel: components["schemas"]["BillingChannelEnum"];
+            price_paise: number;
+            /** Format: date */
+            effective_from: string;
+        };
+        PriceEntry: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly channel: components["schemas"]["BillingChannelEnum"];
+            readonly price_paise: number;
+            /** Format: date */
+            readonly effective_from: string;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        PriceListAdmin: {
+            current: components["schemas"]["ChannelPrice"][];
+            entries: components["schemas"]["PriceEntry"][];
         };
         PrintedRequest: {
             /** Format: date */
@@ -3693,6 +3946,12 @@ export interface components {
             /** @default  */
             reason: string;
         };
+        /**
+         * @description * `price_list` - price_list
+         *     * `override` - override
+         * @enum {string}
+         */
+        SourceEnum: "price_list" | "override";
         StaffComment: {
             /** Format: uuid */
             readonly id: string;
@@ -3831,6 +4090,18 @@ export interface components {
          * @enum {string}
          */
         SubscriberStatusEnum: "active" | "inactive";
+        SubscriptionAdmin: {
+            plan: components["schemas"]["PlanAdmin"] | null;
+            pending_plan: components["schemas"]["PlanAdmin"] | null;
+            status: string | null;
+            /** Format: date */
+            current_period_start: string | null;
+            /**
+             * Format: date
+             * @description A pending plan applies on this day
+             */
+            next_billing_date: string | null;
+        };
         SupportSession: {
             /** Format: uuid */
             readonly id: string;
@@ -4008,6 +4279,15 @@ export interface components {
             /** Format: date-time */
             readonly updated_at: string;
         };
+        TenantBilling: {
+            subscription: components["schemas"]["SubscriptionAdmin"];
+            wallet: components["schemas"]["WalletAdmin"];
+            mandate: components["schemas"]["Mandate"] | null;
+            prices: components["schemas"]["EffectivePrice"][];
+            active_subscribers: number;
+            recent_transactions: components["schemas"]["WalletTransaction"][];
+            invoices: components["schemas"]["Invoice"][];
+        };
         /** @description Create client form (spec 2.4): client details plus the owner who is invited. */
         TenantCreateRequest: {
             name: string;
@@ -4117,6 +4397,14 @@ export interface components {
             paused_at: string | null;
             held_reminders: number;
             prices: components["schemas"]["Price"][];
+        };
+        WalletAdmin: {
+            balance_paise: number;
+            low_balance_level_paise: number;
+            is_low: boolean;
+            can_send: boolean;
+            /** Format: date-time */
+            paused_at: string | null;
         };
         WalletTransaction: {
             /** Format: uuid */
@@ -4596,6 +4884,142 @@ export interface operations {
             };
         };
     };
+    admin_plans_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanAdmin"][];
+                };
+            };
+        };
+    };
+    admin_plans_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlanAdminRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PlanAdminRequest"];
+                "multipart/form-data": components["schemas"]["PlanAdminRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanAdmin"];
+                };
+            };
+        };
+    };
+    admin_plans_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this plan. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedPlanUpdateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedPlanUpdateRequest"];
+                "multipart/form-data": components["schemas"]["PatchedPlanUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlanUpdate"];
+                };
+            };
+        };
+    };
+    admin_price_list_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PriceListAdmin"];
+                };
+            };
+        };
+    };
+    admin_price_list_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PriceCreateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PriceCreateRequest"];
+                "multipart/form-data": components["schemas"]["PriceCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PriceEntry"];
+                };
+            };
+        };
+    };
+    admin_price_list_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     admin_reference_data_retrieve: {
         parameters: {
             query?: never;
@@ -4816,6 +5240,171 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["PaginatedAuditLogList"];
                 };
+            };
+        };
+    };
+    admin_tenants_price_overrides_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Override"][];
+                };
+            };
+        };
+    };
+    admin_tenants_price_overrides_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OverrideCreateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["OverrideCreateRequest"];
+                "multipart/form-data": components["schemas"]["OverrideCreateRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Override"];
+                };
+            };
+        };
+    };
+    admin_tenants_price_overrides_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                override_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    admin_tenants_price_overrides_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                override_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedOverrideEndRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedOverrideEndRequest"];
+                "multipart/form-data": components["schemas"]["PatchedOverrideEndRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Override"];
+                };
+            };
+        };
+    };
+    admin_tenants_subscription_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TenantBilling"];
+                };
+            };
+        };
+    };
+    admin_tenants_subscription_plan_change_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangePlanRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ChangePlanRequest"];
+                "multipart/form-data": components["schemas"]["ChangePlanRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TenantBilling"];
+                };
+            };
+        };
+    };
+    admin_tenants_subscription_plan_change_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

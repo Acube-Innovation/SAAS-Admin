@@ -567,6 +567,146 @@ paths:
                 items:
                   $ref: '#/components/schemas/IndustryTemplateVersion'
           description: ''
+  /api/admin/plans:
+    get:
+      operationId: admin_plans_list
+      description: 'Plans (spec 2.11): list, add, edit. Codes never change; plans
+        are retired, not deleted.'
+      tags:
+      - 'admin: billing'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PlanAdmin'
+          description: ''
+    post:
+      operationId: admin_plans_create
+      description: 'Plans (spec 2.11): list, add, edit. Codes never change; plans
+        are retired, not deleted.'
+      tags:
+      - 'admin: billing'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanAdminRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PlanAdminRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PlanAdminRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanAdmin'
+          description: ''
+  /api/admin/plans/{id}:
+    patch:
+      operationId: admin_plans_partial_update
+      description: 'Plans (spec 2.11): list, add, edit. Codes never change; plans
+        are retired, not deleted.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this plan.
+        required: true
+      tags:
+      - 'admin: billing'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPlanUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPlanUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPlanUpdateRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanUpdate'
+          description: ''
+  /api/admin/price-list:
+    get:
+      operationId: admin_price_list_retrieve
+      description: 'The platform price list: current prices and every entry; add a
+        price from a date.'
+      tags:
+      - 'admin: billing'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PriceListAdmin'
+          description: ''
+    post:
+      operationId: admin_price_list_create
+      description: 'The platform price list: current prices and every entry; add a
+        price from a date.'
+      tags:
+      - 'admin: billing'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PriceCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PriceCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PriceCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PriceEntry'
+          description: ''
+  /api/admin/price-list/{id}:
+    delete:
+      operationId: admin_price_list_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - 'admin: billing'
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/admin/reference-data:
     get:
       operationId: admin_reference_data_retrieve
@@ -825,6 +965,197 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedAuditLogList'
           description: ''
+  /api/admin/tenants/{id}/price-overrides:
+    get:
+      operationId: admin_tenants_price_overrides_list
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - 'admin: billing'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Override'
+          description: ''
+    post:
+      operationId: admin_tenants_price_overrides_create
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - 'admin: billing'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OverrideCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OverrideCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OverrideCreateRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Override'
+          description: ''
+  /api/admin/tenants/{id}/price-overrides/{override_id}:
+    patch:
+      operationId: admin_tenants_price_overrides_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: override_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - 'admin: billing'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedOverrideEndRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedOverrideEndRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedOverrideEndRequest'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Override'
+          description: ''
+    delete:
+      operationId: admin_tenants_price_overrides_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: override_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - 'admin: billing'
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/admin/tenants/{id}/subscription:
+    get:
+      operationId: admin_tenants_subscription_retrieve
+      description: 'Client detail Billing tab: plan and pending change, prices, read-only
+        wallet.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - 'admin: billing'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantBilling'
+          description: ''
+  /api/admin/tenants/{id}/subscription/plan-change:
+    post:
+      operationId: admin_tenants_subscription_plan_change_create
+      description: Schedule a plan change for the next billing date, or cancel the
+        pending one.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - 'admin: billing'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePlanRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ChangePlanRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ChangePlanRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantBilling'
+          description: ''
+    delete:
+      operationId: admin_tenants_subscription_plan_change_destroy
+      description: Schedule a plan change for the next billing date, or cancel the
+        pending one.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - 'admin: billing'
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/admin/tenants/{id}/support-sessions:
     post:
       operationId: admin_tenants_support_sessions_create
@@ -4838,6 +5169,15 @@ components:
       - utility
       type: string
       description: '* `utility` - Utility'
+    ChangePlanRequest:
+      type: object
+      properties:
+        plan_code:
+          type: string
+          minLength: 1
+          pattern: ^[-a-zA-Z0-9_]+$
+      required:
+      - plan_code
     ChangeRequest:
       type: object
       description: The client's view (portal).
@@ -5039,6 +5379,16 @@ components:
       description: |-
         * `whatsapp` - whatsapp
         * `voice` - voice
+    ChannelPrice:
+      type: object
+      properties:
+        channel:
+          $ref: '#/components/schemas/BillingChannelEnum'
+        price_paise:
+          type: integer
+      required:
+      - channel
+      - price_paise
     Checklist:
       type: object
       properties:
@@ -5503,6 +5853,19 @@ components:
         * `read` - Read
         * `answered` - Answered
         * `failed` - Failed
+    EffectivePrice:
+      type: object
+      properties:
+        channel:
+          $ref: '#/components/schemas/BillingChannelEnum'
+        price_paise:
+          type: integer
+        source:
+          $ref: '#/components/schemas/SourceEnum'
+      required:
+      - channel
+      - price_paise
+      - source
     EntityEnum:
       enum:
       - subscribers
@@ -5548,6 +5911,34 @@ components:
           format: uri
       required:
       - url
+    Features:
+      type: object
+      properties:
+        voice_ai:
+          type: boolean
+          default: false
+        public_api:
+          type: boolean
+          default: false
+        staff_app:
+          type: boolean
+          default: false
+      required:
+      - public_api
+      - staff_app
+      - voice_ai
+    FeaturesRequest:
+      type: object
+      properties:
+        voice_ai:
+          type: boolean
+          default: false
+        public_api:
+          type: boolean
+          default: false
+        staff_app:
+          type: boolean
+          default: false
     Field:
       type: object
       properties:
@@ -6748,6 +7139,65 @@ components:
       - count
       - outcome
       - share
+    Override:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        channel:
+          allOf:
+          - $ref: '#/components/schemas/BillingChannelEnum'
+          readOnly: true
+        price_paise:
+          type: integer
+          readOnly: true
+        starts_on:
+          type: string
+          format: date
+          readOnly: true
+        ends_on:
+          type: string
+          format: date
+          readOnly: true
+          nullable: true
+        state:
+          type: string
+          readOnly: true
+          description: scheduled, active or ended (today, IST)
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - channel
+      - created_at
+      - ends_on
+      - id
+      - price_paise
+      - starts_on
+      - state
+    OverrideCreateRequest:
+      type: object
+      properties:
+        channel:
+          $ref: '#/components/schemas/BillingChannelEnum'
+        price_paise:
+          type: integer
+          maximum: 100000
+          minimum: 0
+        starts_on:
+          type: string
+          format: date
+        ends_on:
+          type: string
+          format: date
+          nullable: true
+      required:
+      - channel
+      - price_paise
+      - starts_on
     PaginatedAdminChangeRequestList:
       type: object
       required:
@@ -7153,6 +7603,32 @@ components:
           type: string
           maxLength: 500
         custom_fields: {}
+    PatchedOverrideEndRequest:
+      type: object
+      properties:
+        ends_on:
+          type: string
+          format: date
+          nullable: true
+    PatchedPlanUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        monthly_fee_paise:
+          type: integer
+          maximum: 100000000
+          minimum: 0
+        max_active_subscribers:
+          type: integer
+          maximum: 10000000
+          minimum: 1
+        features:
+          $ref: '#/components/schemas/FeaturesRequest'
+        is_active:
+          type: boolean
     PatchedStaffMemberRequest:
       type: object
       properties:
@@ -7403,6 +7879,81 @@ components:
       - max_active_subscribers
       - monthly_fee_paise
       - name
+    PlanAdmin:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        code:
+          type: string
+          maxLength: 30
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+          maxLength: 100
+          minLength: 2
+        monthly_fee_paise:
+          type: integer
+          maximum: 100000000
+          minimum: 0
+        max_active_subscribers:
+          type: integer
+          maximum: 10000000
+          minimum: 1
+        features:
+          $ref: '#/components/schemas/Features'
+        is_active:
+          type: boolean
+        is_placeholder:
+          type: boolean
+          readOnly: true
+          description: Seeded until the approved plan list replaces it
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - code
+      - features
+      - id
+      - is_active
+      - is_placeholder
+      - max_active_subscribers
+      - monthly_fee_paise
+      - name
+      - updated_at
+    PlanAdminRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 30
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        monthly_fee_paise:
+          type: integer
+          maximum: 100000000
+          minimum: 0
+        max_active_subscribers:
+          type: integer
+          maximum: 10000000
+          minimum: 1
+        features:
+          $ref: '#/components/schemas/FeaturesRequest'
+        is_active:
+          type: boolean
+      required:
+      - code
+      - features
+      - max_active_subscribers
+      - monthly_fee_paise
+      - name
     PlanChangeRequestRequest:
       type: object
       properties:
@@ -7416,6 +7967,51 @@ components:
           maxLength: 1000
       required:
       - plan_code
+    PlanUpdate:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        code:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        name:
+          type: string
+          maxLength: 100
+          minLength: 2
+        monthly_fee_paise:
+          type: integer
+          maximum: 100000000
+          minimum: 0
+        max_active_subscribers:
+          type: integer
+          maximum: 10000000
+          minimum: 1
+        features:
+          $ref: '#/components/schemas/Features'
+        is_active:
+          type: boolean
+        is_placeholder:
+          type: boolean
+          readOnly: true
+          description: Seeded until the approved plan list replaces it
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - code
+      - features
+      - id
+      - is_active
+      - is_placeholder
+      - max_active_subscribers
+      - monthly_fee_paise
+      - name
+      - updated_at
     PlanView:
       type: object
       properties:
@@ -7525,6 +8121,64 @@ components:
       required:
       - channel
       - price_paise
+    PriceCreateRequest:
+      type: object
+      properties:
+        channel:
+          $ref: '#/components/schemas/BillingChannelEnum'
+        price_paise:
+          type: integer
+          maximum: 100000
+          minimum: 1
+        effective_from:
+          type: string
+          format: date
+      required:
+      - channel
+      - effective_from
+      - price_paise
+    PriceEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        channel:
+          allOf:
+          - $ref: '#/components/schemas/BillingChannelEnum'
+          readOnly: true
+        price_paise:
+          type: integer
+          readOnly: true
+        effective_from:
+          type: string
+          format: date
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - channel
+      - created_at
+      - effective_from
+      - id
+      - price_paise
+    PriceListAdmin:
+      type: object
+      properties:
+        current:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChannelPrice'
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/PriceEntry'
+      required:
+      - current
+      - entries
     PrintedRequest:
       type: object
       properties:
@@ -7988,6 +8642,14 @@ components:
           maxLength: 1000
       required:
       - action
+    SourceEnum:
+      enum:
+      - price_list
+      - override
+      type: string
+      description: |-
+        * `price_list` - price_list
+        * `override` - override
     StaffComment:
       type: object
       properties:
@@ -8333,6 +8995,35 @@ components:
       description: |-
         * `active` - Active
         * `inactive` - Inactive
+    SubscriptionAdmin:
+      type: object
+      properties:
+        plan:
+          allOf:
+          - $ref: '#/components/schemas/PlanAdmin'
+          nullable: true
+        pending_plan:
+          allOf:
+          - $ref: '#/components/schemas/PlanAdmin'
+          nullable: true
+        status:
+          type: string
+          nullable: true
+        current_period_start:
+          type: string
+          format: date
+          nullable: true
+        next_billing_date:
+          type: string
+          format: date
+          nullable: true
+          description: A pending plan applies on this day
+      required:
+      - current_period_start
+      - next_billing_date
+      - pending_plan
+      - plan
+      - status
     SupportSession:
       type: object
       properties:
@@ -8786,6 +9477,39 @@ components:
       - suspension_reason
       - timezone
       - updated_at
+    TenantBilling:
+      type: object
+      properties:
+        subscription:
+          $ref: '#/components/schemas/SubscriptionAdmin'
+        wallet:
+          $ref: '#/components/schemas/WalletAdmin'
+        mandate:
+          allOf:
+          - $ref: '#/components/schemas/Mandate'
+          nullable: true
+        prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/EffectivePrice'
+        active_subscribers:
+          type: integer
+        recent_transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/WalletTransaction'
+        invoices:
+          type: array
+          items:
+            $ref: '#/components/schemas/Invoice'
+      required:
+      - active_subscribers
+      - invoices
+      - mandate
+      - prices
+      - recent_transactions
+      - subscription
+      - wallet
     TenantCreateRequest:
       type: object
       description: 'Create client form (spec 2.4): client details plus the owner who
@@ -9086,6 +9810,27 @@ components:
       - low_balance_level_paise
       - paused_at
       - prices
+    WalletAdmin:
+      type: object
+      properties:
+        balance_paise:
+          type: integer
+        low_balance_level_paise:
+          type: integer
+        is_low:
+          type: boolean
+        can_send:
+          type: boolean
+        paused_at:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - balance_paise
+      - can_send
+      - is_low
+      - low_balance_level_paise
+      - paused_at
     WalletTransaction:
       type: object
       properties:

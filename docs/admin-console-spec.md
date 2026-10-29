@@ -223,6 +223,16 @@ Calls respect quiet hours, delivery days and opt-outs.
 
 All money is stored in **paise** (integer).
 
+As built (Step A2): the **Plans and prices** screen lists plans (add, edit, retire; a plan's `code` never changes;
+editing a seeded placeholder plan clears `is_placeholder`) and the price list (prices in effect today, history,
+schedule a price from today or later; only a price that hasn't started can be withdrawn). The client's **Billing**
+tab shows the plan, the current period and next billing date, a pending change (schedule / cancel), the client's
+prices today (price list or override), the overrides (add; a scheduled one can be deleted, a running one ended;
+no backdating or overlaps per channel, `ends_on` empty = open-ended) and a read-only wallet (balance, low-balance
+level, sending state, auto top-up, recent transactions, invoices). The wallet engine charges at the override price
+on the days it covers. New clients start on the cheapest active plan. Platform staff can view; only super admins
+change anything.
+
 ---
 
 ## 3. Workflows
@@ -333,6 +343,11 @@ can make a script live.
 - Super admin picks a new plan. It is saved as `pending_plan` with `effective_on = next_billing_date`.
 - A scheduled task applies it on that date, issues the invoice and sends a client notice.
 - A pending change can be cancelled before it applies. Every step is audited.
+- As built: Celery Beat runs `apply_billing_dates` hourly. On each billing date it applies a pending plan, starts
+  the next monthly period and issues a **subscription invoice** for the plan's fee (GST added, same numbering as
+  top-ups); a plan change also emails the owners. The dates move in the same transaction as the invoice, so a
+  period is invoiced once. (How the subscription fee is paid, e.g. from the wallet or by a separate payment, is not
+  specified yet; the invoice is issued either way.)
 
 ---
 
@@ -472,7 +487,12 @@ All under `/api/admin/`. They need an authenticated, OTP-verified user with `pla
 | POST | `/api/admin/change-requests/{id}/comments` · `/decline` (reason 5–500) · `/link-version` (a version of the same client still in progress: draft … submitted) | Closed requests answer `409 request_closed`. Platform staff are emailed when a client raises a request | staff |
 | GET | `/api/admin/change-requests/assignees` · `/change-requests/{id}/versions` | Platform staff to assign · the client's versions that can be linked | staff |
 | GET | `/api/admin/audit-logs` · `/audit-logs/facets` · `/audit-logs/export` | Audit list (filters: tenant, actor, action, object_type, date_from/date_to in IST; 50 per page, `page_size` ≤ 200) / filter values / CSV of every matching row, newest first (≤ 50,000 rows; formula cells neutralised; writes an `export` entry) | staff |
-| GET/POST/PATCH | `/api/admin/plans` · `/price-list` · `/tenants/{id}/subscription` · `/tenants/{id}/price-overrides` | Billing (2.11, 3.8) | SA |
+| GET/POST/PATCH | `/api/admin/plans[/{id}]` | Plans: list · add · edit | staff / SA |
+| GET/POST/DELETE | `/api/admin/price-list[/{id}]` | Price list: current + entries · add from a date · withdraw a future price | staff / SA |
+| GET | `/api/admin/tenants/{id}/subscription` | Billing tab: plan, pending plan, period, prices today, wallet, auto top-up, recent transactions and invoices | staff |
+| POST/DELETE | `/api/admin/tenants/{id}/subscription/plan-change` | Schedule a plan change (`plan_code`) for the next billing date · cancel it | SA |
+| GET/POST | `/api/admin/tenants/{id}/price-overrides` | Overrides (with `state`: scheduled, active, ended) · add | staff / SA |
+| PATCH/DELETE | `/api/admin/tenants/{id}/price-overrides/{override_id}` | Set `ends_on` · delete one that hasn't started | SA |
 
 Errors use `{"code": "...", "detail": "...", "fields": {...}}`.
 

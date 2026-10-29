@@ -20,3 +20,7 @@ export type Dashboard = Schemas["Dashboard"];
 export type AdminChangeRequest = Schemas["AdminChangeRequest"];
 export type AdminChangeRequestDetail = Schemas["AdminChangeRequestDetail"];
 export type StaffUser = Schemas["StaffUser"];
+export type PlanAdmin = Schemas["PlanAdmin"];
+export type PriceEntry = Schemas["PriceEntry"];
+export type PriceOverride = Schemas["Override"];
+export type TenantBilling = Schemas["TenantBilling"];

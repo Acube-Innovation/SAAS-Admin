@@ -278,6 +278,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "apps.billing.tasks.check_auto_top_ups",
         "schedule": 900.0,
     },
+    "apply-billing-dates": {
+        "task": "apps.billing.tasks.apply_billing_dates",
+        "schedule": 3600.0,
+    },
 }
 
 LOGGING = {

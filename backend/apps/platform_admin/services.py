@@ -51,6 +51,10 @@ def create_client(data: dict, created_by: User) -> Tenant:
             )
             write_audit(Action.CREATE, membership, after=snapshot(membership))
         create_invite(membership, created_by=created_by)
+        # Every client starts on the cheapest active plan (admin spec 2.11; changed in Billing).
+        from apps.billing.payment_services import subscription_for
+
+        subscription_for(tenant)
     return tenant
 
 

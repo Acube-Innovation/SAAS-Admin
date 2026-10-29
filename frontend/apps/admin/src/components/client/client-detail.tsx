@@ -15,12 +15,13 @@ import { keys, useTenant } from "@/lib/queries";
 import { isSuperAdmin } from "@/lib/roles";
 
 import { ActivityTab } from "./tab-activity";
+import { BillingTab } from "./tab-billing";
 import { DetailsTab } from "./tab-details";
 import { SettingsTab } from "./tab-settings";
 import { TemplatesTab } from "./tab-templates";
 import { UsersTab } from "./tab-users";
 
-const TABS = ["details", "users", "settings", "templates", "activity"] as const;
+const TABS = ["details", "users", "settings", "templates", "billing", "activity"] as const;
 type Tab = (typeof TABS)[number];
 type Dialog = "suspend" | "activate" | "support" | null;
 
@@ -138,6 +139,7 @@ export function ClientDetail({ id }: { id: string }) {
           {tab === "users" && <UsersTab tenantId={id} />}
           {tab === "settings" && <SettingsTab client={client} editable={superAdmin} />}
           {tab === "templates" && <TemplatesTab tenantId={id} />}
+          {tab === "billing" && <BillingTab tenantId={id} />}
           {tab === "activity" && <ActivityTab tenantId={id} />}
         </div>
       </div>

@@ -61,3 +61,18 @@ def check_auto_top_ups():
             if trigger_auto_top_up(tenant) == "charge_started":
                 started += 1
     return started
+
+
+@shared_task
+def apply_billing_dates():
+    """Celery Beat, hourly: apply plan changes and start new periods on each billing date."""
+    from apps.core.tenancy import tenant_context
+
+    from .plans import apply_billing_date
+
+    applied = 0
+    for tenant in Tenant.objects.all():
+        with tenant_context(tenant):
+            if apply_billing_date(tenant) != "not_due":
+                applied += 1
+    return applied

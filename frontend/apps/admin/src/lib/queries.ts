@@ -19,6 +19,9 @@ export const keys = {
   auditLogs: ["audit-logs"] as const,
   auditFacets: ["audit-logs", "facets"] as const,
   changeRequests: ["change-requests"] as const,
+  plans: ["plans"] as const,
+  priceList: ["price-list"] as const,
+  tenantBilling: (id: string) => ["tenant", id, "billing"] as const,
 };
 
 export function useTenants(params: { search?: string; status?: string; industry_template?: string; page?: string }) {
@@ -202,5 +205,28 @@ export function useCandidateVersions(id: string, enabled: boolean) {
     queryKey: [...keys.changeRequests, id, "versions"],
     queryFn: () => unwrap(api.GET("/api/admin/change-requests/{id}/versions", { params: { path: { id } } })),
     enabled,
+  });
+}
+
+/** Billing (spec 2.11, 3.8). */
+export function usePlans() {
+  return useQuery({ queryKey: keys.plans, queryFn: () => unwrap(api.GET("/api/admin/plans")) });
+}
+
+export function usePriceList() {
+  return useQuery({ queryKey: keys.priceList, queryFn: () => unwrap(api.GET("/api/admin/price-list")) });
+}
+
+export function useTenantBilling(id: string) {
+  return useQuery({
+    queryKey: keys.tenantBilling(id),
+    queryFn: () => unwrap(api.GET("/api/admin/tenants/{id}/subscription", { params: { path: { id } } })),
+  });
+}
+
+export function useTenantOverrides(id: string) {
+  return useQuery({
+    queryKey: [...keys.tenantBilling(id), "overrides"],
+    queryFn: () => unwrap(api.GET("/api/admin/tenants/{id}/price-overrides", { params: { path: { id } } })),
   });
 }

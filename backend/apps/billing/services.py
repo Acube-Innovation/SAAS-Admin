@@ -10,7 +10,7 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from django.conf import settings
 from django.db import IntegrityError, transaction
-from django.db.models import Min, Sum
+from django.db.models import Min, Q, Sum
 from django.dispatch import Signal
 from django.utils import timezone
 
@@ -25,6 +25,7 @@ from .models import (
     Invoice,
     InvoiceSequence,
     PriceList,
+    PriceOverride,
     Wallet,
     WalletTransaction,
 )
@@ -47,8 +48,17 @@ class InsufficientBalance(ApiError):
 
 
 def price_for(tenant, channel: str, on: dt.date | None = None) -> int:
-    """The price in paise of one unit on a day. Per-client overrides arrive with Step A2."""
+    """The price in paise of one unit on a day: the client's override if one covers the day,
+    otherwise the price list entry in effect."""
     on = on or timezone.localdate()
+    with tenant_context(tenant):
+        override = (
+            PriceOverride.objects.filter(tenant=tenant, channel=channel, starts_on__lte=on)
+            .filter(Q(ends_on__isnull=True) | Q(ends_on__gte=on))
+            .first()
+        )
+    if override is not None:
+        return override.price_paise
     entry = (
         PriceList.objects.filter(channel=channel, effective_from__lte=on)
         .order_by("-effective_from")

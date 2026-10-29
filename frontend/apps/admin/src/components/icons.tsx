@@ -39,6 +39,12 @@ export const icons = {
       <path d="M9 10h6M9 14h4" />
     </svg>
   ),
+  billing: (
+    <svg {...base}>
+      <rect x="3" y="6" width="18" height="13" rx="2" />
+      <path d="M3 10h18M7 15h4" />
+    </svg>
+  ),
   requests: (
     <svg {...base}>
       <path d="M4 5h16v11H8l-4 4V5Z" />
