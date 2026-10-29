@@ -50,3 +50,10 @@ def totp_code(device):
 
 def next_id() -> int:
     return next(_seq)
+
+
+def fund_wallet(tenant, paise=100_000):
+    """Credit the tenant's wallet (an adjustment, no invoice) so it can send."""
+    from apps.billing.services import credit
+
+    return credit(tenant, paise, reason="adjustment", description="Test credit")

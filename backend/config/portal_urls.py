@@ -3,6 +3,7 @@
 from django.urls import path
 from rest_framework.routers import SimpleRouter
 
+from apps.billing.views import InvoiceViewSet, WalletTransactionViewSet, WalletView
 from apps.change_requests.views import PortalChangeRequestViewSet
 from apps.content_view.views import (
     ContentTemplateViewSet,
@@ -47,6 +48,8 @@ router.register(
     "content/voice-scripts", ContentVoiceScriptViewSet, basename="portal-content-voice-script"
 )
 router.register("communication-log", CommunicationLogViewSet, basename="portal-communication-log")
+router.register("wallet/transactions", WalletTransactionViewSet, basename="portal-wallet-txn")
+router.register("invoices", InvoiceViewSet, basename="portal-invoice")
 router.register("change-requests", PortalChangeRequestViewSet, basename="portal-change-request")
 
 urlpatterns = [
@@ -55,6 +58,7 @@ urlpatterns = [
     path("checklist", ChecklistView.as_view(), name="portal-checklist"),
     path("agency", AgencyView.as_view(), name="portal-agency"),
     path("reminder-settings", ReminderSettingsView.as_view(), name="portal-reminder-settings"),
+    path("wallet", WalletView.as_view(), name="portal-wallet"),
     path("deliveries", DeliveriesView.as_view(), name="portal-deliveries"),
     path("deliveries/printed", DeliveriesPrintedView.as_view(), name="portal-deliveries-printed"),
     path("deliveries/export", DeliveriesExportView.as_view(), name="portal-deliveries-export"),

@@ -27,6 +27,8 @@ from django.utils import timezone
 from apps.accounts.models import Membership, TenantRole, User
 from apps.audit.models import Action
 from apps.audit.services import write_audit
+from apps.billing.models import Invoice, Wallet, WalletTransaction
+from apps.billing.services import record_top_up
 from apps.change_requests.models import ChangeRequest
 from apps.core.models import Tenant
 from apps.core.tenancy import tenant_context
@@ -247,6 +249,7 @@ class Command(BaseCommand):
             with tenant_context(tenant):
                 counts = self.create_data(tenant, template, rng, opts["subscribers"])
                 counts.update(self.create_content(tenant, template, users[0]))
+                counts.update(self.create_wallet(tenant))
             write_audit(
                 Action.CREATE,
                 tenant,
@@ -463,6 +466,49 @@ class Command(BaseCommand):
             description="Customers keep asking where to call. Please add 0484 2345678.",
         )
         return {"template versions": versions, "voice scripts": 1, "change requests": 1}
+
+    def create_wallet(self, tenant):
+        """
+        A ₹5,000 top-up (with its GST invoice) 10 days ago, and a debit for every message and call
+        sent since, so the wallet balance and ledger agree with the communication log.
+        """
+        topped_up_at = timezone.now() - dt.timedelta(days=10)
+        top_up = record_top_up(tenant, 500_000, payment_reference=f"demo-{tenant.pk}")
+        Invoice.objects.filter(pk=top_up.invoice_id).update(issued_at=topped_up_at)
+        WalletTransaction.objects.filter(pk=top_up.pk).update(created_at=topped_up_at)
+        wallet = Wallet.objects.get(tenant=tenant)
+        balance = wallet.balance_paise
+        entries = []
+        attempts = Attempt.objects.filter(tenant=tenant, cost_paise__gt=0).select_related(
+            "schedule"
+        )
+        for attempt in attempts.order_by("sent_at"):
+            balance -= attempt.cost_paise
+            voice = attempt.channel == Attempt.Channel.VOICE
+            entries.append(
+                WalletTransaction(
+                    tenant=tenant,
+                    wallet=wallet,
+                    kind=WalletTransaction.Kind.DEBIT,
+                    reason=WalletTransaction.Reason.SEND,
+                    amount_paise=attempt.cost_paise,
+                    balance_after_paise=balance,
+                    channel="voice_minute" if voice else "whatsapp_utility",
+                    reference=f"attempt:{attempt.pk}",
+                    idempotency_key=f"attempt:{attempt.pk}",
+                    description=f"{attempt.get_channel_display()} for "
+                    f"{attempt.schedule.booking_reference}",
+                )
+            )
+        WalletTransaction.objects.bulk_create(entries, batch_size=1000)
+        # created_at is set on insert; move each debit to its send time.
+        sent = {f"attempt:{a.pk}": a.sent_at for a in attempts}
+        for entry in entries:
+            entry.created_at = sent[entry.reference]
+        WalletTransaction.objects.bulk_update(entries, ["created_at"], batch_size=1000)
+        wallet.balance_paise = balance
+        wallet.save(update_fields=["balance_paise", "updated_at"])
+        return {"wallet balance (paise)": balance, "wallet debits": len(entries)}
 
     @staticmethod
     def mobile(rng):

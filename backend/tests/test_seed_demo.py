@@ -190,3 +190,21 @@ def test_messages_and_voice_content(demo):
             )
         assert VoiceScriptVersion.objects.filter(status="live").count() == 1
         assert ChangeRequest.objects.get().status == "open"
+
+
+def test_wallet_matches_the_communication_log(demo):
+    from django.db.models import Sum
+
+    from apps.billing.models import Invoice, Wallet, WalletTransaction
+
+    tenant, output = demo
+    with tenant_context(tenant):
+        spent = Attempt.objects.aggregate(total=Sum("cost_paise"))["total"]
+        wallet = Wallet.objects.get(tenant=tenant)
+        assert wallet.balance_paise == 500_000 - spent
+        debits = WalletTransaction.objects.filter(kind="debit")
+        assert debits.count() == Attempt.objects.filter(cost_paise__gt=0).count()
+        assert debits.order_by("-created_at").first().balance_after_paise == wallet.balance_paise
+        invoice = Invoice.objects.get()
+        assert (invoice.taxable_paise, invoice.total_paise) == (500_000, 590_000)
+    assert f"wallet balance (paise): {wallet.balance_paise}" in output

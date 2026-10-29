@@ -125,7 +125,12 @@ def home(tenant, role) -> dict:
     ).count()
     if sent_today >= tenant.daily_send_cap:
         alerts.append({"code": "send_cap_reached", "severity": "error"})
-    # Wallet (empty balance) and held reminders arrive with billing and the Phase 2 engine.
+    from apps.billing.services import can_send, low_balance_level, wallet_for
+
+    if not can_send(tenant):
+        alerts.append({"code": "wallet_empty", "severity": "error"})
+    elif wallet_for(tenant).balance_paise < low_balance_level(tenant):
+        alerts.append({"code": "wallet_low", "severity": "warn"})
 
     return {
         "date": today,

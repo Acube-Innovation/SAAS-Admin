@@ -186,6 +186,28 @@ play is audited. Recordings expire after 90 days (S3 lifecycle rule).
 - At zero balance, sending pauses: reminders are held and skipped on resume when their send time has passed.
 - **Plan:** view-only, with a **Request a plan change** button that raises a change request.
 
+**Wallet engine (Step 20, `apps/billing`).**
+- Every balance change locks the wallet row (`SELECT … FOR UPDATE`) and writes an append-only `WalletTransaction`
+  with `balance_after_paise`. A debit larger than the balance is refused (`insufficient_balance`) and changes
+  nothing; a database check constraint also refuses a negative balance. `idempotency_key` (e.g. `attempt:<id>`,
+  `payment:<ref>`) makes a repeated debit or credit a no-op.
+- Prices come from the platform price list (`whatsapp_utility` 85 paise, `whatsapp_service` 35 paise,
+  `voice_minute` 150 paise by default; newest `effective_from` on or before the day wins). A call is charged per
+  started minute.
+- **Sending is paused** (`tenant.can_send()` is False) when the balance can't pay for one WhatsApp utility message.
+- The low-balance level uses the 14 full days before today (today's usage doesn't count). Falling below it emails
+  the owners once (until a credit lifts the balance above it) and sends the `wallet_low_balance` signal that auto
+  top-up (Step 21) uses. Home shows `wallet_low` (warn) or `wallet_empty` (error).
+- **Top-ups: GST is added on top.** Buying ₹1,000 of credit costs ₹1,180; the wallet gets the full ₹1,000 and the
+  invoice shows ₹1,000 + GST.
+- **GST invoices:** one per paid top-up (and per subscription charge from Step A2). Numbers run per Indian
+  financial year (April–March) across all clients, `<INVOICE_PREFIX>/<FY>/<6 digits>`, from a row-locked counter
+  (no gaps, no repeats). 18% GST: CGST 9% + SGST 9% when the client is in the seller's state (`SELLER_STATE`),
+  otherwise IGST 18%; each rounded half up to the paisa. Seller and buyer details are copied into the invoice, so
+  it never changes later. The A4 PDF (reportlab, DejaVu Sans for ₹) is stored at
+  `tenants/<tenant>/invoices/<FY>/` and downloaded through a 5-minute link. Seller details come from `SELLER_*`
+  settings; the SAC code (`INVOICE_SAC_CODE`, default 998319) should be confirmed by the accountant.
+
 ### 2.10 Users, Reminder settings, Integrations
 
 **Users** (owner only): invite (email, name, role `manager` / `office_staff` / `owner`), change role, deactivate,
@@ -259,6 +281,11 @@ Implementation notes (Step 14):
 2. Below the low-balance level: alert, plus an auto top-up if a mandate is active.
 3. At zero: `tenant.can_send()` is False and reminders are **held**.
 4. After a credit: sending resumes, and held reminders whose send time has passed are marked **Skipped**.
+
+The reminder engine (Phase 2) calls `billing.charge_attempt()` before each send and `billing.hold_reminder()` when
+`can_send()` is False; `Schedule.reminder_due_at` is the planned send time and `reminder_held_at` marks a held
+reminder. On a credit that lets sending resume, held reminders past their send time get outcome `skipped` (timeline:
+`reminder_skipped`); the others are released (`reminder_released`) and go out on time.
 
 ### 3.5 CSV import (subscribers, bookings)
 
@@ -337,7 +364,7 @@ All are tenant-scoped (`tenant_id` + RLS) with UUID keys.
 | Job | jobs | `schedule`, `scheduled_date`, `assigned_staff`, `status` (`pending`, `done`, `cancelled`), `cancelled_reason` |
 | FollowUpItem | jobs | `schedule`, `outcome`, `status` (`open`, `contacted`, `resolved`), `notes` (list of `at`, `by`, `text`), `opened_at`, `contacted_at`, `resolved_at`, `resolution` |
 | ChangeRequest / ChangeRequestComment | change_requests | admin spec 2.9 |
-| Wallet / WalletTransaction / Invoice / PaymentMandate | billing | paise amounts, `idempotency_key` / provider event id unique |
+| Wallet / WalletTransaction / Invoice / PaymentMandate | billing | Wallet: `balance_paise` (≥ 0, DB check), `low_balance_since`, `paused_at`. WalletTransaction: `kind` (`credit`, `debit`), `reason` (`top_up`, `auto_top_up`, `send`, `adjustment`), `amount_paise`, `balance_after_paise`, `channel`, `reference`, `idempotency_key` (unique per tenant when set), `invoice`. Invoice: `number`, `financial_year`, `sequence`, `kind`, `issued_at`, `seller`, `buyer`, `place_of_supply`, `lines`, `taxable_paise`, `cgst_paise`, `sgst_paise`, `igst_paise`, `total_paise`, `payment_reference`, `pdf`. PaymentMandate: Step 21 |
 | ApiKey / WebhookEndpoint / WebhookDelivery | integrations | `key_hash`, `prefix`, `revoked_at`; `url`, `secret`; `attempts`, `status` |
 
 ## 7. Portal API
@@ -378,6 +405,9 @@ systems under `/api/v1/` (API key auth, per-key rate limits): subscribers, sched
 | GET | `content/question-flows` | Each schedule type's answers and the outcome each records | all |
 | GET POST | `change-requests` · `change-requests/{id}` | List (`status`; 50 per page), raise (`request_type`, `subject` 5–150, `description` ≤ 2,000); detail with comments (staff shown by name only) and the linked version. No edit or delete (`405`) | read: all · raise: owner, manager |
 | POST | `change-requests/{id}/comments` | Comment (1–2,000 characters); closed requests answer `409 request_closed` | owner, manager |
+| GET | `wallet` | Balance, low-balance level, `is_low`, `can_send`, `paused_at`, held reminders, current prices | owner, manager (support: view) |
+| GET | `wallet/transactions` | Ledger, newest first (`kind`; 50 per page) | owner, manager (support: view) |
+| GET | `invoices` · `invoices/{id}` · `invoices/{id}/pdf` | GST invoices; the PDF through a 5-minute link | owner, manager (support: view) |
 | GET | `communication-log` · `communication-log/{id}` | Every attempt with its replies, newest first (`date_from`/`date_to`, `channel`, `delivery_status`, `outcome`, `booking`, `subscriber`, `has_recording`, `search`; 50 per page) | all |
 | GET | `communication-log/{id}/recording` | `{url, expires_in: 300, expires_at}`: a presigned link to the call recording. Audited (`recording_played`). `404 no_recording`, `410 recording_expired` after 90 days | owner, manager (support: view) |
 | GET | `reports/reminder-results` · `reports/follow-up-ageing` · `reports/subscriber-health` | Reports (2.5) with their filters | owner, manager (support: view) |

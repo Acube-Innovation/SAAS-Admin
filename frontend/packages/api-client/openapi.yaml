@@ -2973,6 +2973,78 @@ paths:
               schema:
                 type: string
           description: ''
+  /api/portal/invoices:
+    get:
+      operationId: portal_invoices_list
+      description: |-
+        `scoped(queryset)` filters to the request's tenant (RLS does too; this keeps queries explicit)
+        and adds `tenant` to the serializer context.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - 'portal: wallet and billing'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedInvoiceList'
+          description: ''
+  /api/portal/invoices/{id}:
+    get:
+      operationId: portal_invoices_retrieve
+      description: |-
+        `scoped(queryset)` filters to the request's tenant (RLS does too; this keeps queries explicit)
+        and adds `tenant` to the serializer context.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this invoice.
+        required: true
+      tags:
+      - 'portal: wallet and billing'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invoice'
+          description: ''
+  /api/portal/invoices/{id}/pdf:
+    get:
+      operationId: portal_invoices_pdf_retrieve
+      description: A download link for the invoice PDF, valid for 5 minutes.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this invoice.
+        required: true
+      tags:
+      - 'portal: wallet and billing'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvoiceLink'
+          description: ''
   /api/portal/jobs/{id}/reassign:
     post:
       operationId: portal_jobs_reassign_create
@@ -3613,6 +3685,51 @@ paths:
               schema:
                 $ref: '#/components/schemas/TeamMember'
           description: ''
+  /api/portal/wallet:
+    get:
+      operationId: portal_wallet_retrieve
+      tags:
+      - 'portal: wallet and billing'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wallet'
+          description: ''
+  /api/portal/wallet/transactions:
+    get:
+      operationId: portal_wallet_transactions_list
+      description: |-
+        `scoped(queryset)` filters to the request's tenant (RLS does too; this keeps queries explicit)
+        and adds `tenant` to the serializer context.
+      parameters:
+      - in: query
+        name: kind
+        schema:
+          type: string
+          enum:
+          - credit
+          - debit
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - 'portal: wallet and billing'
+      security:
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedWalletTransactionList'
+          description: ''
 components:
   schemas:
     AcceptInviteRequest:
@@ -3980,6 +4097,14 @@ components:
           type: boolean
       required:
       - name
+    AttemptChannelEnum:
+      enum:
+      - whatsapp
+      - voice
+      type: string
+      description: |-
+        * `whatsapp` - WhatsApp
+        * `voice` - Voice call
     AuditEntry:
       type: object
       properties:
@@ -4187,6 +4312,16 @@ components:
       - otp_verified
       - platform_role
       - requires_2fa
+    BillingChannelEnum:
+      enum:
+      - whatsapp_utility
+      - whatsapp_service
+      - voice_minute
+      type: string
+      description: |-
+        * `whatsapp_utility` - WhatsApp utility message
+        * `whatsapp_service` - WhatsApp service message
+        * `voice_minute` - Voice call minute
     BlankEnum:
       enum:
       - ''
@@ -4658,14 +4793,6 @@ components:
           $ref: '#/components/schemas/TenantRoleEnum'
       required:
       - role
-    ChannelEnum:
-      enum:
-      - whatsapp
-      - voice
-      type: string
-      description: |-
-        * `whatsapp` - WhatsApp
-        * `voice` - Voice call
     ChannelOrderEnum:
       enum:
       - whatsapp
@@ -4898,12 +5025,16 @@ components:
       - template_paused
       - no_live_template
       - send_cap_reached
+      - wallet_low
+      - wallet_empty
       type: string
       description: |-
         * `tenant_suspended` - tenant_suspended
         * `template_paused` - template_paused
         * `no_live_template` - no_live_template
         * `send_cap_reached` - send_cap_reached
+        * `wallet_low` - wallet_low
+        * `wallet_empty` - wallet_empty
     Comment:
       type: object
       properties:
@@ -5751,6 +5882,76 @@ components:
       - email
       - full_name
       - role
+    Invoice:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        number:
+          type: string
+          readOnly: true
+        financial_year:
+          type: string
+          readOnly: true
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/InvoiceKindEnum'
+          readOnly: true
+        issued_at:
+          type: string
+          format: date-time
+          readOnly: true
+        taxable_paise:
+          type: integer
+          readOnly: true
+        cgst_paise:
+          type: integer
+          readOnly: true
+        sgst_paise:
+          type: integer
+          readOnly: true
+        igst_paise:
+          type: integer
+          readOnly: true
+        total_paise:
+          type: integer
+          readOnly: true
+        payment_reference:
+          type: string
+          readOnly: true
+      required:
+      - cgst_paise
+      - financial_year
+      - id
+      - igst_paise
+      - issued_at
+      - kind
+      - number
+      - payment_reference
+      - sgst_paise
+      - taxable_paise
+      - total_paise
+    InvoiceKindEnum:
+      enum:
+      - top_up
+      - subscription
+      type: string
+      description: |-
+        * `top_up` - Wallet top-up
+        * `subscription` - Subscription
+    InvoiceLink:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+        expires_in:
+          type: integer
+      required:
+      - expires_in
+      - url
     ItemEnum:
       enum:
       - agency_details
@@ -5926,7 +6127,7 @@ components:
           readOnly: true
         channel:
           allOf:
-          - $ref: '#/components/schemas/ChannelEnum'
+          - $ref: '#/components/schemas/AttemptChannelEnum'
           readOnly: true
         sent_at:
           type: string
@@ -6357,6 +6558,31 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ImportJob'
+    PaginatedInvoiceList:
+      type: object
+      required:
+      - count
+      - next
+      - previous
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Invoice'
     PaginatedLogEntryList:
       type: object
       required:
@@ -6482,6 +6708,31 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Tenant'
+    PaginatedWalletTransactionList:
+      type: object
+      required:
+      - count
+      - next
+      - previous
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/WalletTransaction'
     PatchedAdminChangeRequestUpdateRequest:
       type: object
       description: Assign (or unassign with null) and/or Start work (`status = in_progress`).
@@ -6726,6 +6977,16 @@ components:
         * `manager` - manager
         * `office_staff` - office_staff
         * `support` - support
+    Price:
+      type: object
+      properties:
+        channel:
+          $ref: '#/components/schemas/BillingChannelEnum'
+        price_paise:
+          type: integer
+      required:
+      - channel
+      - price_paise
     PrintedRequest:
       type: object
       properties:
@@ -6785,6 +7046,18 @@ components:
             $ref: '#/components/schemas/AnswerRequest'
       required:
       - answers
+    ReasonEnum:
+      enum:
+      - top_up
+      - auto_top_up
+      - send
+      - adjustment
+      type: string
+      description: |-
+        * `top_up` - Top-up
+        * `auto_top_up` - Auto top-up
+        * `send` - Message or call
+        * `adjustment` - Adjustment
     ReasonOptionalRequest:
       type: object
       properties:
@@ -8215,6 +8488,97 @@ components:
       - retry_gap_minutes
       - version
       - voice
+    Wallet:
+      type: object
+      properties:
+        balance_paise:
+          type: integer
+        low_balance_level_paise:
+          type: integer
+          description: 3 × average daily usage of the last 14 days, or ₹1,000 until
+            14 days of history
+        is_low:
+          type: boolean
+        can_send:
+          type: boolean
+          description: False when the balance can't pay for a reminder
+        paused_at:
+          type: string
+          format: date-time
+          nullable: true
+        held_reminders:
+          type: integer
+        prices:
+          type: array
+          items:
+            $ref: '#/components/schemas/Price'
+      required:
+      - balance_paise
+      - can_send
+      - held_reminders
+      - is_low
+      - low_balance_level_paise
+      - paused_at
+      - prices
+    WalletTransaction:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        kind:
+          allOf:
+          - $ref: '#/components/schemas/WalletTransactionKindEnum'
+          readOnly: true
+        reason:
+          allOf:
+          - $ref: '#/components/schemas/ReasonEnum'
+          readOnly: true
+        amount_paise:
+          type: integer
+          readOnly: true
+        balance_after_paise:
+          type: integer
+          readOnly: true
+        channel:
+          allOf:
+          - $ref: '#/components/schemas/BillingChannelEnum'
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+        invoice_id:
+          type: string
+          format: uuid
+          nullable: true
+          readOnly: true
+        invoice_number:
+          type: string
+          nullable: true
+      required:
+      - amount_paise
+      - balance_after_paise
+      - channel
+      - created_at
+      - description
+      - id
+      - invoice_id
+      - invoice_number
+      - kind
+      - reason
+    WalletTransactionKindEnum:
+      enum:
+      - credit
+      - debit
+      type: string
+      description: |-
+        * `credit` - Credit
+        * `debit` - Debit
   securitySchemes:
     cookieAuth:
       type: apiKey

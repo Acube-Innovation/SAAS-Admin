@@ -62,8 +62,15 @@ class Tenant(BaseModel):
         return self.name
 
     def can_send(self) -> bool:
-        """Whether reminders may be sent now. Phase 2 adds wallet and send-cap checks."""
-        return self.status == self.Status.ACTIVE
+        """
+        Whether reminders may be sent now: the account is active and the wallet can pay for one
+        reminder (Workflow 3.4). The daily send cap is checked by the reminder engine (Phase 2).
+        """
+        if self.status != self.Status.ACTIVE:
+            return False
+        from apps.billing.services import can_send as wallet_can_send
+
+        return wallet_can_send(self)
 
 
 class TenantScopedModel(BaseModel):

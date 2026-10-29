@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "apps.content_view",
     "apps.change_requests",
     "apps.reports",
+    "apps.billing",
 ]
 
 AUTH_USER_MODEL = "accounts.User"
@@ -227,6 +228,8 @@ SPECTACULAR_SETTINGS = {
         "BookingStatusEnum": "apps.schedules.models.Schedule.Status",
         "ChangeRequestStatusEnum": "apps.change_requests.models.ChangeRequest.Status",
         "ChangeRequestTypeEnum": "apps.change_requests.models.ChangeRequest.RequestType",
+        "AttemptChannelEnum": "apps.schedules.models.Attempt.Channel",
+        "BillingChannelEnum": "apps.billing.models.Channel",
         "SubscriberStatusEnum": "apps.subscribers.models.Subscriber.Status",
     },
 }
@@ -283,3 +286,16 @@ LOGGING = {
     },
     "root": {"handlers": ["console"], "level": env("LOG_LEVEL", "INFO")},
 }
+
+# --- Billing (portal spec 2.9) --------------------------------------------------------------
+# The seller printed on GST invoices. Set these per environment; the defaults are placeholders.
+SELLER_LEGAL_NAME = env("SELLER_LEGAL_NAME", "Seller name not set (SELLER_LEGAL_NAME)")
+SELLER_GSTIN = env("SELLER_GSTIN", "")
+SELLER_ADDRESS = env("SELLER_ADDRESS", "Address not set (SELLER_ADDRESS)")
+SELLER_STATE = env("SELLER_STATE", "KL")  # state code; same state as the buyer -> CGST + SGST
+SELLER_EMAIL = env("SELLER_EMAIL", "billing@example.com")
+INVOICE_PREFIX = env("INVOICE_PREFIX", "SC")
+INVOICE_SAC_CODE = env("INVOICE_SAC_CODE", "998319")  # confirm with the accountant
+GST_RATE_PERCENT = int(env("GST_RATE_PERCENT", "18"))
+INVOICE_FONT_PATH = env("INVOICE_FONT_PATH", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")
+LOW_BALANCE_DEFAULT_PAISE = 100_000  # ₹1,000 until there are 14 days of usage

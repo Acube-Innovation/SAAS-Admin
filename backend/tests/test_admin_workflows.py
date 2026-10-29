@@ -54,6 +54,7 @@ def test_suspend_requires_a_reason(admin_api, tenant):
 
 
 def test_suspend_stops_sending_and_is_audited(admin_api, tenant):
+    factories.fund_wallet(tenant)
     assert tenant.can_send()
 
     response = admin_api.post(f"{URL}/{tenant.id}/suspend", REASON, format="json")
@@ -105,6 +106,7 @@ def test_suspended_tenant_is_read_only_for_its_users(admin_api, tenant, manager,
 
 
 def test_activate_requires_a_reason_and_restores_sending(admin_api, tenant):
+    factories.fund_wallet(tenant)
     services.suspend_tenant(tenant, "Unpaid invoice")
 
     assert admin_api.post(f"{URL}/{tenant.id}/activate", {}, format="json").status_code == 400

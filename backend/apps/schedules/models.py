@@ -49,6 +49,10 @@ class Schedule(TenantScopedModel):
     custom_fields = models.JSONField(default=dict, blank=True)
     cancelled_at = models.DateTimeField(null=True, blank=True)
     cancel_reason = models.CharField(max_length=500, blank=True)
+    # Set by the reminder engine (Phase 2): when the next reminder is due, and whether it is held
+    # because the wallet can't pay for it (Workflow 3.4).
+    reminder_due_at = models.DateTimeField(null=True, blank=True)
+    reminder_held_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ["-booking_date", "booking_reference"]

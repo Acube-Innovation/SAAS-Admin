@@ -7,3 +7,4 @@ celery[redis]==5.6.3    # also brings the compatible redis client
 psycopg[binary]==3.3.6
 django-storages[s3]==1.14.6  # files on S3 (SeaweedFS S3 API locally)
 boto3==1.43.119
+reportlab==4.4.4             # GST invoice PDFs (approved in Step 20)

@@ -1530,6 +1530,63 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/portal/invoices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `scoped(queryset)` filters to the request's tenant (RLS does too; this keeps queries explicit)
+         *     and adds `tenant` to the serializer context.
+         */
+        get: operations["portal_invoices_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/invoices/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `scoped(queryset)` filters to the request's tenant (RLS does too; this keeps queries explicit)
+         *     and adds `tenant` to the serializer context.
+         */
+        get: operations["portal_invoices_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/invoices/{id}/pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description A download link for the invoice PDF, valid for 5 minutes. */
+        get: operations["portal_invoices_pdf_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/portal/jobs/{id}/reassign": {
         parameters: {
             query?: never;
@@ -1794,6 +1851,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/portal/wallet": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["portal_wallet_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/portal/wallet/transactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description `scoped(queryset)` filters to the request's tenant (RLS does too; this keeps queries explicit)
+         *     and adds `tenant` to the serializer context.
+         */
+        get: operations["portal_wallet_transactions_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1921,6 +2014,12 @@ export interface components {
             default_staff?: string | null;
             is_active?: boolean;
         };
+        /**
+         * @description * `whatsapp` - WhatsApp
+         *     * `voice` - Voice call
+         * @enum {string}
+         */
+        AttemptChannelEnum: "whatsapp" | "voice";
         AuditEntry: {
             /** Format: uuid */
             readonly id: string;
@@ -1997,6 +2096,13 @@ export interface components {
             active_tenant_id: string | null;
             memberships: components["schemas"]["Membership"][];
         };
+        /**
+         * @description * `whatsapp_utility` - WhatsApp utility message
+         *     * `whatsapp_service` - WhatsApp service message
+         *     * `voice_minute` - Voice call minute
+         * @enum {string}
+         */
+        BillingChannelEnum: "whatsapp_utility" | "whatsapp_service" | "voice_minute";
         /** @enum {unknown} */
         BlankEnum: "";
         Booking: {
@@ -2181,12 +2287,6 @@ export interface components {
             role: components["schemas"]["TenantRoleEnum"];
         };
         /**
-         * @description * `whatsapp` - WhatsApp
-         *     * `voice` - Voice call
-         * @enum {string}
-         */
-        ChannelEnum: "whatsapp" | "voice";
-        /**
          * @description * `whatsapp` - whatsapp
          *     * `voice` - voice
          * @enum {string}
@@ -2268,9 +2368,11 @@ export interface components {
          *     * `template_paused` - template_paused
          *     * `no_live_template` - no_live_template
          *     * `send_cap_reached` - send_cap_reached
+         *     * `wallet_low` - wallet_low
+         *     * `wallet_empty` - wallet_empty
          * @enum {string}
          */
-        CodeEnum: "tenant_suspended" | "template_paused" | "no_live_template" | "send_cap_reached";
+        CodeEnum: "tenant_suspended" | "template_paused" | "no_live_template" | "send_cap_reached" | "wallet_low" | "wallet_empty";
         Comment: {
             /** Format: uuid */
             readonly id: string;
@@ -2603,6 +2705,32 @@ export interface components {
             full_name: string;
             role: components["schemas"]["TenantRoleEnum"];
         };
+        Invoice: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly number: string;
+            readonly financial_year: string;
+            readonly kind: components["schemas"]["InvoiceKindEnum"];
+            /** Format: date-time */
+            readonly issued_at: string;
+            readonly taxable_paise: number;
+            readonly cgst_paise: number;
+            readonly sgst_paise: number;
+            readonly igst_paise: number;
+            readonly total_paise: number;
+            readonly payment_reference: string;
+        };
+        /**
+         * @description * `top_up` - Wallet top-up
+         *     * `subscription` - Subscription
+         * @enum {string}
+         */
+        InvoiceKindEnum: "top_up" | "subscription";
+        InvoiceLink: {
+            /** Format: uri */
+            url: string;
+            expires_in: number;
+        };
         /**
          * @description * `agency_details` - agency_details
          *     * `auto_top_up` - auto_top_up
@@ -2685,7 +2813,7 @@ export interface components {
         LogEntry: {
             /** Format: uuid */
             readonly id: string;
-            readonly channel: components["schemas"]["ChannelEnum"];
+            readonly channel: components["schemas"]["AttemptChannelEnum"];
             /** Format: date-time */
             readonly sent_at: string | null;
             readonly delivery_status: components["schemas"]["DeliveryStatusEnum"];
@@ -2892,6 +3020,21 @@ export interface components {
             previous: string | null;
             results: components["schemas"]["ImportJob"][];
         };
+        PaginatedInvoiceList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous: string | null;
+            results: components["schemas"]["Invoice"][];
+        };
         PaginatedLogEntryList: {
             /** @example 123 */
             count: number;
@@ -2966,6 +3109,21 @@ export interface components {
              */
             previous: string | null;
             results: components["schemas"]["Tenant"][];
+        };
+        PaginatedWalletTransactionList: {
+            /** @example 123 */
+            count: number;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=4
+             */
+            next: string | null;
+            /**
+             * Format: uri
+             * @example http://api.example.org/accounts/?page=2
+             */
+            previous: string | null;
+            results: components["schemas"]["WalletTransaction"][];
         };
         /** @description Assign (or unassign with null) and/or Start work (`status = in_progress`). */
         PatchedAdminChangeRequestUpdateRequest: {
@@ -3076,6 +3234,10 @@ export interface components {
          * @enum {string}
          */
         PortalRoleEnum: "owner" | "manager" | "office_staff" | "support";
+        Price: {
+            channel: components["schemas"]["BillingChannelEnum"];
+            price_paise: number;
+        };
         PrintedRequest: {
             /** Format: date */
             date: string;
@@ -3103,6 +3265,14 @@ export interface components {
         QuestionFlowRequest: {
             answers: components["schemas"]["AnswerRequest"][];
         };
+        /**
+         * @description * `top_up` - Top-up
+         *     * `auto_top_up` - Auto top-up
+         *     * `send` - Message or call
+         *     * `adjustment` - Adjustment
+         * @enum {string}
+         */
+        ReasonEnum: "top_up" | "auto_top_up" | "send" | "adjustment";
         ReasonOptionalRequest: {
             /** @default  */
             reason: string;
@@ -3639,6 +3809,39 @@ export interface components {
             max_retries: number;
             retry_gap_minutes: number;
         };
+        Wallet: {
+            balance_paise: number;
+            /** @description 3 × average daily usage of the last 14 days, or ₹1,000 until 14 days of history */
+            low_balance_level_paise: number;
+            is_low: boolean;
+            /** @description False when the balance can't pay for a reminder */
+            can_send: boolean;
+            /** Format: date-time */
+            paused_at: string | null;
+            held_reminders: number;
+            prices: components["schemas"]["Price"][];
+        };
+        WalletTransaction: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: date-time */
+            readonly created_at: string;
+            readonly kind: components["schemas"]["WalletTransactionKindEnum"];
+            readonly reason: components["schemas"]["ReasonEnum"];
+            readonly amount_paise: number;
+            readonly balance_after_paise: number;
+            readonly channel: components["schemas"]["BillingChannelEnum"];
+            readonly description: string;
+            /** Format: uuid */
+            readonly invoice_id: string | null;
+            invoice_number: string | null;
+        };
+        /**
+         * @description * `credit` - Credit
+         *     * `debit` - Debit
+         * @enum {string}
+         */
+        WalletTransactionKindEnum: "credit" | "debit";
     };
     responses: never;
     parameters: never;
@@ -6119,6 +6322,72 @@ export interface operations {
             };
         };
     };
+    portal_invoices_list: {
+        parameters: {
+            query?: {
+                /** @description A page number within the paginated result set. */
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedInvoiceList"];
+                };
+            };
+        };
+    };
+    portal_invoices_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this invoice. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Invoice"];
+                };
+            };
+        };
+    };
+    portal_invoices_pdf_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this invoice. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvoiceLink"];
+                };
+            };
+        };
+    };
     portal_jobs_reassign_create: {
         parameters: {
             query?: never;
@@ -6637,6 +6906,48 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TeamMember"];
+                };
+            };
+        };
+    };
+    portal_wallet_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Wallet"];
+                };
+            };
+        };
+    };
+    portal_wallet_transactions_list: {
+        parameters: {
+            query?: {
+                kind?: "credit" | "debit";
+                /** @description A page number within the paginated result set. */
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedWalletTransactionList"];
                 };
             };
         };

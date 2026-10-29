@@ -104,6 +104,8 @@ class HomeSerializer(serializers.Serializer):
                     "template_paused",
                     "no_live_template",
                     "send_cap_reached",
+                    "wallet_low",
+                    "wallet_empty",
                 ]
             ),
             "severity": serializers.ChoiceField(choices=["error", "warn"]),

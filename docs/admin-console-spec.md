@@ -426,6 +426,8 @@ All primary keys are UUIDs. Every model has `created_at` and `updated_at`. **Ten
 | ChangeRequest / ChangeRequestComment | change_requests | Yes | see 2.9 |
 | VoiceScript / VoiceScriptVersion | messaging_templates | Yes | see 2.10 |
 | Plan, PriceList, PriceOverride, Subscription | billing | Plan/PriceList: No; others: Yes | see 2.11 |
+| Wallet, WalletTransaction, Invoice | billing | Yes (platform staff read all) | see the client portal spec 2.9 and 6 |
+| InvoiceSequence | billing | No | `financial_year` (unique), `last_number`: invoice numbers are global per financial year |
 
 ---
 
